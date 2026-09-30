@@ -23,7 +23,7 @@
         .answer-box select { border: 1px solid var(--border); border-radius: 4px; padding: 3px; font-size: 0.85rem; font-weight: bold; color: var(--accent); outline: none; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
-        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; }
+        input[type="text"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
         .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
         .submit-btn:hover { background: #059669; }
@@ -34,7 +34,19 @@
 
 <div class="scanner-container">
     <h1>📷 أداة تصحيح أوراق التظليل الذكية</h1>
-    <p class="subtitle">قراءة الاسم تلقائياً وإرسال النتائج للوحة التحكم</p>
+    <p class="subtitle">قراءة الاسم واختيار النموذج وإرسال النتائج للوحة التحكم</p>
+
+    <!-- اختيار النموذج المستهدف -->
+    <div class="form-group">
+        <label>اختر النموذج:</label>
+        <select id="targetModelSelect">
+            <option value="النموذج (1)">النموذج (1)</option>
+            <option value="النموذج (2)">النموذج (2)</option>
+            <option value="النموذج (3)">النموذج (3)</option>
+            <option value="النموذج (4)">النموذج (4)</option>
+            <option value="النموذج (5)">النموذج (5)</option>
+        </select>
+    </div>
 
     <!-- مفتاح الإجابة للـ 20 سؤالاً -->
     <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة الصحيحة (20 سؤالاً):</div>
@@ -102,7 +114,6 @@
                     logger: m => console.log(m)
                 });
                 
-                // تنظيف النص المستخرج أو وضعه في خانة الاسم
                 let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
                 document.getElementById('scanStudentName').value = cleanText ? cleanText.slice(0, 40) : "";
                 statusDiv.innerText = "✅ تمت قراءة الصورة بنجاح!";
@@ -113,9 +124,10 @@
         }
     }
 
-    // تصحيح ورقة التظليل وإرسال النتيجة للوحة التحكم
+    // تصحيح ورقة التظليل وإرسال النتيجة للوحة التحكم تحت النموذج المحدد
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('scanStudentName').value.trim();
+        const selectedModel = document.getElementById('targetModelSelect').value;
         const fileInput = document.getElementById('scanStudentImage');
 
         if (!studentName) {
@@ -156,7 +168,7 @@
             name: studentName,
             score: score,
             total: 20,
-            model_id: 'أوراق التظليل', 
+            model_id: selectedModel, // إرسال اسم النموذج المختار (من 1 إلى 5) إلى لوحتك
             answers: answersDetails,
             sections: skillsObj,
             time: firebase.firestore.FieldValue.serverTimestamp()
@@ -164,7 +176,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها إلى لوحتك بنجاح تحت قسم (أوراق التظليل)!\nالدرجة: ${score} من 20 (${p}%)`);
+            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها إلى لوحتك تحت (${selectedModel}) بنجاح!\nالدرجة: ${score} من 20 (${p}%)`);
             document.getElementById('scanStudentName').value = '';
             fileInput.value = '';
             document.getElementById('ocrStatus').innerText = '';
