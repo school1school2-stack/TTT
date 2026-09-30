@@ -126,7 +126,7 @@
         </div>
         <div class="action-buttons no-print" id="action-area">
             <button class="btn-share" onclick="generateShareLink(selectedModel)">🔗 مشاركة اللوحة</button>
-            <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️️ طباعة</button>
+            <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>
         </div>
     </div>
 
@@ -286,14 +286,13 @@
 
     let chartA, chartB, studentLineChart = null;
     let currentUnsubscribe = null;
-    let selectedModel = 'أوراق التظليل'; // تعيين العنوان الافتراضي ليكون أوراق التظليل
+    let selectedModel = 'أوراق التظليل'; 
     let globalSnapshotData = []; 
     let currentFilteredQuery = '';
 
     const urlParams = new URLSearchParams(window.location.search);
     const isViewOnly = urlParams.has('view');
 
-    // توليد حقول الـ 20 سؤالاً لمفتاح الإجابة
     function initAnswerKeyInputs() {
         const container = document.getElementById('answerKeyContainer');
         container.innerHTML = '';
@@ -312,7 +311,6 @@
         }
     }
 
-    // تصحيح ورقة الطالب وإرسال النتيجة إلى لوحة التحكم تحت عنوان "أوراق التظليل"
     async function processAndSaveScannedPaper() {
         const studentName = document.getElementById('scanStudentName').value.trim();
         const fileInput = document.getElementById('scanStudentImage');
@@ -322,7 +320,7 @@
             return;
         }
         if (fileInput.files.length === 0) {
-            alert('الرجاء اختيار صورة ورقة التظليل الخاصة بالطالب.');
+            alert('الرجاء اختيار صورة ورقة التظليل الخاصة بالط الطالب.');
             return;
         }
 
@@ -355,7 +353,7 @@
             name: studentName,
             score: score,
             total: 20,
-            model_id: 'أوراق التظليل', // إرسال وتصنيف البيانات تحت عنوان أوراق التظليل حصرياً
+            model_id: 'أوراق التظليل', 
             answers: answersDetails,
             sections: skillsObj,
             time: firebase.firestore.FieldValue.serverTimestamp()
@@ -600,7 +598,7 @@
         const subTitle = document.getElementById('sub-title');
         if (m === 'all') {
             subTitle.innerText = "جميع النماذج وأوراق التظليل";
-            actionArea.innerHTML = `<button class="btn-share" onclick="generateShareLink('all')">🔗 مشاركة اللوحة</button><button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
+            actionArea.innerHTML = `<button class="btn-share" onclick="generateShareLink('all')">🔗 مشاركة اللوحة</button><button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️️ طباعة</button>`;
         } else {
             subTitle.innerText = `قسم: ${m}`;
             actionArea.innerHTML = `<button class="btn-share" onclick="generateShareLink('${m}')">🔗 مشاركة القسم</button><button class="bulk-delete-btn" onclick="deleteEntireModel('${m}')">🗑️ تصفير القسم</button><button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
@@ -671,7 +669,6 @@
         });
     }
 
-    // التشغيل التلقائي عند التحميل وتحديد العرض الافتراضي على "أوراق التظليل"
     window.onload = function() {
         initAnswerKeyInputs();
         setMod('أوراق التظليل');
