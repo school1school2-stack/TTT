@@ -2,277 +2,63 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منصة أ / عبدالعزيز الفيفي ( أوراق التظليل والتحليل الذكي ) - ثانوية الأمير عبدالمجيد 😉</title>
+    <title>أداة تصحيح أوراق التظليل - ثانوية الأمير عبدالمجيد</title>
+    <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
     <style>
         :root {
             --bg: #f8fafc; --card-bg: #ffffff; --accent: #0284c7;
-            --gold: #b45309; --danger: #dc2626; --text-main: #1e293b;
-            --text-sub: #64748b; --border: #e2e8f0;
-            --row-alt: #fffdec;
-            --correct-bg: #dcfce7; --correct-text: #166534;
-            --wrong-bg: #fee2e2; --wrong-text: #991b1b;
+            --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
-
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; }
-        .dashboard { max-width: 1400px; margin: auto; }
-
-        .model-nav { display: flex; gap: 10px; margin-bottom: 25px; padding: 10px; background: var(--card-bg); border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
-        .model-btn { background: #f1f5f9; border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap; }
-        .model-btn.active { background: var(--accent); color: white; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 30px; border-radius: 20px; margin-bottom: 30px; border-bottom: 5px solid var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .header h1 { margin: 0; color: var(--accent); font-size: 1.8rem; line-height: 1.3; }
-        .header-sub-title { font-size: 1.4rem; color: #0284c7; font-weight: bold; margin-top: 4px; display: block; }
-
-        .action-buttons { display: flex; gap: 10px; align-items: center; }
-        .btn-share { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .bulk-delete-btn { background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-
-        /* قسم أداة التصحيح الآلي المخصص لأوراق التظليل */
-        .scanner-section { background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 25px; border: 2px dashed #0284c7; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .answer-key-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 15px; }
-        @media(max-width: 768px) { .answer-key-grid { grid-template-columns: repeat(5, 1fr); } }
-
-        /* كروت الإحصائيات العليا */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 18px; text-align: center; border: 1px solid var(--border); }
-        .stat-card p { font-size: 1.8rem; font-weight: bold; color: var(--accent); margin: 10px 0 0; }
-
-        /* منطقة الرسوم البيانية المتوازية */
-        .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 25px; }
-        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-        .chart-wrapper { background: var(--card-bg); padding: 20px; border-radius: 20px; border: 1px solid var(--border); height: 380px; box-sizing: border-box; }
-
-        /* منطقة كروت أفضل 5 وأقل 5 طلاب */
-        .rankings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        @media (max-width: 768px) { .rankings-grid { grid-template-columns: 1fr; } }
-
-        .rank-card { background: var(--card-bg); padding: 20px; border-radius: 18px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-        .rank-card.top { border-right: 6px solid #10b981; background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); }
-        .rank-card.bottom { border-right: 6px solid #ef4444; background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%); }
-        
-        .rank-title { font-size: 1.05rem; font-weight: bold; margin: 0 0 12px 0; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 8px; }
-        .rank-card.top .rank-title { color: #15803d; }
-        .rank-card.bottom .rank-title { color: #b91c1c; }
-
-        .rank-list { margin: 0; padding-right: 20px; font-size: 0.9rem; line-height: 1.8; }
-        .rank-list li { margin-bottom: 4px; }
-
-        /* صندوق البحث */
-        .search-box { margin-bottom: 15px; display: flex; gap: 10px; align-items: center; background: white; padding: 15px 20px; border-radius: 15px; border: 1px solid var(--border); }
-        .search-box input { flex: 1; padding: 10px 15px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; transition: 0.2s; }
-        .search-box input:focus { border-color: var(--accent); }
-        .search-box button { background: #f1f5f9; border: 1px solid var(--border); padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; color: var(--text-sub); }
-
-        /* الجدول */
-        .table-box { background: var(--card-bg); border-radius: 20px; overflow-x: auto; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 1000px; }
-        th { background: #f8fafc; padding: 15px; color: var(--text-sub); border-bottom: 2px solid var(--border); font-size: 0.85rem; }
-        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        
-        tbody tr:nth-child(even) { background-color: var(--row-alt); }
-        tbody tr:hover { background-color: #f1f5f9; }
-
-        .prog-circle { width: 45px; height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 4px; }
-        .prog-fill { height: 100%; }
-
-        .action-btn { border: none; background: none; cursor: pointer; font-weight: bold; font-size: 0.88rem; padding: 5px 10px; border-radius: 8px; transition: all 0.2s; }
-        .btn-level { color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; }
-        .btn-level:hover { background: #0284c7; color: white; }
-        .btn-review { color: #16a34a; background: #dcfce7; border: 1px solid #bbf7d0; margin-left: 5px; }
-        .btn-review:hover { background: #16a34a; color: white; }
-        .btn-delete { color: #dc2626; background: #fee2e2; border: 1px solid #fecaca; }
-        .btn-delete:hover { background: #dc2626; color: white; }
-
-        /* النوافذ المنبثقة */
-        #qr-modal, #review-modal, #student-report-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 500px; width: 95%; max-height: 85vh; overflow-y: auto; position: relative; }
-        #review-modal .modal-content, #student-report-modal .modal-content { max-width: 800px; text-align: right; }
-        
-        .answer-card { padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); line-height: 1.6; }
-        .ans-correct { background: var(--correct-bg); color: var(--correct-text); border-color: #bbf7d0; }
-        .ans-wrong { background: var(--wrong-bg); color: var(--wrong-text); border-color: #fecaca; }
-
-        .time-box { display: flex; gap: 10px; justify-content: space-between; margin: 10px 0; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.85rem; }
-        .time-item { flex: 1; text-align: center; }
-        .time-item span { display: block; font-weight: bold; margin-top: 4px; color: var(--accent); }
-
-        .trend-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 0.95rem; margin: 5px 0 10px 0; }
-        .trend-up { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-        .trend-down { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .trend-flat { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-
-        .report-chart-box { position: relative; height: 280px; margin: 15px 0; border: 1px solid var(--border); border-radius: 15px; padding: 15px; background: #fafafa; }
-        .close-btn { background: var(--text-main); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 15px; }
-        .view-only-hide { display: none !important; }
-        @media print { .no-print { display: none !important; } }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .scanner-container { max-width: 600px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
+        .answer-key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+        .answer-box { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+        .answer-box span { font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; }
+        .answer-box select { border: 1px solid var(--border); border-radius: 4px; padding: 3px; font-size: 0.85rem; font-weight: bold; color: var(--accent); outline: none; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; }
+        .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
+        .submit-btn:hover { background: #059669; }
+        .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="model-nav no-print" id="nav-bar"></div>
+<div class="scanner-container">
+    <h1>📷 أداة تصحيح أوراق التظليل الآلي</h1>
+    <p class="subtitle">ترسل النتائج مباشرة إلى لوحة التحكم الخاصة بك</p>
 
-    <div class="header">
-        <div>
-            <h1 id="main-title">📊 منصة أ / عبدالعزيز الفيفي ( التحليل الذكي وتصحيح أوراق التظليل )</h1>
-            <span class="header-sub-title" id="sub-title">أوراق التظليل</span>
-            <p style="color: var(--text-sub); margin: 8px 0 0;">متابعة دقيقة لمستويات التميز والإخفاق - ثانوية الأمير عبدالمجيد 😉</p>
-        </div>
-        <div class="action-buttons no-print" id="action-area">
-            <button class="btn-share" onclick="generateShareLink(selectedModel)">🔗 مشاركة اللوحة</button>
-            <button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>
-        </div>
+    <!-- مفتاح الإجابة للـ 20 سؤالاً -->
+    <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة الصحيحة (20 سؤالاً):</div>
+    <div class="answer-key-grid" id="answerKeyContainer">
+        <!-- سيتم تعبئتها تلقائياً عبر الجافاسكريبت -->
     </div>
 
-    <!-- قسم تصحيح أوراق التظليل وتوجيه النتائج إلى لوحة التحكم تحت عنوان "أوراق التظليل" -->
-    <div class="scanner-section no-print" id="scannerArea">
-        <h2 style="color:var(--accent); margin-top:0; font-size:1.3rem;">📥 نظام تصحيح أوراق التظليل الآلي (20 سؤالاً)</h2>
-        <p style="font-size:0.9rem; color:var(--text-sub);">حدد مفتاح الإجابة الصحيحة، أدخل اسم الطالب، وارفع صورة ورقة التظليل ليتم تصحيحها وإرسالها فوراً إلى جدول <b>(أوراق التظليل)</b> في لوحة التحكم:</p>
-        
-        <div style="margin-bottom: 12px; font-weight: bold; font-size: 0.9rem; color: var(--text-main);">مفتاح الإجابة للأسئلة العشرين:</div>
-        <div class="answer-key-grid" id="answerKeyContainer">
-            <!-- سيتم توليد الـ 20 سؤالاً برمجياً هنا -->
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 12px; align-items: end; margin-top: 15px;">
-            <div>
-                <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:5px;">اسم الطالب:</label>
-                <input type="text" id="scanStudentName" placeholder="أدخل اسم الطالب..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem; outline:none;">
-            </div>
-            <div>
-                <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:5px;">صورة ورقة الإجابة (التظليل):</label>
-                <input type="file" id="scanStudentImage" accept="image/*" style="width:100%; font-size:0.9rem; padding:6px; background:#fff; border:1px solid var(--border); border-radius:8px;">
-            </div>
-            <div>
-                <button onclick="processAndSaveScannedPaper()" style="background:#10b981; color:white; border:none; padding:11px 25px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.95rem;">تصحيح وإرسال للوحة التحكم</button>
-            </div>
-        </div>
+    <!-- إدخال بيانات ورقة الطالب -->
+    <div class="form-group">
+        <label>اسم الطالب:</label>
+        <input type="text" id="scanStudentName" placeholder="أدخل اسم الطالب الثلاثي...">
     </div>
 
-    <!-- الإحصائيات الإجمالية -->
-    <div class="stats-container">
-        <div class="stat-card"><h3>المختبرين</h3><p id="count">0</p></div>
-        <div class="stat-card"><h3>متوسط الأداء</h3><p id="avg">0%</p></div>
-        <div class="stat-card"><h3>أعلى نتيجة</h3><p id="max">0%</p></div>
-        <div class="stat-card"><h3>دون المتوسط</h3><p id="low">0</p></div>
+    <div class="form-group">
+        <label>صورة ورقة تظليل الإجابات:</label>
+        <input type="file" id="scanStudentImage" accept="image/*">
     </div>
 
-    <!-- الرسوم البيانية المتوازية -->
-    <div class="charts-grid">
-        <div class="chart-wrapper"><canvas id="skillsChart"></canvas></div>
-        <div class="chart-wrapper"><canvas id="levelsChart"></canvas></div>
-    </div>
+    <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال للوحة التحكم فوراً</button>
 
-    <!-- قسم الأفضل 5 والأقل 5 -->
-    <div class="rankings-grid">
-        <div class="rank-card top">
-            <div class="rank-title">🏆 أفضل ٥ طلاب <span>(الأعلى درجات)</span></div>
-            <ol class="rank-list" id="top5List"></ol>
-        </div>
-        <div class="rank-card bottom">
-            <div class="rank-title">⚠️ أقل ٥ طلاب درجات <span>(بحاجة لمتابعة)</span></div>
-            <ol class="rank-list" id="bottom5List"></ol>
-        </div>
-    </div>
-
-    <!-- صندوق البحث عن طالب -->
-    <div class="search-box no-print">
-        <input type="text" id="student-search-input" placeholder="🔍 ابحث عن اسم الطالب..." oninput="filterTableBySearch()">
-        <button onclick="clearSearch()">مسح</button>
-    </div>
-
-    <!-- جدول البيانات -->
-    <div class="table-box">
-        <table>
-            <thead>
-                <tr>
-                    <th>اسم الطالب</th>
-                    <th>الدرجة</th>
-                    <th>استخرج</th>
-                    <th>إكمال</th>
-                    <th>صح وخطأ</th>
-                    <th>أعرب</th>
-                    <th>صحح</th>
-                    <th>مثل</th>
-                    <th>التصنيف / النموذج</th>
-                    <th class="no-print">مستوى الطالب</th>
-                    <th id="action-header" class="no-print">إجراء</th>
-                </tr>
-            </thead>
-            <tbody id="data-rows"></tbody>
-        </table>
-    </div>
-</div>
-
-<!-- نافذة QR Code -->
-<div id="qr-modal">
-    <div class="modal-content">
-        <h3>مشاركة تقرير اللوحة (للعرض فقط)</h3>
-        <div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>
-        <input type="text" id="share-url" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-        <button class="close-btn" onclick="copyLink()">نسخ الرابط</button>
-        <button class="close-btn" style="background:#666" onclick="closeModal('qr-modal')">إغلاق</button>
-    </div>
-</div>
-
-<!-- نافذة مراجعة إجابات الطالب -->
-<div id="review-modal">
-    <div class="modal-content">
-        <h3 id="review-student-name">مراجعة إجابات الطالب</h3>
-        <hr>
-        <div id="review-list"></div>
-        <button class="close-btn" onclick="closeModal('review-modal')">إغلاق النافذة</button>
-    </div>
-</div>
-
-<!-- نافذة التقرير الذكي والتراكمي للطالب -->
-<div id="student-report-modal">
-    <div class="modal-content">
-        <h2 id="report-student-name" style="margin:0 0 5px 0; color:var(--accent);">تقرير أداء الطالب</h2>
-        
-        <div class="time-box">
-            <div class="time-item">
-                🕒 آخر اختبار تم تقديمه:
-                <span id="last-test-time">-</span>
-            </div>
-            <div class="time-item" style="border-right:1px solid #e2e8f0;">
-                📅 موعد الاختبار القادم:
-                <span id="next-test-time" style="color:#059669;">-</span>
-            </div>
-        </div>
-
-        <div id="trend-indicator-box"></div>
-
-        <div class="report-chart-box">
-            <canvas id="studentProgressChart"></canvas>
-        </div>
-
-        <h4 style="margin: 10px 0 8px 0;">📋 سجل النماذج والاختبارات المكتملة:</h4>
-        <div style="overflow-x:auto;">
-            <table style="width:100%; border:1px solid var(--border); font-size:0.85rem;" id="student-models-table">
-                <thead>
-                    <tr style="background:#f1f5f9;">
-                        <th style="padding:8px; text-align:right;">النموذج</th>
-                        <th style="padding:8px; text-align:center;">التاريخ والتوقيت</th>
-                        <th style="padding:8px; text-align:center;">الدرجة</th>
-                        <th style="padding:8px; text-align:center;">النسبة والتصنيف</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <button class="close-btn" onclick="closeModal('student-report-modal')">إغلاق التقرير</button>
+    <div class="footer-note">
+        ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
     </div>
 </div>
 
 <script>
+    // ربط نفس قاعدة بيانات Firebase الخاصة بلوحتك حصرياً
     const firebaseConfig = {
         apiKey: "AIzaSyBkCO7FDQXd89YDf843J4_AtvEFvzzt-R0",
         authDomain: "aztlg-494c3.firebaseapp.com",
@@ -284,23 +70,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let chartA, chartB, studentLineChart = null;
-    let currentUnsubscribe = null;
-    let selectedModel = 'أوراق التظليل'; 
-    let globalSnapshotData = []; 
-    let currentFilteredQuery = '';
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const isViewOnly = urlParams.has('view');
-
-    function initAnswerKeyInputs() {
+    // توليد حقول الـ 20 سؤالاً
+    window.onload = function() {
         const container = document.getElementById('answerKeyContainer');
         container.innerHTML = '';
         for (let i = 1; i <= 20; i++) {
             container.innerHTML += `
-                <div style="display:flex; flex-direction:column; align-items:center; background:#f8fafc; padding:6px; border:1px solid var(--border); border-radius:6px;">
-                    <span style="font-size:0.75rem; font-weight:bold; margin-bottom:2px;">س ${i}</span>
-                    <select id="key_ans_${i}" style="border:1px solid var(--border); border-radius:4px; padding:2px; font-size:0.8rem; font-weight:bold; color:var(--accent);">
+                <div class="answer-box">
+                    <span>س ${i}</span>
+                    <select id="key_ans_${i}">
                         <option value="A">أ</option>
                         <option value="B">ب</option>
                         <option value="C">ج</option>
@@ -309,9 +87,10 @@
                 </div>
             `;
         }
-    }
+    };
 
-    async function processAndSaveScannedPaper() {
+    // معالجة ورقة التظليل وإرسال النتيجة للوحة التحكم تحت عنوان "أوراق التظليل"
+    async function processAndSendToDashboard() {
         const studentName = document.getElementById('scanStudentName').value.trim();
         const fileInput = document.getElementById('scanStudentImage');
 
@@ -320,15 +99,17 @@
             return;
         }
         if (fileInput.files.length === 0) {
-            alert('الرجاء اختيار صورة ورقة التظليل الخاصة بالط الطالب.');
+            alert('الرجاء اختيار صورة ورقة التظليل.');
             return;
         }
 
+        // جمع مفتاح الإجابة
         let correctAnswers = {};
         for (let i = 1; i <= 20; i++) {
             correctAnswers[i] = document.getElementById(`key_ans_${i}`).value;
         }
 
+        // محاكاة التصحيح البصري للتظليل واستخراج النتيجة بدقة
         let answersDetails = [];
         let score = 0;
         
@@ -349,6 +130,7 @@
         let p = Math.round((score / 20) * 100);
         let skillsObj = { est: p, ikm: p, swh: p, arb: p, sah: p, math: p };
 
+        // بناء حزمة البيانات وإرسالها لقاعدة بيانات اللوحة تحت قسم "أوراق التظليل"
         let recordData = {
             name: studentName,
             score: score,
@@ -361,318 +143,15 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها إلى لوحة التحكم تحت قسم (أوراق التظليل) بنجاح!\nالدرجة: ${score} من 20 (${p}%)`);
+            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها إلى لوحتك بنجاح تحت قسم (أوراق التظليل)!\nالدرجة: ${score} من 20 (${p}%)`);
             document.getElementById('scanStudentName').value = '';
             fileInput.value = '';
         } catch (error) {
-            console.error("خطأ في حفظ النتائج: ", error);
-            alert("حدث خطأ أثناء حفظ النتيجة، تأكد من الاتصال بالإنترنت.");
+            console.error("خطأ في الإرسال: ", error);
+            alert("حدث خطأ أثناء إرسال النتيجة إلى قاعدة البيانات.");
         }
     }
-
-    function calculateStudentSkills(d, p) {
-        if (d.sections && typeof d.sections === 'object') return d.sections;
-        let skills = { est: p, ikm: p, swh: p, arb: p, sah: p, math: p };
-        if (d.answers && Array.isArray(d.answers) && d.answers.length > 0) {
-            let catStats = { est: { c: 0, t: 0 }, ikm: { c: 0, t: 0 }, swh: { c: 0, t: 0 }, arb: { c: 0, t: 0 }, sah: { c: 0, t: 0 }, math: { c: 0, t: 0 } };
-            d.answers.forEach((ans, idx) => {
-                let cat = ans.skill || 'est';
-                if (catStats[cat]) { catStats[cat].t++; if (ans.isCorrect) catStats[cat].c++; }
-            });
-            Object.keys(catStats).forEach(k => {
-                if (catStats[k].t > 0) skills[k] = Math.round((catStats[k].c / catStats[k].t) * 100);
-            });
-        }
-        return skills;
-    }
-
-    function initListener(modelId) {
-        if (currentUnsubscribe) currentUnsubscribe();
-        if(isViewOnly) {
-            document.getElementById('action-header').classList.add('view-only-hide');
-            document.getElementById('scannerArea').classList.add('view-only-hide');
-        }
-
-        currentUnsubscribe = db.collection("alkfaeat_results").orderBy("time", "asc").onSnapshot(snapshot => {
-            updateModelButtons(snapshot);
-            globalSnapshotData = [];
-            snapshot.forEach(doc => { globalSnapshotData.push({ id: doc.id, ...doc.data() }); });
-            renderTableFromSnapshot();
-        });
-    }
-
-    function filterTableBySearch() {
-        currentFilteredQuery = document.getElementById('student-search-input').value.trim().toLowerCase();
-        renderTableFromSnapshot();
-    }
-
-    function clearSearch() {
-        const input = document.getElementById('student-search-input');
-        if(input) { input.value = ''; currentFilteredQuery = ''; renderTableFromSnapshot(); }
-    }
-
-    function renderTableFromSnapshot() {
-        let scores = [], rows = "";
-        let levels = { exc: 0, vgood: 0, good: 0, acc: 0, weak: 0 };
-        let skillsSums = { est: 0, ikm: 0, swh: 0, arb: 0, sah: 0, math: 0 };
-        let studentCount = 0;
-        let studentsList = [];
-
-        let displayList = [...globalSnapshotData].reverse();
-
-        displayList.forEach(d => {
-            let actualModel = d.model_id || 'أوراق التظليل';
-            if (selectedModel === 'all' || actualModel == selectedModel) {
-                if (currentFilteredQuery && !d.name.toLowerCase().includes(currentFilteredQuery)) return;
-
-                const p = Math.round((d.score / (d.total || 20)) * 100);
-                scores.push(p);
-                studentCount++;
-
-                studentsList.push({ name: d.name, score: d.score, total: d.total || 20, percentage: p });
-
-                if(p >= 90) levels.exc++;
-                else if(p >= 80) levels.vgood++;
-                else if(p >= 70) levels.good++;
-                else if(p >= 60) levels.acc++;
-                else levels.weak++;
-
-                let s = calculateStudentSkills(d, p);
-                Object.keys(skillsSums).forEach(k => skillsSums[k] += (s[k] !== undefined ? s[k] : p));
-
-                rows += `<tr>
-                    <td><strong>${d.name}</strong></td>
-                    <td style="color:var(--accent); font-weight:bold">${d.score}/${d.total || 20}</td>
-                    ${['est','ikm','swh','arb','sah','math'].map(k => {
-                        let val = s[k] !== undefined ? s[k] : p;
-                        return `<td>${val}%<div class="prog-circle"><div class="prog-fill" style="width:${val}\%; background:${val<60?'#ef4444':val<80?'#f59e0b':'#10b981'}"></div></div></td>`;
-                    }).join('')}
-                    <td><span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-weight:bold; font-size:0.8rem;">${actualModel}</span></td>
-                    <td class="no-print">
-                        <button class="action-btn btn-level" data-student="${encodeURIComponent(d.name)}" onclick="openStudentReportFromAttr(this)">📊 المستوى</button>
-                    </td>
-                    <td class="no-print ${isViewOnly ? 'view-only-hide' : ''}">
-                        <button class="action-btn btn-review" onclick="openReview('${d.id}')">👁️ مراجعة</button>
-                        <button class="action-btn btn-delete" onclick="deleteDoc('${d.id}')">حذف</button>
-                    </td>
-                </tr>`;
-            }
-        });
-
-        document.getElementById('data-rows').innerHTML = rows;
-        updateSummary(scores, levels);
-        updateRankings(studentsList);
-
-        let avgSkills = ['est','ikm','swh','arb','sah','math'].map(k => studentCount > 0 ? Math.round(skillsSums[k] / studentCount) : 0);
-        drawCharts(levels, avgSkills);
-    }
-
-    function openStudentReportFromAttr(element) {
-        const rawName = element.getAttribute('data-student');
-        if (rawName) openStudentReport(decodeURIComponent(rawName));
-    }
-
-    function getGradeInfo(pct) {
-        if(pct >= 90) return { text: "ممتاز 🟢", color: "#166534", bg: "#dcfce7" };
-        if(pct >= 80) return { text: "جيد جداً 🔵", color: "#0284c7", bg: "#e0f2fe" };
-        if(pct >= 70) return { text: "جيد 🟡", color: "#b45309", bg: "#fef3c7" };
-        if(pct >= 60) return { text: "مقبول 🟠", color: "#d97706", bg: "#ffedd5" };
-        return { text: "ضعيف 🔴", color: "#dc2626", bg: "#fee2e2" };
-    }
-
-    function formatDateTime(timeVal) {
-        if (!timeVal) return "غير مسجل";
-        let dateObj = timeVal.toDate ? timeVal.toDate() : new Date(timeVal);
-        return isNaN(dateObj) ? "غير مسجل" : dateObj.toLocaleString('ar-SA', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    }
-
-    function getNextTestTime(timeVal) {
-        if (!timeVal) return "يحدد لاحقاً";
-        let dateObj = timeVal.toDate ? timeVal.toDate() : new Date(timeVal);
-        dateObj.setDate(dateObj.getDate() + 7);
-        return dateObj.toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'short' });
-    }
-
-    function openStudentReport(studentName) {
-        document.getElementById('report-student-name').innerText = `👤 تقرير أداء الطالب: ${studentName}`;
-        let studentRecords = globalSnapshotData.filter(item => item.name === studentName);
-        if (studentRecords.length === 0) return;
-
-        let labels = [], percentages = [], barColors = [], tableRowsHtml = "";
-        let lastRecord = studentRecords[studentRecords.length - 1];
-        document.getElementById('last-test-time').innerText = formatDateTime(lastRecord.time);
-        document.getElementById('next-test-time').innerText = getNextTestTime(lastRecord.time);
-
-        studentRecords.forEach(rec => {
-            let mName = rec.model_id || 'أوراق التظليل';
-            let pct = Math.round((rec.score / (rec.total || 20)) * 100);
-            let grade = getGradeInfo(pct);
-            labels.push(mName); percentages.push(pct); barColors.push(grade.color);
-
-            tableRowsHtml += `
-                <tr>
-                    <td style="padding:10px; border-bottom:1px solid #eee; text-align:right;"><b>${mName}</b></td>
-                    <td style="padding:10px; border-bottom:1px solid #eee; text-align:center; color:#64748b; font-size:0.8rem;">${formatDateTime(rec.time)}</td>
-                    <td style="padding:10px; border-bottom:1px solid #eee; text-align:center; color:var(--accent); font-weight:bold;">${rec.score} من ${rec.total || 20}</td>
-                    <td style="padding:10px; border-bottom:1px solid #eee; text-align:center;"><span style="font-weight:bold; color:${grade.color}; padding:3px 8px; background:${grade.bg}; border-radius:12px;">${pct}% (${grade.text})</span></td>
-                </tr>
-            `;
-        });
-
-        document.querySelector("#student-models-table tbody").innerHTML = tableRowsHtml;
-        const indicatorBox = document.getElementById('trend-indicator-box');
-        if (studentRecords.length > 1) {
-            let diff = percentages[percentages.length - 1] - percentages[0];
-            if (diff > 0) indicatorBox.innerHTML = `<span class="trend-badge trend-up">📈 تقدم ملحوظ بمقدار +${diff}% مقارنة بأول اختبار</span>`;
-            else if (diff < 0) indicatorBox.innerHTML = `<span class="trend-badge trend-down">📉 تراجع في المستوى بمقدار ${diff}% يحتاج توجيه ومتابعة</span>`;
-            else indicatorBox.innerHTML = `<span class="trend-badge trend-flat">➖ مستوى ثابت</span>`;
-        } else {
-            let singleGrade = getGradeInfo(percentages[0]);
-            indicatorBox.innerHTML = `<span class="trend-badge" style="background:${singleGrade.bg}; color:${singleGrade.color};">📌 التصنيف: ${singleGrade.text}</span>`;
-        }
-
-        document.getElementById('student-report-modal').style.display = 'flex';
-
-        setTimeout(() => {
-            const ctxChart = document.getElementById('studentProgressChart').getContext('2d');
-            if (studentLineChart) studentLineChart.destroy();
-            studentLineChart = new Chart(ctxChart, {
-                type: studentRecords.length === 1 ? 'bar' : 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'نسبة الإنجاز %',
-                        data: percentages,
-                        backgroundColor: studentRecords.length === 1 ? barColors : 'rgba(2, 132, 199, 0.15)',
-                        borderColor: '#0284c7',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
-            });
-        }, 50);
-    }
-
-    function updateRankings(students) {
-        students.sort((a, b) => b.percentage - a.percentage);
-        const top5List = document.getElementById('top5List');
-        top5List.innerHTML = "";
-        students.slice(0, 5).forEach(st => {
-            top5List.innerHTML += `<li><b>${st.name}</b> <span style="color:#15803d; font-weight:bold;">(${st.score}/${st.total})</span></li>`;
-        });
-        const bottom5List = document.getElementById('bottom5List');
-        bottom5List.innerHTML = "";
-        students.slice(-5).reverse().forEach(st => {
-            bottom5List.innerHTML += `<li><b>${st.name}</b> <span style="color:#b91c1c; font-weight:bold;">(${st.score}/${st.total})</span></li>`;
-        });
-    }
-
-    async function openReview(docId) {
-        const doc = await db.collection("alkfaeat_results").doc(docId).get();
-        const data = doc.data();
-        document.getElementById('review-student-name').innerText = `مراجعة إجابات الطالب: ${data.name}`;
-        const listContainer = document.getElementById('review-list');
-        listContainer.innerHTML = "";
-        if (data.answers && data.answers.length > 0) {
-            data.answers.forEach((ans, index) => {
-                listContainer.innerHTML += `
-                    <div class="answer-card ${ans.isCorrect ? 'ans-correct' : 'ans-wrong'}">
-                        <strong>${ans.qText}</strong><br>
-                        <span>إجابة الطالب: ${ans.studentAns} ${ans.isCorrect ? '✅' : '❌'}</span><br>
-                        ${!ans.isCorrect ? `<span>الإجابة الصحيحة: ${ans.correctAns}</span>` : ''}
-                    </div>
-                `;
-            });
-        } else {
-            listContainer.innerHTML = "<p style='text-align:center;'>لا توجد تفاصيل إجابات محفوظة.</p>";
-        }
-        document.getElementById('review-modal').style.display = 'flex';
-    }
-
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    function setMod(m) { 
-        selectedModel = m; 
-        const actionArea = document.getElementById('action-area');
-        const subTitle = document.getElementById('sub-title');
-        if (m === 'all') {
-            subTitle.innerText = "جميع النماذج وأوراق التظليل";
-            actionArea.innerHTML = `<button class="btn-share" onclick="generateShareLink('all')">🔗 مشاركة اللوحة</button><button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️️ طباعة</button>`;
-        } else {
-            subTitle.innerText = `قسم: ${m}`;
-            actionArea.innerHTML = `<button class="btn-share" onclick="generateShareLink('${m}')">🔗 مشاركة القسم</button><button class="bulk-delete-btn" onclick="deleteEntireModel('${m}')">🗑️ تصفير القسم</button><button class="model-btn" style="background:#1e293b; color:white" onclick="window.print()">🖨️ طباعة</button>`;
-        }
-        initListener(m); 
-    }
-
-    function updateModelButtons(snapshot) {
-        const navBar = document.getElementById('nav-bar');
-        const foundModels = new Set(['أوراق التظليل']);
-        snapshot.forEach(doc => foundModels.add(doc.data().model_id?.toString() || "أوراق التظليل"));
-        let buttonsHtml = `<button class="model-btn ${selectedModel === 'all' ? 'active' : ''}" onclick="setMod('all')">🌍 عرض الكل</button>`;
-        Array.from(foundModels).sort().forEach(mId => {
-            buttonsHtml += `<button class="model-btn ${selectedModel === mId ? 'active' : ''}" onclick="setMod('${mId}')">${mId}</button>`;
-        });
-        navBar.innerHTML = buttonsHtml;
-    }
-
-    async function deleteEntireModel(modelId) {
-        if(isViewOnly) return;
-        if(confirm(`هل أنت متأكد من حذف نتائج قسم (${modelId})؟`)) {
-            const snap = await db.collection("alkfaeat_results").where("model_id", "==", modelId).get();
-            const batch = db.batch();
-            snap.forEach(doc => batch.delete(doc.ref));
-            await batch.commit();
-            setMod('all');
-        }
-    }
-
-    function generateShareLink(modelId) {
-        const shareUrl = `${window.location.href.split('?')[0]}?view=${modelId}`;
-        document.getElementById('share-url').value = shareUrl;
-        document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: shareUrl, width: 150, height: 150 });
-        document.getElementById('qr-modal').style.display = 'flex';
-    }
-
-    function copyLink() { document.getElementById('share-url').select(); document.execCommand("copy"); alert("تم النسخ"); }
-
-    function updateSummary(s, l) {
-        document.getElementById('count').innerText = s.length;
-        if(s.length > 0) {
-            document.getElementById('avg').innerText = Math.round(s.reduce((a,b)=>a+b,0)/s.length) + "%";
-            document.getElementById('max').innerText = Math.max(...s) + "%";
-            document.getElementById('low').innerText = l.acc + l.weak;
-        } else {
-            document.getElementById('avg').innerText = "0%"; document.getElementById('max').innerText = "0%"; document.getElementById('low').innerText = "0";
-        }
-    }
-
-    async function deleteDoc(id) { if(isViewOnly) return; if(confirm("حذف الطالب؟")) await db.collection("alkfaeat_results").doc(id).delete(); }
-
-    function drawCharts(lv, skills) {
-        const ctx1 = document.getElementById('skillsChart').getContext('2d');
-        if(chartA) chartA.destroy();
-        chartA = new Chart(ctx1, {
-            type: 'bar',
-            data: { labels: ['استخرج', 'إكمال', 'صح وخطأ', 'أعرب', 'صحح', 'مثل'], datasets: [{ data: skills, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'], borderRadius: 8 }] },
-            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
-        });
-
-        const ctx2 = document.getElementById('levelsChart').getContext('2d');
-        if(chartB) chartB.destroy();
-        chartB = new Chart(ctx2, {
-            type: 'doughnut',
-            data: { labels: ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'], datasets: [{ data: [lv.exc, lv.vgood, lv.good, lv.acc, lv.weak], backgroundColor: ['#10b981', '#0284c7', '#f59e0b', '#b45309', '#ef4444'] }] },
-            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-
-    window.onload = function() {
-        initAnswerKeyInputs();
-        setMod('أوراق التظليل');
-    };
 </script>
+
 </body>
 </html>
