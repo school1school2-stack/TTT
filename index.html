@@ -2,10 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة تصحيح أوراق التظليل - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة تصحيح أوراق التظليل الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- مكتبة التعرف الضوئي على النصوص (OCR) لقراءة اسم الطالب تلقائياً -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js'></script>
     <style>
         :root {
             --bg: #f8fafc; --card-bg: #ffffff; --accent: #0284c7;
@@ -22,6 +24,7 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; }
+        .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
         .submit-btn:hover { background: #059669; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
@@ -30,24 +33,23 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة تصحيح أوراق التظليل الآلي</h1>
-    <p class="subtitle">ترسل النتائج مباشرة إلى لوحة التحكم الخاصة بك</p>
+    <h1>📷 أداة تصحيح أوراق التظليل الذكية</h1>
+    <p class="subtitle">قراءة الاسم تلقائياً وإرسال النتائج للوحة التحكم</p>
 
     <!-- مفتاح الإجابة للـ 20 سؤالاً -->
     <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة الصحيحة (20 سؤالاً):</div>
-    <div class="answer-key-grid" id="answerKeyContainer">
-        <!-- سيتم تعبئتها تلقائياً عبر الجافاسكريبت -->
-    </div>
+    <div class="answer-key-grid" id="answerKeyContainer"></div>
 
     <!-- إدخال بيانات ورقة الطالب -->
     <div class="form-group">
-        <label>اسم الطالب:</label>
-        <input type="text" id="scanStudentName" placeholder="أدخل اسم الطالب الثلاثي...">
+        <label>صورة ورقة تظليل الإجابات (أسفل الصفحة الثانية):</label>
+        <input type="file" id="scanStudentImage" accept="image/*" onchange="extractStudentName(this)">
+        <div id="ocrStatus" class="status-msg"></div>
     </div>
 
     <div class="form-group">
-        <label>صورة ورقة تظليل الإجابات:</label>
-        <input type="file" id="scanStudentImage" accept="image/*">
+        <label>اسم الطالب (يتم تعبئته تلقائياً أو يدوياً):</label>
+        <input type="text" id="scanStudentName" placeholder="سيظهر اسم الطالب هنا بعد قراءة الصورة...">
     </div>
 
     <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال للوحة التحكم فوراً</button>
@@ -58,7 +60,7 @@
 </div>
 
 <script>
-    // ربط نفس قاعدة بيانات Firebase الخاصة بلوحتك حصرياً
+    // ربط نفس قاعدة بيانات Firebase الخاصة بلوحتك
     const firebaseConfig = {
         apiKey: "AIzaSyBkCO7FDQXd89YDf843J4_AtvEFvzzt-R0",
         authDomain: "aztlg-494c3.firebaseapp.com",
@@ -70,7 +72,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // توليد حقول الـ 20 سؤالاً
     window.onload = function() {
         const container = document.getElementById('answerKeyContainer');
         container.innerHTML = '';
@@ -89,13 +90,36 @@
         }
     };
 
-    // معالجة ورقة التظليل وإرسال النتيجة للوحة التحكم تحت عنوان "أوراق التظليل"
+    // قراءة اسم الطالب ضوئياً من الصورة باستخدام Tesseract.js
+    async function extractStudentName(input) {
+        if (input.files && input.files[0]) {
+            const statusDiv = document.getElementById('ocrStatus');
+            statusDiv.innerText = "⏳ جاري قراءة اسم الطالب من الصورة بالذكاء الاصطناعي...";
+            
+            try {
+                const imageUrl = URL.createObjectURL(input.files[0]);
+                const { data: { text } } = await Tesseract.recognize(imageUrl, 'ara+eng', {
+                    logger: m => console.log(m)
+                });
+                
+                // تنظيف النص المستخرج أو وضعه في خانة الاسم
+                let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
+                document.getElementById('scanStudentName').value = cleanText ? cleanText.slice(0, 40) : "";
+                statusDiv.innerText = "✅ تمت قراءة الصورة بنجاح!";
+            } catch (error) {
+                console.error(error);
+                statusDiv.innerText = "⚠️ تعذر استخراج الاسم تلقائياً، يمكنك كتابته يدوياً.";
+            }
+        }
+    }
+
+    // تصحيح ورقة التظليل وإرسال النتيجة للوحة التحكم
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('scanStudentName').value.trim();
         const fileInput = document.getElementById('scanStudentImage');
 
         if (!studentName) {
-            alert('الرجاء إدخال اسم الطالب أولاً.');
+            alert('الرجاء التأكد من كتابة أو استخراج اسم الطالب.');
             return;
         }
         if (fileInput.files.length === 0) {
@@ -103,13 +127,11 @@
             return;
         }
 
-        // جمع مفتاح الإجابة
         let correctAnswers = {};
         for (let i = 1; i <= 20; i++) {
             correctAnswers[i] = document.getElementById(`key_ans_${i}`).value;
         }
 
-        // محاكاة التصحيح البصري للتظليل واستخراج النتيجة بدقة
         let answersDetails = [];
         let score = 0;
         
@@ -130,7 +152,6 @@
         let p = Math.round((score / 20) * 100);
         let skillsObj = { est: p, ikm: p, swh: p, arb: p, sah: p, math: p };
 
-        // بناء حزمة البيانات وإرسالها لقاعدة بيانات اللوحة تحت قسم "أوراق التظليل"
         let recordData = {
             name: studentName,
             score: score,
@@ -146,6 +167,7 @@
             alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها إلى لوحتك بنجاح تحت قسم (أوراق التظليل)!\nالدرجة: ${score} من 20 (${p}%)`);
             document.getElementById('scanStudentName').value = '';
             fileInput.value = '';
+            document.getElementById('ocrStatus').innerText = '';
         } catch (error) {
             console.error("خطأ في الإرسال: ", error);
             alert("حدث خطأ أثناء إرسال النتيجة إلى قاعدة البيانات.");
