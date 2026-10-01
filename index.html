@@ -16,22 +16,22 @@
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
-        .form-group { margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; position: relative; }
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
         
         /* قائمة اختيار الطالب الذكية */
         .student-select-box { position: relative; width: 100%; }
         .student-search-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
-        .student-dropdown-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 10px 10px; max-height: 180px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .student-dropdown-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 10px 10px; max-height: 180px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; text-align: right; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
         /* شبكة إدخال إجابات الطالب للمطابقة */
         .student-answers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
         .student-ans-box { display: flex; flex-direction: column; align-items: center; background: #ffffff; padding: 6px; border: 1px solid var(--border); border-radius: 6px; }
         .student-ans-box span { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; color: #0284c7; }
-        .student-ans-box select { border: 1px solid var(--border); border-radius: 4px; padding: 2px; font-size: 0.85rem; font-weight: bold; outline: none; }
+        .student-ans-box select { border: 1px solid var(--border); border-radius: 4px; padding: 2px; font-size: 0.85rem; font-weight: bold; outline: none; width: 100%; text-align: center; }
 
         .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
         .camera-btn:hover { background: #0369a1; }
@@ -49,7 +49,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح الآلي المعتمدة (النماذج 1 إلى 5)</h1>
-    <p class="subtitle">اختر النموذج لتتغير مفاتيح الإجابة فوراً، صور ورقة الطالب، وأرسل النتيجة</p>
+    <p class="subtitle">اختر النموذج لتتغير المفاتيح تلقائياً، صور ورقة الطالب، وأرسل النتيجة</p>
 
     <!-- قائمة النماذج المعتمدة (من 1 إلى 5) -->
     <div class="form-group">
@@ -84,14 +84,14 @@
 
     <!-- فتح الكاميرا لتصوير ورقة الطالب -->
     <div class="form-group">
-        <label>تصوير ورقة تظليل الطالب:</label> مفتاح
+        <label>تصوير ورقة تظليل الطالب:</label>
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
         <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
             📸 فتح الكاميرا وتصوير ورقة الطالب
         </button>
         <div id="previewContainer">
             <img id="capturedImage" src="" alt="معاينة الورقة">
-            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط صورة ورقة الطالب وحفظها</div>
+            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط صورة ورقة الطالب بنجاح</div>
         </div>
     </div>
 
@@ -259,7 +259,7 @@
         }
     }
 
-    // تطبيق مفاتيح النموذج المختار فوراً
+    // تطبيق وتحديث مفاتيح الإجابة فور تغيير النموذج
     function applyModelKey() {
         const select = document.getElementById('targetModelSelect');
         const modelName = select.value;
@@ -272,10 +272,11 @@
                     document.getElementById(`stud_ans_${i}`).value = currentModelData[i].correct;
                 }
             }
-            document.getElementById('keyStatus').innerText = `✅ تم تحديث وتطبيق مفاتيح الإجابة لـ (${modelName}) بنجاح!`;
+            document.getElementById('keyStatus').innerText = `✅ تم تحديث مفاتيح الإجابة لـ (${modelName}) بنجاح!`;
         }
     }
 
+    // جلب قائمة الطلاب من قاعدة البيانات
     function loadAllowedStudents() {
         db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
             allStudents = [];
@@ -284,6 +285,8 @@
                 if(data.name) allStudents.push(data.name);
             });
             renderStudentDropdown(allStudents);
+        }).catch((error) => {
+            console.error("خطأ في جلب الطلاب:", error);
         });
     }
 
@@ -307,7 +310,9 @@
     }
 
     function showDropdown() {
-        document.getElementById('studentDropdownList').style.display = 'block';
+        const listDiv = document.getElementById('studentDropdownList');
+        listDiv.style.display = 'block';
+        renderStudentDropdown(allStudents);
     }
 
     function filterStudents() {
@@ -317,6 +322,7 @@
         document.getElementById('studentDropdownList').style.display = 'block';
     }
 
+    // إخفاء القائمة عند النقر خارجها
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.student-select-box')) {
             document.getElementById('studentDropdownList').style.display = 'none';
@@ -335,7 +341,7 @@
         }
     }
 
-    // تصحيح وإرسال الدرجة الحقيقية للوحة التحكم بناءً على النموذج المختار
+    // تصحيح وإرسال النتيجة مع نصوص الأسئلة والخيارات والدرجة الحقيقية لوحة التحكم
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -389,7 +395,7 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم تصحيح ورقة الطالب (${studentName}) بنجاح!\nالدرجة: ${score} من 20 (${p}%) تحت (${customModelName})`);
             
-            // إعادة ضبط الحقول للطالب التالي مع الحفاظ على النموذج الحالي
+            // إعادة ضبط الحقول للطالب التالي مع الحفاظ على النموذج المختار
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
