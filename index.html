@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -12,7 +12,7 @@
             --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 800px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        .scanner-container { max-width: 850px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -32,7 +32,11 @@
         .grid-20 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
         .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
-        .ans-card select { width: 100%; padding: 3px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); border-radius: 4px; text-align: center; background: #fffdfa; }
+        
+        /* أزرار خيارات الطالب (أ، ب، ج، د) بشكل سلس وسريع للنقر */
+        .options-group { display: flex; justify-content: center; gap: 3px; }
+        .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
+        .opt-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
 
         /* لوحة مقارنة الفروق */
         .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
@@ -54,8 +58,8 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح والمقارنة الذكية</h1>
-    <p class="subtitle">اعرض مفاتيح النموذج، صور ورقة تظليل الطالب، طابق خياراته الظاهرة في الصورة ثم اعتمدها</p>
+    <h1>📷 أداة التصحيح والمقارنة السريعة</h1>
+    <p class="subtitle">صور ورقة الطالب، انقر على خيارات تظليله الظاهرة في الصورة، قارن واعتمد النتيجة فوراً</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
@@ -102,9 +106,9 @@
         </div>
     </div>
 
-    <!-- 5. مفاتيح إجابات الطالب (معبأة تلقائياً بناءً على تظليل الورقة الظاهرة في الصورة) -->
+    <!-- 5. تظليل إجابات الطالب (أزرار سريعة لكل سؤال أ، ب، ج، د) -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️ تظليل إجابات الطالب (مطابقة لتظليل ورقة الطالب المصورة):</label>
+        <label style="color: #047857; margin-bottom: 8px;">✍️ حدد تظليل إجابات الطالب (انقر على الخيار الظاهر في صورة الورقة):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
@@ -135,6 +139,7 @@
 
     let allStudents = [];
     let imageCaptured = false;
+    let studentAnswersState = {}; // لتخزين إجابات الطالب لكل سؤال
 
     // بنك مفاتيح النماذج الخمسة المعتمدة
     const modelQuestionsBank = {
@@ -145,13 +150,11 @@
         "النموذج الخامس (هـ)": { 1:'B', 2:'B', 3:'A', 4:'B', 5:'B', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'C', 13:'B', 14:'A', 15:'B', 16:'A', 17:'A', 18:'C', 19:'A', 20:'C' }
     };
 
-    // إجابات الطالب المستخرجة بدقة من صورة ورقة الطالب المرفقة (من 1 إلى 20)
-    const scannedStudentAnswers = {
-        1: 'C', 2: 'C', 3: 'C', 4: 'C', 5: 'C', 6: 'A', 7: 'B', 8: 'B', 9: 'B', 10: 'A',
-        11: 'C', 12: 'C', 13: 'C', 14: 'A', 15: 'B', 16: 'A', 17: 'A', 18: 'B', 19: 'C', 20: 'A'
-    };
-
     window.onload = function() {
+        // تهيئة إجابات الطالب الافتراضية (أ) لكل الأسئلة من 1 إلى 20
+        for (let i = 1; i <= 20; i++) {
+            studentAnswersState[i] = 'A';
+        }
         buildStudentAnswersGrid();
         applyModelKey();
         loadAllowedStudents();
@@ -160,22 +163,45 @@
     function buildStudentAnswersGrid() {
         const container = document.getElementById('studentAnswersContainer');
         container.innerHTML = '';
-        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+        const keys = ['A', 'B', 'C', 'D'];
+        const labels = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'};
 
         for (let i = 1; i <= 20; i++) {
-            let defaultAns = scannedStudentAnswers[i] || 'A';
+            let currentVal = studentAnswersState[i];
+            let optHtml = '';
+            keys.forEach(k => {
+                let activeClass = (currentVal === k) ? 'opt-btn active' : 'opt-btn';
+                optHtml += `<button type="button" class="${activeClass}" onclick="setStudentAns(${i}, '${k}')">${labels[k]}</button>`;
+            });
+
             container.innerHTML += `
                 <div class="ans-card">
                     <span>س ${i}</span>
-                    <select id="stud_ans_${i}" onchange="updateComparison()">
-                        <option value="A" ${defaultAns==='A'?'selected':''}>أ</option>
-                        <option value="B" ${defaultAns==='B'?'selected':''}>ب</option>
-                        <option value="C" ${defaultAns==='C'?'selected':''}>ج</option>
-                        <option value="D" ${defaultAns==='D'?'selected':''}>د</option>
-                    </select>
+                    <div class="options-group" id="q_opts_${i}">
+                        ${optHtml}
+                    </div>
                 </div>
             `;
         }
+    }
+
+    // تحديث إجابة الطالب عند النقر على الزر السريع
+    function setStudentAns(qNum, ansKey) {
+        studentAnswersState[qNum] = ansKey;
+        
+        // تحديث شكل الأزرار بصرياً فوراً
+        const container = document.getElementById(`q_opts_${qNum}`);
+        const buttons = container.getElementsByTagName('button');
+        const keys = ['A', 'B', 'C', 'D'];
+        
+        for(let j=0; j<buttons.length; j++) {
+            if(keys[j] === ansKey) {
+                buttons[j].className = 'opt-btn active';
+            } else {
+                buttons[j].className = 'opt-btn';
+            }
+        }
+        updateComparison();
     }
 
     // عرض مفاتيح النموذج المعتمد بالأعلى وتحديث المقارنة
@@ -212,7 +238,7 @@
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
 
         for (let i = 1; i <= 20; i++) {
-            const studentVal = document.getElementById(`stud_ans_${i}`).value;
+            const studentVal = studentAnswersState[i];
             const correctVal = currentKey[i];
             const isMatch = (studentVal === correctVal);
 
@@ -309,7 +335,7 @@
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
         
         for (let i = 1; i <= 20; i++) {
-            let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; 
+            let studentAnsKey = studentAnswersState[i]; 
             let correctAnsKey = currentKey[i]; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
