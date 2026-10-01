@@ -27,7 +27,7 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
-        /* شبكة إدخال إجابات الطالب الظاهرة في ورقته للمطابقة الدقيقة */
+        /* شبكة إدخال إجابات الطالب للمطابقة */
         .student-answers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
         .student-ans-box { display: flex; flex-direction: column; align-items: center; background: #ffffff; padding: 6px; border: 1px solid var(--border); border-radius: 6px; }
         .student-ans-box span { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; color: #0284c7; }
@@ -48,13 +48,13 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي الدقيقة 100%</h1>
-    <p class="subtitle">تصوير الورقة، مطابقة إجابات الطالب مع المفتاح المعتمد، وإرسال الدرجة الحقيقية</p>
+    <h1>📷 أداة التصحيح الآلي المعتمدة</h1>
+    <p class="subtitle">اختر النموذج لتتغير المفاتيح تلقائياً، صور ورقة الطالب، وأرسل النتيجة</p>
 
-    <!-- اختيار النموذج -->
+    <!-- قائمة النماذج مع ربط الحدث onchange -->
     <div class="form-group">
         <label>اختر النموذج:</label>
-        <select id="targetModelSelect">
+        <select id="targetModelSelect" onchange="applyModelKey()">
             <option value="النموذج السادس (هـ) - اختبار النحو" selected>النموذج السادس (هـ) - اختبار النحو</option>
             <option value="النموذج (1)">النموذج الأول</option>
             <option value="النموذج (2)">النموذج الثاني</option>
@@ -69,6 +69,8 @@
         <label>اسم النموذج في لوحة التحكم:</label>
         <input type="text" id="customModelName" value="النموذج السادس (هـ) - اختبار النحو">
     </div>
+
+    <div id="keyStatus" class="status-msg" style="margin-bottom: 10px;"></div>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 15px;">
 
@@ -94,8 +96,8 @@
         </div>
     </div>
 
-    <!-- إدخال إجابات الطالب الظاهرة في ورقته للمطابقة مع المفتاح المعتمد -->
-    <label style="margin-bottom: 5px;">إجابات الطالب الظاهرة في ورقة التظليل (مطابقة للمفتاح):</label>
+    <!-- إجابات الطالب للمطابقة مع المفتاح المعتمد -->
+    <label style="margin-bottom: 5px;">إجابات الطالب الظاهرة في ورقة التظليل:</label>
     <div class="student-answers-grid" id="studentAnswersContainer"></div>
 
     <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال الدرجة الحقيقية للوحة التحكم</button>
@@ -136,7 +138,7 @@
         12: { q: 'أحد الحروف التالية ينصب الفعل المضارع:', options: { A: 'لم', B: 'لا الناهية', C: 'كي', D: 'لام الأمر' }, correct: 'C' },
         13: { q: 'المبتدأ والخبر في جملة "الشجرتان مثمرتان" مرفوعان بـ:', options: { A: 'الضمة', B: 'الألف', C: 'ثبوت النون', D: 'الواو' }, correct: 'B' },
         14: { q: 'الجملة المبنية للمجهول بشكل صحيح هي:', options: { A: 'كُتِبَ الدرسُ', B: 'كَتَبَ الدرسُ', C: 'كُتِبَ الدرسَ', D: 'كُتِبَ الطالبُ' }, correct: 'A' },
-        15: { q: 'الفعل المضارع "يلعبْ" في "لم يلعبْ الولد":', options: { A: 'مجزوم وعلامة جزمه حذف العلة', B: 'مجزوم وعلامة جزمه السكون', C: 'منصوب بالفتحة', C: 'مرفوع بالضمة' }, correct: 'B' },
+        15: { q: 'الفعل المضارع "يلعبْ" في "لم يلعبْ الولد":', options: { A: 'مجزوم وعلامة جزمه حذف العلة', B: 'مجزوم وعلامة جزمه السكون', C: 'منصوب بالفتحة', D: 'مرفوع بالضمة' }, correct: 'B' },
         16: { q: 'جملة "كان المسلمون متحدين"، كلمة "المسلمون":', options: { A: 'اسم كان مرفوع بالواو', B: 'خبر كان منصوب بالياء', C: 'فاعل مرفوع بالواو', D: 'مبتدأ مرفوع بالضمة' }, correct: 'A' },
         17: { q: 'التغير الذي أحدثته "لیت" في: "ليت الشبابَ يعودُ":', options: { A: 'نصبت المبتدأ ورفعت الخبر', B: 'رفعت المبتدأ ونصبت الخبر', C: 'جزم الفعل المضارع', D: 'لم تؤثر إعرابياً' }, correct: 'A' },
         18: { q: 'الفعل الذي ينتمي للأفعال الخمسة فيما يلي:', options: { A: 'يكتبُ', B: 'اكتبوا', C: 'تحفظينَ', D: 'كَتَبَا' }, correct: 'C' },
@@ -145,6 +147,12 @@
     };
 
     window.onload = function() {
+        buildAnswerGrids();
+        applyModelKey();
+        loadAllowedStudents();
+    };
+
+    function buildAnswerGrids() {
         const container = document.getElementById('studentAnswersContainer');
         container.innerHTML = '';
         for (let i = 1; i <= 20; i++) {
@@ -159,13 +167,22 @@
                     </select>
                 </div>
             `;
-            // ضبط الإجابة الافتراضية مطابقة للمفتاح لسرعة وسهولة التعديل فقط إن وجد خطأ في ورقة الطالب
+        }
+    }
+
+    // دالة تطبيق مفتاح الإجابة بناءً على النموذج المختار
+    function applyModelKey() {
+        const select = document.getElementById('targetModelSelect');
+        const modelName = select.value;
+        document.getElementById('customModelName').value = modelName;
+
+        for (let i = 1; i <= 20; i++) {
             if (questionsDataMap[i]) {
                 document.getElementById(`stud_ans_${i}`).value = questionsDataMap[i].correct;
             }
         }
-        loadAllowedStudents();
-    };
+        document.getElementById('keyStatus').innerText = `✅ تم اعتماد مفتاح الإجابة الخاص بـ (${modelName}) بنجاح!`;
+    }
 
     function loadAllowedStudents() {
         db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
@@ -226,7 +243,7 @@
         }
     }
 
-    // التصحيح ومقارنة إجابات الطالب الحقيقية بالمفتاح المعتمد وإرسال الدرجة الفعلية للوحة التحكم
+    // تصحيح ومقارنة إجابات الطالب الحقيقية بالمفتاح المعتمد وإرسال الدرجة الفعلية
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -245,8 +262,8 @@
         let score = 0;
         
         for (let i = 1; i <= 20; i++) {
-            let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; // إجابة الطالب المظللة في ورقته
-            let correctAnsKey = questionsDataMap[i].correct; // المفتاح المعتمد 100%
+            let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; 
+            let correctAnsKey = questionsDataMap[i].correct; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
@@ -276,13 +293,14 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) بناءً على المفتاح المعتمد بدقة!\nالدرجة الحقيقية: ${score} من 20 (${p}%) وتم إرسالها للوحة التحكم.`);
+            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) بناءً على المفتاح المعتمد!\nالدرجة الحقيقية: النموذج السادس (${score} من 20) (${p}%) وتم إرسالها للوحة التحكم.`);
             
-            // إعادة ضبط الحقول للطالب التالي
+            // إعادة ضبط الحقول للطالب التالي مع الحفاظ على مفتاح النموذج السادس
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
             imageCaptured = false;
+            applyModelKey();
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
