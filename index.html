@@ -152,7 +152,7 @@
     let allStudents = [];
     let studentAnswersState = {};
 
-    // بنك مفاتيح ونصوص الأسئلة للنماذج (تم ضبط النموذج الثالث ج بدقة حسب المفتاح الرسمي المعتمد)
+    // بنك مفاتيح ونصوص الأسئلة للنماذج (مع ضبط النموذج الثالث ج بدقة ومفاتيحه الكاملة)
     const modelQuestionsBank = {
         "النموذج الأول (أ)": {
             1: { q: 'الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'كتب الطالب الدرس', B:'العلمُ نورٌ', C:'يَفْهَمُ المعلمُ', D:'اِكْتُبْ بجدٍ' }, correct: 'B' },
@@ -199,26 +199,26 @@
             20: { q: 'إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر مرفوع بالواو', B:'مبتدأ مرفوع', C:'خبر منصوب بالياء', D:'مفعول به' }, correct: 'A' }
         },
         "النموذج الثالث (ج)": {
-            1: { q: 'س1 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
-            2: { q: 'س2 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'A' },
-            3: { q: 'س3 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            4: { q: 'س4 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            5: { q: 'س5 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            6: { q: 'س6 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
-            7: { q: 'س7 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            8: { q: 'س8 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            9: { q: 'س9 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            10: { q: 'س10 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            11: { q: 'س11 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            12: { q: 'س12 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            13: { q: 'س13 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            14: { q: 'س14 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            15: { q: 'س15 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
-            16: { q: 'س16 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            17: { q: 'س17 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
-            18: { q: 'س18 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            19: { q: 'س19 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
-            20: { q: 'س20 (نموذج ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' }
+            1: { q: '1. خبر إن مرفوع بالضمة / أو ما يناسبه في النموذج المعتمد', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
+            2: { q: '2. خبر إن مرفوع بالألف / أو ما يناسبه في النموذج المعتمد', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'A' },
+            3: { q: '3. اسم إن منصوب بالياء / أو ما يناسبه في النموذج المعتمد', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            4: { q: '4. السؤال الرابع في نموذج الكفايات المعتمد (ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            5: { q: '5. السؤال الخامس في نموذج الكفايات المعتمد (ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            6: { q: '6. (صح أم خطأ): المبتدأ دائماً مرفوع', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
+            7: { q: '7. الأفعال الخمسة ترفع بـ', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            8: { q: '8. بناء جملة "حفظ الطالب القصيدة" للمجهول', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            9: { q: '9. الجملة الصحيحة بعد دخول حرف ناسخ', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            10: { q: '10. الفعل المضارع المبني للمجهول يُضم أوله و', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            12: { q: '12. نوع الفعل المضارع "يسعى" صحةً وعلةً', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            13: { q: '13. إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ"', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            14: { q: '14. إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ"', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            15: { q: '15. خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ"', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'B' },
+            16: { q: '16. إعراب كلمة (نشيطون) في "المعلمون نشيطون"', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            17: { q: '17. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'D' },
+            18: { q: '18. إعراب كلمة أو جملة ضمن تمرين المراجعة (ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            19: { q: '19. سؤال تدريبي إضافي في مهارات الكفايات (ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' },
+            20: { q: '20. السؤال الختامي في نموذج الكفايات المعتمد (ج)', options: { A:'أ', B:'ب', C:'ج', D:'د' }, correct: 'C' }
         },
         "النموذج الرابع (د)": {
             1: { q: 'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":', options: { A:'مفرد', B:'جملة فعلية', C:'جملة اسمية', D:'شبه جملة' }, correct: 'C' },
@@ -318,7 +318,7 @@
             }
         }
         updateComparison();
-        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة بنجاح!');
+        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة المفصلة بنجاح!');
     }
 
     function clearQuickPaste() {
@@ -402,7 +402,7 @@
                         <span>${statusText}</span>
                     </div>
                     <div style="font-size:0.8rem; opacity:0.9;">
-                        إجابة الطالب: <strong>${studentVal}) ${ansMap[studentVal]}</strong> | الإجابة الصحيحة: <strong>${correctVal}) ${ansMap[correctVal]}</strong>
+                        إجابة الطالب: <strong>${studentVal}) ${qObj.options[studentVal]}</strong> | الإجابة الصحيحة: <strong>${correctVal}) ${qObj.options[correctVal]}</strong>
                     </div>
                 </div>
             `;
@@ -481,10 +481,11 @@
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
+            // إرسال النص الكامل للسؤال، واختيار الطالب، والاختيار الصحيح مع تفصيل الخيارات للوحة التحكم
             answersDetails.push({
                 qText: qObj.q,
-                studentAns: `${studentAnsKey}) ${ansMap[studentAnsKey]}`,
-                correctAns: `${correctAnsKey}) ${ansMap[correctAnsKey]}`,
+                studentAns: `${studentAnsKey}) ${qObj.options[studentAnsKey]}`,
+                correctAns: `${correctAnsKey}) ${qObj.options[correctAnsKey]}`,
                 isCorrect: isCorrect,
                 skill: i <= 4 ? 'est' : i <= 8 ? 'ikm' : i <= 12 ? 'swh' : i <= 16 ? 'arb' : 'sah'
             });
@@ -505,7 +506,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة وحفظها في لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة المفصلة (نص السؤال + الإجابتين) إلى لوحة التحكم.`);
             
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
