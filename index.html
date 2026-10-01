@@ -44,8 +44,8 @@
         .opt-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
 
         /* لوحة التغذية الراجعة */
-        .diff-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-        .diff-item { padding: 10px; border-radius: 8px; font-size: 0.85rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+        .diff-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 8px; max-height: 300px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+        .diff-item { padding: 12px; border-radius: 8px; font-size: 0.9rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
         .diff-item.match { background: #ecfdf5; border-color: #10b981; color: #065f46; }
         .diff-item.diff { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
 
@@ -120,7 +120,7 @@
 
     <!-- 5. تظليل إجابات الطالب -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️️ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
+        <label style="color: #047857; margin-bottom: 8px;">✍ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
@@ -395,15 +395,17 @@
             const itemClass = isMatch ? 'diff-item match' : 'diff-item diff';
             const statusText = isMatch ? '🟢 إجابة صحيحة' : '🔴 إجابة خاطئة';
 
+            // العرض المفصل للتغذية الراجعة يضمن ظهور (نص السؤال، إجابة الطالب، الإجابة الصحيحة)
             diffContainer.innerHTML += `
                 <div class="${itemClass}">
                     <div style="display:flex; justify-content:space-between; font-weight:bold;">
                         <span>السؤال (${i}): ${qObj.q}</span>
                         <span>${statusText}</span>
                     </div>
-                    <div style="font-size:0.8rem; opacity:0.9;">
-                        إجابة الطالب: <strong>${studentVal}) ${ansMap[studentVal]}</strong> | الإجابة الصحيحة: <strong>${correctVal}) ${ansMap[correctVal]}</strong>
+                    <div style="font-size:0.85rem; margin-top:2px;">
+                        إجابة الطالب: <strong>${studentVal}) ${ansMap[studentVal]}</strong>
                     </div>
+                    ${!isMatch ? `<div style="font-size:0.85rem; color:#991b1b;">الإجابة الصحيحة: <strong>${correctVal})${ansMap[correctVal]}</strong></div>` : ''}
                 </div>
             `;
         }
@@ -481,6 +483,7 @@
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
+            // إرسال البيانات بشكل كامل وواضح لكل سؤال (نص السؤال، إجابة الطالب، الإجابة الصحيحة)
             answersDetails.push({
                 qText: qObj.q,
                 studentAns: `${studentAnsKey}) ${ansMap[studentAnsKey]}`,
