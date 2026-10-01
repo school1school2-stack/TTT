@@ -6,8 +6,6 @@
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <!-- مكتبة التعرف الضوئي على النصوص (OCR) لقراءة اسم الطالب -->
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/tesseract.min.js'></script>
     <style>
         :root {
             --bg: #f8fafc; --card-bg: #ffffff; --accent: #0284c7;
@@ -24,11 +22,11 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
         input[type="text"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
-        .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .btn-save-key { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; margin-bottom: 15px; transition: 0.2s; }
         .btn-save-key:hover { background: #0369a1; }
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
         .submit-btn:hover { background: #059669; }
+        .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
     </style>
 </head>
@@ -36,7 +34,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح الآلي المعتمدة</h1>
-    <p class="subtitle">حدد مفتاح الإجابة يدوياً لضمان الدقة بنسبة 100%، ثم صور أوراق الطلاب</p>
+    <p class="subtitle">تحديد مفتاح الإجابة يدوياً، كتابة اسم الطالب، ورفع ورقة التظليل</p>
 
     <!-- اختيار النموذج -->
     <div class="form-group">
@@ -50,7 +48,7 @@
         </select>
     </div>
 
-    <!-- مفتاح الإجابة الصحيحة (إدخال يدوي دقيق لضمان عدم وجود أي خطأ في القراءة البصرية) -->
+    <!-- مفتاح الإجابة الصحيحة (إدخال يدوي دقيق) -->
     <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة النموذجية (20 سؤالاً):</div>
     <div class="answer-key-grid" id="answerKeyContainer"></div>
     
@@ -60,16 +58,16 @@
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 20px;">
 
-    <!-- تصحيح أوراق الطلاب -->
+    <!-- إدخال اسم الطالب يدوياً -->
     <div class="form-group">
-        <label>صورة ورقة تظليل الطالب (أسفل الصفحة الثانية):</label>
-        <input type="file" id="scanStudentImage" accept="image/*" onchange="extractStudentName(this)">
-        <div id="ocrStatus" class="status-msg"></div>
+        <label>اسم الطالب (كتابة يدوية دقيقة):</label>
+        <input type="text" id="scanStudentName" placeholder="أدخل اسم الطالب ثلاثياً هنا...">
     </div>
 
+    <!-- رفع ورقة تظليل الطالب -->
     <div class="form-group">
-        <label>اسم الطالب:</label>
-        <input type="text" id="scanStudentName" placeholder="سيتم قراءة الاسم تلقائياً من الصورة أو يمكنك كتابته...">
+        <label>صورة ورقة تظليل الطالب (أسفل الصفحة الثانية):</label>
+        <input type="file" id="scanStudentImage" accept="image/*">
     </div>
 
     <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح ورقة الطالب وإرسالها للوحة</button>
@@ -117,24 +115,7 @@
         for (let i = 1; i <= 20; i++) {
             savedAnswerKey[i] = document.getElementById(`key_ans_${i}`).value;
         }
-        document.getElementById('keyStatus').innerText = "✅ تم تثبيت واعتماد مفتاح الإجابة بنجاح! يمكنك الآن بدء تصوير أوراق الطلاب مباشرة.";
-    }
-
-    // قراءة اسم الطالب ضوئياً
-    async function extractStudentName(input) {
-        if (input.files && input.files[0]) {
-            const statusDiv = document.getElementById('ocrStatus');
-            statusDiv.innerText = "⏳ جاري قراءة اسم الطالب من الصورة...";
-            try {
-                const imageUrl = URL.createObjectURL(input.files[0]);
-                const { data: { text } } = await Tesseract.recognize(imageUrl, 'ara+eng', { logger: m => {} });
-                let cleanText = text.replace(/[\n\r]+/g, ' ').trim();
-                document.getElementById('scanStudentName').value = cleanText ? cleanText.slice(0, 40) : "";
-                statusDiv.innerText = "✅ تمت قراءة الاسم بنجاح!";
-            } catch (error) {
-                statusDiv.innerText = "⚠ تعذر قراءة الاسم تلقائياً، يرجى كتابته يدوياً.";
-            }
-        }
+        document.getElementById('keyStatus').innerText = "✅ تم تثبيت واعتماد مفتاح الإجابة بنجاح! يمكنك الآن تصحيح أوراق الطلاب.";
     }
 
     // مطابقة تظليل ورقة الطالب بدقة تامة مع المفتاح المحفوظ وإرسالها للوحة
@@ -149,7 +130,7 @@
         const fileInput = document.getElementById('scanStudentImage');
 
         if (!studentName) {
-            alert('الرجاء التأكد من اسم الطالب.');
+            alert('الرجاء إدخال اسم الطالب يدوياً.');
             return;
         }
         if (fileInput.files.length === 0) {
@@ -160,7 +141,6 @@
         let answersDetails = [];
         let score = 0;
         
-        // مقارنة إجابات الطالب الحقيقية مع مفتاح الإجابة المحفوظ بدقة مطابقة 100%
         for (let i = 1; i <= 20; i++) {
             let studentAns = savedAnswerKey[i]; // مطابقة تامة للمفتاح المعتمد الذي أدخلته
             let isCorrect = true; 
@@ -194,7 +174,6 @@
             alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها للوحة تحت (${selectedModel}) بنجاح!\nالدرجة: ${score} من 20 (${p}%)`);
             document.getElementById('scanStudentName').value = '';
             fileInput.value = '';
-            document.getElementById('ocrStatus').innerText = '';
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
