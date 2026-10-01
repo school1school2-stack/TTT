@@ -76,38 +76,9 @@
         </div>
     </div>
 
-    <!-- 2. اختيار النموذج المعتمد -->
-    <div class="form-group">
-        <label>2️⃣ اختر النموذج المعتمد:</label>
-        <select id="targetModelSelect" onchange="applyModelKey()">
-            <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
-            <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
-            <option value="النموذج الثالث (ج)" selected>النموذج الثالث (ج - المعتمد)</option>
-            <option value="النموذج الرابع (د)">النموذج الرابع (د)</option>
-            <option value="النموذج الخامس (هـ)">النموذج الخامس (هـ)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>اسم النموذج في لوحة التحكم:</label>
-        <input type="text" id="customModelName" value="النموذج الثالث (ج)">
-    </div>
-
-    <!-- بطاقة عرض النتيجة الفورية -->
-    <div class="score-card">
-        <h2 id="liveScoreDisplay">0 من 20 (0%)</h2>
-        <p>🎯 نتيجة الطالب الفورية قبل الاعتماد والإرسال</p>
-    </div>
-
-    <!-- 3. مفاتيح النموذج المعتمد -->
-    <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
-        <label style="color: #0369a1; margin-bottom: 8px;">📌 مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
-        <div class="grid-20" id="modelKeyContainer"></div>
-    </div>
-
-    <!-- 4. نافذة المساعد الذكي للإجابات السريعة مع زر المسح والتصفير -->
+    <!-- 2. نافذة المساعد الذكي للإجابات السريعة (خانة اللصق) مباشرة تحت اسم الطالب -->
     <div class="ai-helper-box">
-        <label style="color: #047857; margin-bottom: 5px;">🤖 نافذة التعبئة الذكية السريعة:</label>
+        <label style="color: #047857; margin-bottom: 5px;">2️⃣ نافذة التعبئة الذكية السريعة (اللصق):</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
             الصق الإجابات المستخرجة هنا، أو انقر على (تصفير الخانة) لمسحها ولصق إجابة طالب جديد مباشرة:
         </p>
@@ -118,19 +89,49 @@
         </div>
     </div>
 
-    <!-- 5. تظليل إجابات الطالب -->
+    <!-- 3. تظليل إجابات الطالب (مفاتيح الطالب) -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
+        <label style="color: #047857; margin-bottom: 8px;">3️⃣ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 6. لوحة التغذية الراجعة المفصلة -->
+    <!-- 4. اختيار النماذج -->
+    <div class="form-group">
+        <label>4️⃣ اختر النموذج المعتمد:</label>
+        <select id="targetModelSelect" onchange="applyModelKey()">
+            <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
+            <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
+            <option value="النموذج الثالث (ج)" selected>النموذج الثالث (ج - المعتمد)</option>
+            <option value="النموذج الرابع (د)">النموذج الرابع (د)</option>
+            <option value="النموذج الخامس (هـ)">النموذج الخامس (هـ)</option>
+        </select>
+    </div>
+
+    <div class="form-group" style="display: none;">
+        <label>اسم النموذج في لوحة التحكم:</label>
+        <input type="text" id="customModelName" value="النموذج الثالث (ج)">
+    </div>
+
+    <!-- بطاقة عرض النتيجة الفورية -->
+    <div class="score-card">
+        <h2 id="liveScoreDisplay">0 من 20 (0%)</h2>
+        <p>🎯 نتيجة الطالب الفورية قبل الاعتماد والإرسال</p>
+    </div>
+
+    <!-- 5. مفتاح النموذج (مفاتيح الإجابة النموذجية) -->
+    <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
+        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
+        <div class="grid-20" id="modelKeyContainer"></div>
+    </div>
+
+    <!-- لوحة التغذية الراجعة المفصلة -->
     <div class="form-group">
         <label>📖 تقرير التغذية الراجعة المفصلة للطالب:</label>
         <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
-    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد النتيجة وإرسالها لوحة التحكم</button>
+    <!-- 6. اعتماد وإرسال -->
+    <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -152,7 +153,6 @@
     let allStudents = [];
     let studentAnswersState = {};
 
-    // بنك مفاتيح ونصوص الأسئلة الكاملة حسب نموذج (ج) المطابق لصور الاختبار
     const modelQuestionsBank = {
         "النموذج الأول (أ)": {
             1: { q: 'الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'D' },
@@ -165,7 +165,7 @@
             8: { q: 'اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'B' },
             9: { q: 'إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'B' },
             10: { q: 'نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'B' },
-            11: { q: 'الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً', B:'كان الجو حارّاً (أخرى)', C:'كان الجو حارّاً', D:'كان الجو حارّاً' }, correct: 'C' },
+            11: { q: 'الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً', B:'كان الجو حارّاً', C:'كان الجو حارّاً', D:'كان الجو حارّاً' }, correct: 'C' },
             12: { q: 'الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'B' },
             13: { q: 'عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'C' },
             14: { q: 'الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'A' },
@@ -484,7 +484,6 @@
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
-            // جلب النص الكامل للإجابة مع الرمز لضمان ظهور التغذية الراجعة متكاملة في لوحة التحكم
             let studentOptText = qObj.options && qObj.options[studentAnsKey] ? qObj.options[studentAnsKey] : ansMap[studentAnsKey];
             let correctOptText = qObj.options && qObj.options[correctAnsKey] ? qObj.options[correctAnsKey] : ansMap[correctAnsKey];
 
@@ -512,7 +511,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة الكاملة (نص السؤال والنصوص الإجابية) إلى لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة الكاملة إلى لوحة التحكم.`);
             
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
