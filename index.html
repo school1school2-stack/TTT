@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي المعتمدة (5 نماذج) - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -12,7 +12,7 @@
             --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 700px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        .scanner-container { max-width: 750px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -27,12 +27,12 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
-        /* شبكة إدخال إجابات الطالب للمطابقة */
-        .student-answers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .student-ans-box { display: flex; flex-direction: column; align-items: center; background: #ffffff; padding: 6px; border: 1px solid var(--border); border-radius: 6px; }
-        .student-ans-box span { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; color: #0284c7; }
-        .student-ans-box select { border: 1px solid var(--border); border-radius: 4px; padding: 2px; font-size: 0.85rem; font-weight: bold; outline: none; }
-
+        /* شبكة مقارنة إجابات الطالب مع المفتاح المعتمد */
+        .comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .comparison-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
+        .comparison-item.correct { border-color: #10b981; background: #ecfdf5; }
+        .comparison-item.wrong { border-color: #ef4444; background: #fef2f2; }
+        
         .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
         .camera-btn:hover { background: #0369a1; }
         
@@ -48,13 +48,13 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي المعتمدة (5 نماذج)</h1>
-    <p class="subtitle">اختر النموذج لتتغير مفاتيح الإجابة المعتمدة فوراً، صور ورقة الطالب، وأرسل النتيجة بدقة 100%</p>
+    <h1>📷 أداة التصحيح الآلي مع المقارنة البصرية</h1>
+    <p class="subtitle">صور ورقة تظليل الطالب، أدخل خياراته المرصودة للمقارنة الفورية وإرسال الدرجة بدقة 100%</p>
 
-    <!-- قائمة النماذج الخمسة المعتمدة مع ربط التحديث -->
+    <!-- قائمة النماذج الخمسة المعتمدة -->
     <div class="form-group">
         <label>اختر النموذج المعتمد:</label>
-        <select id="targetModelSelect" onchange="applyModelKey()">
+        <select id="targetModelSelect" onchange="updateModelSelection()">
             <option value="النموذج الأول (أ)" selected>النموذج الأول (أ)</option>
             <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
             <option value="النموذج الثالث (ج)">النموذج الثالث (ج)</option>
@@ -63,15 +63,10 @@
         </select>
     </div>
 
-    <!-- اسم النموذج في لوحة التحكم -->
     <div class="form-group">
         <label>اسم النموذج في لوحة التحكم:</label>
         <input type="text" id="customModelName" value="النموذج الأول (أ)">
     </div>
-
-    <div id="keyStatus" class="status-msg" style="margin-bottom: 10px;"></div>
-
-    <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 15px;">
 
     <!-- اختيار اسم الطالب -->
     <div class="form-group">
@@ -85,21 +80,29 @@
     <!-- فتح الكاميرا لتصوير ورقة الطالب -->
     <div class="form-group">
         <label>تصوير ورقة تظليل الطالب:</label>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewAndAnalyze(this)">
         <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
             📸 فتح الكاميرا وتصوير ورقة الطالب
         </button>
         <div id="previewContainer">
             <img id="capturedImage" src="" alt="معاينة الورقة">
-            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط صورة ورقة الطالب وحفظها</div>
+            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط صورة ورقة الطالب بنجاح</div>
         </div>
     </div>
 
-    <!-- إجابات الطالب للمطابقة مع المفتاح المعتمد -->
-    <label style="margin-bottom: 5px;">إجابات الطالب الظاهرة في ورقة التظليل:</label>
-    <div class="student-answers-grid" id="studentAnswersContainer"></div>
+    <!-- إدخال إجابات الطالب المرصودة من الصورة -->
+    <div class="form-group">
+        <label>إجابات الطالب الظاهرة في الورقة (أو حددها مطابقة لما صورته):</label>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 10px;" id="studentInputsContainer"></div>
+    </div>
 
-    <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال الدرجة الحقيقية للوحة التحكم</button>
+    <!-- لوحة المقارنة البصرية الفورية -->
+    <label style="margin-bottom: 5px;">لوحة المقارنة البصرية (طالب vs المفتاح المعتمد):</label>
+    <div class="comparison-grid" id="comparisonGridContainer">
+        <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 20px;">قم بتصوير الورقة وإدخال الإجابات لتظهر نتائج المقارنة الفورية هنا...</div>
+    </div>
+
+    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد الدرجة الحقيقية وإرسالها للوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -121,54 +124,44 @@
     let allStudents = [];
     let imageCaptured = false;
 
-    // بنك مفاتيح الإجابات الدقيقة 100% للنماذج الخمسة المعتمدة
+    // بنك المفاتيح المعتمدة بدقة 100% للنماذج الخمسة
     const modelQuestionsBank = {
         "النموذج الأول (أ)": {
-            1: { correct: 'B' }, 2: { correct: 'A' }, 3: { correct: 'C' }, 4: { correct: 'B' }, 5: { correct: 'C' },
-            6: { correct: 'A' }, 7: { correct: 'C' }, 8: { correct: 'C' }, 9: { correct: 'B' }, 10: { correct: 'A' },
-            11: { correct: 'B' }, 12: { correct: 'A' }, 13: { correct: 'A' }, 14: { correct: 'B' }, 15: { correct: 'B' },
-            16: { correct: 'A' }, 17: { correct: 'B' }, 18: { correct: 'B' }, 19: { correct: 'C' }, 20: { correct: 'A' }
+            1: 'B', 2: 'A', 3: 'C', 4: 'B', 5: 'C', 6: 'A', 7: 'C', 8: 'C', 9: 'B', 10: 'A',
+            11: 'B', 12: 'A', 13: 'A', 14: 'B', 15: 'B', 16: 'A', 17: 'B', 18: 'B', 19: 'C', 20: 'A'
         },
         "النموذج الثاني (ب)": {
-            1: { correct: 'C' }, 2: { correct: 'B' }, 3: { correct: 'D' }, 4: { correct: 'C' }, 5: { correct: 'A' },
-            6: { correct: 'D' }, 7: { correct: 'B' }, 8: { correct: 'A' }, 9: { correct: 'C' }, 10: { correct: 'B' },
-            11: { correct: 'D' }, 12: { correct: 'C' }, 13: { correct: 'A' }, 14: { correct: 'A' }, 15: { correct: 'B' },
-            16: { correct: 'A' }, 17: { correct: 'C' }, 18: { correct: 'D' }, 19: { correct: 'B' }, 20: { correct: 'A' }
+            1: 'C', 2: 'B', 3: 'D', 4: 'C', 5: 'A', 6: 'D', 7: 'B', 8: 'A', 9: 'C', 10: 'B',
+            11: 'D', 12: 'C', 13: 'A', 14: 'A', 15: 'B', 16: 'A', 17: 'C', 18: 'D', 19: 'B', 20: 'A'
         },
         "النموذج الثالث (ج)": {
-            1: { correct: 'D' }, 2: { correct: 'A' }, 3: { correct: 'C' }, 4: { correct: 'B' }, 5: { correct: 'B' },
-            6: { correct: 'D' }, 7: { correct: 'C' }, 8: { correct: 'C' }, 9: { correct: 'B' }, 10: { correct: 'B' },
-            11: { correct: 'C' }, 12: { correct: 'B' }, 13: { correct: 'C' }, 14: { correct: 'B' }, 15: { correct: 'C' },
-            16: { correct: 'B' }, 17: { correct: 'D' }, 18: { correct: 'B' }, 19: { correct: 'B' }, 20: { correct: 'B' }
+            1: 'D', 2: 'A', 3: 'C', 4: 'B', 5: 'B', 6: 'D', 7: 'C', 8: 'C', 9: 'B', 10: 'B',
+            11: 'C', 12: 'B', 13: 'C', 14: 'B', 15: 'C', 16: 'B', 17: 'D', 18: 'B', 19: 'B', 20: 'B'
         },
         "النموذج الرابع (د)": {
-            1: { correct: 'C' }, 2: { correct: 'B' }, 3: { correct: 'A' }, 4: { correct: 'B' }, 5: { correct: 'C' },
-            6: { correct: 'A' }, 7: { correct: 'D' }, 8: { correct: 'C' }, 9: { correct: 'B' }, 10: { correct: 'A' },
-            11: { correct: 'A' }, 12: { correct: 'D' }, 13: { correct: 'B' }, 14: { correct: 'A' }, 15: { correct: 'B' },
-            16: { correct: 'A' }, 17: { correct: 'C' }, 18: { correct: 'C' }, 19: { correct: 'A' }, 20: { correct: 'D' }
+            1: 'C', 2: 'B', 3: 'A', 4: 'B', 5: 'C', 6: 'A', 7: 'D', 8: 'C', 9: 'B', 10: 'A',
+            11: 'A', 12: 'D', 13: 'B', 14: 'A', 15: 'B', 16: 'A', 17: 'C', 18: 'C', 19: 'A', 20: 'D'
         },
         "النموذج الخامس (هـ)": {
-            1: { correct: 'B' }, 2: { correct: 'B' }, 3: { correct: 'A' }, 4: { correct: 'B' }, 5: { correct: 'B' },
-            6: { correct: 'A' }, 7: { correct: 'C' }, 8: { correct: 'C' }, 9: { correct: 'B' }, 10: { correct: 'A' },
-            11: { correct: 'B' }, 12: { correct: 'C' }, 13: { correct: 'B' }, 14: { correct: 'A' }, 15: { correct: 'B' },
-            16: { correct: 'A' }, 17: { correct: 'A' }, 18: { correct: 'C' }, 19: { correct: 'A' }, 20: { correct: 'C' }
+            1: 'B', 2: 'B', 3: 'A', 4: 'B', 5: 'B', 6: 'A', 7: 'C', 8: 'C', 9: 'B', 10: 'A',
+            11: 'B', 12: 'C', 13: 'B', 14: 'A', 15: 'B', 16: 'A', 17: 'A', 18: 'C', 19: 'A', 20: 'C'
         }
     };
 
     window.onload = function() {
-        buildAnswerGrids();
-        applyModelKey();
+        buildStudentInputs();
         loadAllowedStudents();
+        updateComparison();
     };
 
-    function buildAnswerGrids() {
-        const container = document.getElementById('studentAnswersContainer');
+    function buildStudentInputs() {
+        const container = document.getElementById('studentInputsContainer');
         container.innerHTML = '';
         for (let i = 1; i <= 20; i++) {
             container.innerHTML += `
-                <div class="student-ans-box">
-                    <span>س ${i}</span>
-                    <select id="stud_ans_${i}">
+                <div style="display:flex; flex-direction:column; align-items:center; background:#fff; padding:4px; border:1px solid var(--border); border-radius:6px;">
+                    <span style="font-size:0.75rem; font-weight:bold; color:#0284c7;">س${i}</span>
+                    <select id="stud_ans_${i}" onchange="updateComparison()" style="border:1px solid var(--border); border-radius:4px; padding:2px; font-size:0.8rem; font-weight:bold;">
                         <option value="A">أ</option>
                         <option value="B">ب</option>
                         <option value="C">ج</option>
@@ -179,20 +172,35 @@
         }
     }
 
-    // تطبيق مفاتيح النموذج المختار فوراً بدقة 100%
-    function applyModelKey() {
+    function updateModelSelection() {
         const select = document.getElementById('targetModelSelect');
-        const modelName = select.value;
-        document.getElementById('customModelName').value = modelName;
+        document.getElementById('customModelName').value = select.value;
+        updateComparison();
+    }
 
-        const currentModelData = modelQuestionsBank[modelName];
-        if (currentModelData) {
-            for (let i = 1; i <= 20; i++) {
-                if (currentModelData[i]) {
-                    document.getElementById(`stud_ans_${i}`).value = currentModelData[i].correct;
-                }
-            }
-            document.getElementById('keyStatus').innerText = `✅ تم تحديث وتطبيق مفاتيح الإجابة لـ (${modelName}) بنجاح!`;
+    // إجراء المقارنة البصرية الفورية بين إجابات الطالب والمفتاح المعتمد وعرض الدوائر الملونة
+    function updateComparison() {
+        const selectedModel = document.getElementById('targetModelSelect').value;
+        const currentKey = modelQuestionsBank[selectedModel];
+        const gridContainer = document.getElementById('comparisonGridContainer');
+        gridContainer.innerHTML = '';
+
+        for (let i = 1; i <= 20; i++) {
+            const studentAns = document.getElementById(`stud_ans_${i}`).value;
+            const correctAns = currentKey[i];
+            const isMatch = (studentAns === correctAns);
+
+            const itemClass = isMatch ? 'comparison-item correct' : 'comparison-item wrong';
+            const iconBadge = isMatch ? '🟢' : '🔴 دائرة خاطئة';
+            
+            const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+
+            gridContainer.innerHTML += `
+                <div class="${itemClass}">
+                    <span><strong>س${i}:</strong> الطالب (${ansMap[studentAns]}) | الصحيح (${ansMap[correctAns]})</span>
+                    <span>${iconBadge}</span>
+                </div>
+            `;
         }
     }
 
@@ -243,7 +251,7 @@
         }
     });
 
-    function previewCapturedImage(input) {
+    function previewAndAnalyze(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -255,7 +263,7 @@
         }
     }
 
-    // تصحيح ومقارنة إجابات الطالب بالنموذج المعتمد وإرسالها للحفظ في قاعدة البيانات
+    // اعتماد النتيجة وحساب الدرجة بناءً على المطابقة الحقيقية وإرسالها للوحة التحكم
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -271,20 +279,21 @@
             return;
         }
 
-        const currentModelData = modelQuestionsBank[selectedModel];
+        const currentKey = modelQuestionsBank[selectedModel];
         let answersDetails = [];
         let score = 0;
         
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; 
-            let correctAnsKey = currentModelData[i].correct; 
+            let correctAnsKey = currentKey[i]; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
+            let ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
             answersDetails.push({
                 qText: `السؤال رقم ${i}`,
-                studentAns: studentAnsKey,
-                correctAns: correctAnsKey,
+                studentAns: `${studentAnsKey}) ${ansMap[studentAnsKey]}`,
+                correctAns: `${correctAnsKey}) ${ansMap[correctAnsKey]}`,
                 isCorrect: isCorrect,
                 skill: i <= 4 ? 'est' : i <= 8 ? 'ikm' : i <= 12 ? 'swh' : i <= 16 ? 'arb' : 'sah'
             });
@@ -305,14 +314,13 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) بدقة 100%!\nالدرجة: ${score} من 20 (${p}%) تحت (${customModelName}) وتم إرسالها وحفظها في لوحة التحكم بنجاح.`);
+            alert(`✅ تم الاعتماد والتصحيح بنجاح للطالب (${studentName})!\nالدرجة الحقيقية:ين ${score} من 20 (${p}%) تحت (${customModelName}) وتم حفظها في لوحة التحكم.`);
             
-            // إعادة ضبط الحقول للطالب التالي مع الحفاظ على النموذج الحالي
+            // إعادة التعيين للطالب التالي
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
             imageCaptured = false;
-            applyModelKey();
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
