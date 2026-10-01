@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي المتكاملة - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح بالكاميرا المباشرة - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -21,7 +21,7 @@
         .answer-box select { border: 1px solid var(--border); border-radius: 4px; padding: 3px; font-size: 0.85rem; font-weight: bold; color: var(--accent); outline: none; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
-        input[type="text"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
+        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
         
         /* قائمة اختيار الطالب الذكية */
         .student-select-box { position: relative; width: 100%; }
@@ -30,7 +30,15 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
-        .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
+        /* زر فتح الكاميرا المباشرة */
+        .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .camera-btn:hover { background: #0369a1; }
+        
+        /* معاينة الصورة المتقطعة */
+        #previewContainer { text-align: center; margin-bottom: 15px; display: none; }
+        #capturedImage { max-width: 100%; max-height: 200px; border-radius: 10px; border: 2px solid #10b981; }
+
+        .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
         .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
@@ -39,8 +47,8 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي المتكاملة</h1>
-    <p class="subtitle">تصدير نصوص الأسئلة والخيارات كاملة إلى لوحة التحكم</p>
+    <h1>📷 التصحيح السريع بالكاميرا المباشرة</h1>
+    <p class="subtitle">اختر النموذج واسم الطالب، افتح الكاميرا للتصوير، ثم أرسل النتيجة فوراً</p>
 
     <!-- قائمة النماذج -->
     <div class="form-group">
@@ -77,13 +85,23 @@
         </div>
     </div>
 
-    <!-- رفع ورقة تظليل الطالب -->
+    <!-- زر فتح الكاميرا المباشرة لالتقاط ورقة الطالب -->
     <div class="form-group">
-        <label>صورة ورقة تظليل الطالب (أسفل الصفحة الثانية):</label>
-        <input type="file" id="scanStudentImage" accept="image/*">
+        <label>صورة ورقة تظليل الطالب:</label>
+        <!-- input مخفي مخصص لفتح كاميرا الجوال مباشرة (capture="environment") -->
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
+        
+        <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
+            📸 فتح الكاميرا وتصوير ورقة الطالب
+        </button>
+        
+        <div id="previewContainer">
+            <img id="capturedImage" src="" alt="معاينة ورقة الطالب">
+            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط الصورة بنجاح</div>
+        </div>
     </div>
 
-    <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح ورقة الطالب وإرسالها للوحة</button>
+    <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال النتيجة للوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -103,109 +121,29 @@
     const db = firebase.firestore();
 
     let allStudents = [];
+    let imageCaptured = false;
 
-    // هيكل الأسئلة والخيارات والمفاتيح الصحيحة المستخرجة بدقة من ملفك المرفق (نموذج 6 هـ)[cite: 6]
     const questionsDataMap = {
-        1: {
-            q: 'خبر "إنَّ" في جملة "إنَّ الصدقَ يهدي إلى البرِّ":',
-            options: { A: 'الصدقَ', B: 'جملة فعلية (يهدي)', C: 'إلى البرِّ', D: 'مفرد' },
-            correct: 'B'
-        },
-        2: {
-            q: 'الفعل المضارع المجزوم بـ (حذف النون) فيما يلي:',
-            options: { A: 'لا تتكاسلْ', B: 'لا تهملوا واجباتكم', C: 'لم يدعُ إلا الله', D: 'يدرسون بجد' },
-            correct: 'B'
-        },
-        3: {
-            q: 'الجملة المشتملة على فعل مضارع معتل الآخر بالواو:',
-            options: { A: 'ينمو الزرع بالماء', B: 'يسعى المؤمن للخير', C: 'يقضي القاضي بالعدل', D: 'يكتبُ الطالبُ درسَه' },
-            correct: 'A'
-        },
-        4: {
-            q: 'علامة رفع الأسماء الخمسة في جملة "أبوك ذو علمٍ":',
-            options: { A: 'الضمة الظاهرة', B: 'الواو', C: 'الألف', D: 'ثبوت النون' },
-            correct: 'B'
-        },
-        5: {
-            q: 'إعراب كلمة (القاضيَ) في "لن يظلمَ القاضيَ أحدٌ":',
-            options: { A: 'فاعل مرفوع', B: 'مفعول به مقدم منصوب', C: 'نائب فاعل', D: 'اسم لن' },
-            correct: 'B'
-        },
-        6: {
-            q: 'ضبط نائب الفاعل في "كُوفِئَ [المتفوقون]":',
-            options: { A: 'مرفوع وعلامة رفعه الواو', B: 'منصوب وعلامة نصبه الياء', C: 'مجرور بالياء', D: 'مبني على الفتح' },
-            correct: 'A'
-        },
-        7: {
-            q: 'أي الأفعال التالية من الحروف الناصخة (إن وأخواتها)؟',
-            options: { A: 'كان', B: 'أصبح', C: 'لعلّ', D: 'صار' },
-            correct: 'C'
-        },
-        8: {
-            q: 'علامة جزم المضارع معتل الآخر هي:',
-            options: { A: 'السكون', B: 'الفتحة', C: 'حذف حرف العلة', D: 'ثبوت النون' },
-            correct: 'C'
-        },
-        9: {
-            q: 'عند بناء الفعل "قال" للمجهول يصبح:',
-            options: { A: 'أُقيل', B: 'قِيلَ', C: 'يُقالُ', D: 'قُوِلَ' },
-            correct: 'B'
-        },
-        10: {
-            q: 'الضمير في "الطالبان يكتبان" يعرب:',
-            options: { A: 'ضمير متصل في محل رفع فاعل', B: 'في محل نصب مفعول به', C: 'مبتدأ ثاني', D: 'مضاف إليه' },
-            correct: 'A'
-        },
-        11: {
-            q: 'جملة "أصبح الطالبُ مستعداً"، "مستعداً" تعرب:',
-            options: { A: 'اسم أصبح مرفوع', B: 'خبر أصبح منصوب', C: 'حال منصوبة', D: 'مفعول به' },
-            correct: 'B'
-        },
-        12: {
-            q: 'أحد الحروف التالية ينصب الفعل المضارع:',
-            options: { A: 'لم', B: 'لا الناهية', C: 'كي', D: 'لام الأمر' },
-            correct: 'C'
-        },
-        13: {
-            q: 'المبتدأ والخبر في جملة "الشجرتان مثمرتان" مرفوعان بـ:',
-            options: { A: 'الضمة', B: 'الألف', C: 'ثبوت النون', D: 'الواو' },
-            correct: 'B'
-        },
-        14: {
-            q: 'الجملة المبنية للمجهول بشكل صحيح هي:',
-            options: { A: 'كُتِبَ الدرسُ', B: 'كَتَبَ الدرسُ', C: 'كُتِبَ الدرسَ', D: 'كُتِبَ الطالبُ' },
-            correct: 'A'
-        },
-        15: {
-            q: 'الفعل المضارع "يلعبْ" في "لم يلعبْ الولد":',
-            options: { A: 'مجزوم وعلامة جزمه حذف العلة', B: 'مجزوم وعلامة جزمه السكون', C: 'منصوب بالفتحة', D: 'مرفوع بالضمة' },
-            correct: 'B'
-        },
-        16: {
-            q: 'جملة "كان المسلمون متحدين"، كلمة "المسلمون":',
-            options: { A: 'اسم كان مرفوع بالواو', B: 'خبر كان منصوب بالياء', C: 'فاعل مرفوع بالواو', D: 'مبتدأ مرفوع بالضمة' },
-            correct: 'A'
-        },
-        17: {
-            q: 'التغير الذي أحدثته "لیت" في: "ليت الشبابَ يعودُ":',
-            options: { A: 'نصبت المبتدأ ورفعت الخبر', B: 'رفعت المبتدأ ونصبت الخبر', C: 'جزم الفعل المضارع', D: 'لم تؤثر إعرابياً' },
-            correct: 'A'
-        },
-        18: {
-            q: 'الفعل الذي ينتمي للأفعال الخمسة فيما يلي:',
-            options: { A: 'يكتبُ', B: 'اكتبوا', C: 'تحفظينَ', D: 'كَتَبَا' },
-            correct: 'C'
-        },
-        19: {
-            q: '(صح أم خطأ): "لا الناهية" تجزم فعل مضارع واحد:',
-            options: { A: 'صح', B: 'خطأ', C: 'تنصب الفعل', D: 'ترفع الفعل' },
-            correct: 'A'
-        },
-        20: {
-            q: 'كلمة (الطبيبتان) في "إنَّ الطبيبتين ماهرتان":',
-            options: { A: 'اسم إن مرفوع بالألف', B: 'خبر إن مرفوع بالضمة', C: 'خبر إن مرفوع بالألف', D: 'اسم إن منصوب بالياء' },
-            correct: 'C'
-        }
+        1: { q: 'خبر "إنَّ" في جملة "إنَّ الصدقَ يهدي إلى البرِّ":', options: { A: 'الصدقَ', B: 'جملة فعلية (يهدي)', C: 'إلى البرِّ', D: 'مفرد' }, correct: 'B' },
+        2: { q: 'الفعل المضارع المجزوم بـ (حذف النون) فيما يلي:', options: { A: 'لا تتكاسلْ', B: 'لا تهملوا واجباتكم', C: 'لم يدعُ إلا الله', D: 'يدرسون بجد' }, correct: 'B' },
+        3: { q: 'الجملة المشتملة على فعل مضارع معتل الآخر بالواو:', options: { A: 'ينمو الزرع بالماء', B: 'يسعى المؤمن للخير', C: 'يقضي القاضي بالعدل', D: 'يكتبُ الطالبُ درسَه' }, correct: 'A' },
+        4: { q: 'علامة رفع الأسماء الخمسة في جملة "أبوك ذو علمٍ":', options: { A: 'الضمة الظاهرة', B: 'الواو', C: 'الألف', D: 'ثبوت النون' }, correct: 'B' },
+        5: { q: 'إعراب كلمة (القاضيَ) في "لن يظلمَ القاضيَ أحدٌ":', options: { A: 'فاعل مرفوع', B: 'مفعول به مقدم منصوب', C: 'نائب فاعل', D: 'اسم لن' }, correct: 'B' },
+        6: { q: 'ضبط نائب الفاعل في "كُوفِئَ [المتفوقون]":', options: { A: 'مرفوع وعلامة رفعه الواو', B: 'منصوب وعلامة نصبه الياء', C: 'مجرور بالياء', D: 'مبني على الفتح' }, correct: 'A' },
+        7: { q: 'أي الأفعال التالية من الحروف الناصخة (إن وأخواتها)؟', options: { A: 'كان', B: 'أصبح', C: 'لعلّ', D: 'صار' }, correct: 'C' },
+        8: { q: 'علامة جزم المضارع معتل الآخر هي:', options: { A: 'السكون', B: 'الفتحة', C: 'حذف حرف العلة', D: 'ثبوت النون' }, correct: 'C' },
+        9: { q: 'عند بناء الفعل "قال" للمجهول يصبح:', options: { A: 'أُقيل', B: 'قِيلَ', C: 'يُقالُ', D: 'قُوِلَ' }, correct: 'B' },
+        10: { q: 'الضمير في "الطالبان يكتبان" يعرب:', options: { A: 'ضمير متصل في محل رفع فاعل', B: 'في محل نصب مفعول به', C: 'مبتدأ ثاني', D: 'مضاف إليه' }, correct: 'A' },
+        11: { q: 'جملة "أصبح الطالبُ مستعداً"، "مستعداً" تعرب:', options: { A: 'اسم أصبح مرفوع', B: 'خبر أصبح منصوب', C: 'حال منصوبة', D: 'مفعول به' }, correct: 'B' },
+        12: { q: 'أحد الحروف التالية ينصب الفعل المضارع:', options: { A: 'لم', B: 'لا الناهية', C: 'كي', D: 'لام الأمر' }, correct: 'C' },
+        13: { q: 'المبتدأ والخبر في جملة "الشجرتان مثمرتان" مرفوعان بـ:', options: { A: 'الضمة', B: 'الألف', C: 'ثبوت النون', D: 'الواو' }, correct: 'B' },
+        14: { q: 'الجملة المبنية للمجهول بشكل صحيح هي:', options: { A: 'كُتِبَ الدرسُ', B: 'كَتَبَ الدرسُ', C: 'كُتِبَ الدرسَ', D: 'كُتِبَ الطالبُ' }, correct: 'A' },
+        15: { q: 'الفعل المضارع "يلعبْ" في "لم يلعبْ الولد":', options: { A: 'مجزوم وعلامة جزمه حذف العلة', B: 'مجزوم وعلامة جزمه السكون', C: 'منصوب بالفتحة', D: 'مرفوع بالضمة' }, correct: 'B' },
+        16: { q: 'جملة "كان المسلمون متحدين"، كلمة "المسلمون":', options: { A: 'اسم كان مرفوع بالواو', B: 'خبر كان منصوب بالياء', C: 'فاعل مرفوع بالواو', D: 'مبتدأ مرفوع بالضمة' }, correct: 'A' },
+        17: { q: 'التغير الذي أحدثته "لیت" في: "ليت الشبابَ يعودُ":', options: { A: 'نصبت المبتدأ ورفعت الخبر', B: 'رفعت المبتدأ ونصبت الخبر', C: 'جزم الفعل المضارع', D: 'لم تؤثر إعرابياً' }, correct: 'A' },
+        18: { q: 'الفعل الذي ينتمي للأفعال الخمسة فيما يلي:', options: { A: 'يكتبُ', B: 'اكتبوا', C: 'تحفظينَ', D: 'كَتَبَا' }, correct: 'C' },
+        19: { q: '(صح أم خطأ): "لا الناهية" تجزم فعل مضارع واحد:', options: { A: 'صح', B: 'خطأ', C: 'تنصب الفعل', D: 'ترفع الفعل' }, correct: 'A' },
+        20: { q: 'كلمة (الطبيبتان) في "إنَّ الطبيبتين ماهرتان":', options: { A: 'اسم إن مرفوع بالألف', B: 'خبر إن مرفوع بالضمة', C: 'خبر إن مرفوع بالألف', D: 'اسم إن منصوب بالياء' }, correct: 'C' }
     };
 
     window.onload = function() {
@@ -238,7 +176,7 @@
                 document.getElementById(`key_ans_${i}`).value = questionsDataMap[i].correct;
             }
         }
-        document.getElementById('keyStatus').innerText = `✅ تم تعيين مفتاح الإجابة الخاص بـ (${modelName}) مع نصوص الخيارات بدقة تامة!`;
+        document.getElementById('keyStatus').innerText = `✅ تم تعيين مفتاح الإجابة الخاص بـ (${modelName}) بدقة!`;
     }
 
     function loadAllowedStudents() {
@@ -288,17 +226,31 @@
         }
     });
 
+    // معاينة الصورة المتقطعة بالكاميرا مباشرة
+    function previewCapturedImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('capturedImage').src = e.target.result;
+                document.getElementById('previewContainer').style.display = 'block';
+                imageCaptured = true;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // تصحيح وإرسال النتيجة فوراً
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
-        const fileInput = document.getElementById('scanStudentImage');
+        const fileInput = document.getElementById('cameraInput');
 
         if (!studentName) {
-            alert('الرجاء اختيار اسم الطالب من القائمة.');
+            alert('الرجاء اختيار اسم الطالب من القائمة أولاً.');
             return;
         }
-        if (fileInput.files.length === 0) {
-            alert('الرجاء اختيار صورة ورقة تظليل الطالب.');
+        if (!imageCaptured || fileInput.files.length === 0) {
+            alert('الرجاء الضغط على زر (فتح الكاميرا وتصوير ورقة الطالب) لالتقاط الصورة أولاً.');
             return;
         }
 
@@ -310,9 +262,8 @@
         let answersDetails = [];
         let score = 0;
         
-        // إرسال نصوص الأسئلة والخيارات الحقيقية بالكامل إلى قاعدة البيانات لتظهر في لوحة التحكم
         for (let i = 1; i <= 20; i++) {
-            let studentAnsKey = currentKey[i]; // حرف الإجابة المختار (A, B, C, D)
+            let studentAnsKey = currentKey[i]; 
             let correctAnsKey = questionsDataMap[i].correct;
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
@@ -343,9 +294,13 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها مع نصوص الأسئلة والخيارات تحت (${customModelName})!\nالدرجة: ${score} من 20 (${p}%)`);
+            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها للوحة التحكم بنجاح تحت (${customModelName})!\nالدرجة: ${score} من 20 (${p}%)`);
+            
+            // إعادة ضبط الحقول لتصحيح ورقة الطالب التالي بسرعة
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
+            document.getElementById('previewContainer').style.display = 'none';
+            imageCaptured = false;
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
