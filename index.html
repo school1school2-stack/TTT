@@ -114,7 +114,7 @@
 
     <!-- 5. مفاتيح الإجابة النموذجية المعتمدة (تفاعل أ، ب، ج، د وحفظ بالسحابة) -->
     <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
-        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح النموذج المعتمد (انقر للتنقل بين الخيارات والتعديل):</label>
+        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح النموذج المعتمد (ثابتة لجميع الطلاب حتى تغييرها):</label>
         <div class="grid-20" id="modelKeyContainer"></div>
         
         <div style="margin-top: 15px; display: flex; gap: 8px; align-items: center;">
@@ -731,7 +731,7 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
             
-            // ملاحظة: عند إرسال درجة الطالب، يتم تصفير خانة الطالب واسمه فقط لتصحيح طالب جديد، بينما يظل النموذج المعتمد مخزناً ولا يتصفر!
+            // تم الحفاظ على مفاتيح النموذج المعتمد ثابتة دون تصفير، وتصفير اسم الطالب وخانة اللصق فقط للطالب التالي
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
         } catch (error) {
