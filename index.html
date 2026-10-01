@@ -67,9 +67,18 @@
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
     <p class="subtitle">ثانوية الأمير عبدالمجيد - نموذج ج المعتمد</p>
 
-    <!-- 1. اختيار النموذج المعتمد -->
+    <!-- 1. اختيار اسم الطالب في المقدمة -->
+    <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
+        <label style="color: #0369a1; font-size: 1rem; margin-bottom: 8px;">1️⃣ ابحث عن اسم الطالب واختاره أولاً:</label>
+        <div class="student-select-box">
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="اكتب اسم الطالب للبحث..." oninput="filterStudents()" onclick="showDropdown()">
+            <div id="studentDropdownList" class="student-dropdown-list"></div>
+        </div>
+    </div>
+
+    <!-- 2. اختيار النموذج المعتمد -->
     <div class="form-group">
-        <label>اختر النموذج المعتمد:</label>
+        <label>2️⃣ اختر النموذج المعتمد:</label>
         <select id="targetModelSelect" onchange="applyModelKey()">
             <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
             <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
@@ -90,13 +99,13 @@
         <p>🎯 نتيجة الطالب الفورية قبل الاعتماد والإرسال</p>
     </div>
 
-    <!-- 2. مفاتيح النموذج المعتمد -->
+    <!-- 3. مفاتيح النموذج المعتمد -->
     <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
         <label style="color: #0369a1; margin-bottom: 8px;">📌 مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
         <div class="grid-20" id="modelKeyContainer"></div>
     </div>
 
-    <!-- نافذة المساعد الذكي للإجابات السريعة مع زر المسح والتصفير -->
+    <!-- 4. نافذة المساعد الذكي للإجابات السريعة مع زر المسح والتصفير -->
     <div class="ai-helper-box">
         <label style="color: #047857; margin-bottom: 5px;">🤖 نافذة التعبئة الذكية السريعة:</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
@@ -109,22 +118,13 @@
         </div>
     </div>
 
-    <!-- 3. اختيار اسم الطالب -->
-    <div class="form-group">
-        <label>ابحث عن اسم الطالب واختاره:</label>
-        <div class="student-select-box">
-            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="اكتب اسم الطالب للبحث..." oninput="filterStudents()" onclick="showDropdown()">
-            <div id="studentDropdownList" class="student-dropdown-list"></div>
-        </div>
-    </div>
-
-    <!-- 4. تظليل إجابات الطالب -->
+    <!-- 5. تظليل إجابات الطالب -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
         <label style="color: #047857; margin-bottom: 8px;">✍️ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 5. لوحة التغذية الراجعة المفصلة -->
+    <!-- 6. لوحة التغذية الراجعة المفصلة -->
     <div class="form-group">
         <label>📖 تقرير التغذية الراجعة المفصلة للطالب:</label>
         <div class="diff-grid" id="diffGridContainer"></div>
@@ -321,7 +321,6 @@
         alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة بنجاح!');
     }
 
-    // دالة تصفير ومسح خانة اللصق وإعادة تعيين الإجابات
     function clearQuickPaste() {
         document.getElementById('quickPasteInput').value = '';
         for (let i = 1; i <= 20; i++) {
@@ -508,7 +507,6 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة وحفظها في لوحة التحكم.`);
             
-            // تنظيف تلقائي بعد الاعتماد لتصحيح الطالب التالي
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
         } catch (error) {
