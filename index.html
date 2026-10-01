@@ -38,13 +38,13 @@
         .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
         
-        /* حقول إدخال مفتاح الإجابة اليدوي */
-        .key-input { width: 100%; text-align: center; font-weight: bold; font-size: 1rem; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: #f0f9ff; color: #0369a1; text-transform: uppercase; }
-
-        /* أزرار خيارات الطالب (أ، ب، ج، د) */
+        /* أزرار خيارات الطالب ونموذج الإجابة (أ، ب، ج، د) */
         .options-group { display: flex; justify-content: center; gap: 3px; }
         .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
         .opt-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+        
+        /* أزرار نموذج الإجابة المعتمد بلون مختلف مميز */
+        .model-btn.active { background: #0369a1 !important; color: white !important; border-color: #0369a1 !important; }
 
         /* لوحة التغذية الراجعة */
         .diff-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
@@ -59,6 +59,9 @@
         .clear-btn { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .clear-btn:hover { background: #dc2626; }
 
+        .save-model-btn { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; width: 100%; }
+        .save-model-btn:hover { background: #0369a1; }
+
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
@@ -68,7 +71,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
-    <p class="subtitle">ثانوية الأمير عبدالمجيد - نموذج 1 المعتمد</p>
+    <p class="subtitle">ثانوية الأمير عبدالمجيد - تخصيص مفاتيح النموذج المعتمد</p>
 
     <!-- 1. اختيار اسم الطالب في المقدمة -->
     <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
@@ -98,16 +101,16 @@
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 4. اختيار النماذج -->
-    <div class="form-group">
-        <label>4️⃣ اختر النموذج المعتمد:</label>
-        <select id="targetModelSelect" onchange="loadSelectedModelData()">
-            <option value="نموذج 1" selected>نموذج 1</option>
-            <option value="نموذج 2">نموذج 2</option>
-            <option value="نموذج 3">نموذج 3</option>
-            <option value="نموذج 4">نموذج 4</option>
-            <option value="نموذج 5">نموذج 5</option>
-        </select>
+    <!-- 4. مفاتيح الإجابة النموذجية المعتمدة (تفاعل أ، ب، ج، د) -->
+    <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
+        <label style="color: #0369a1; margin-bottom: 8px;">4️⃣ حدد مفاتيح النموذج المعتمد (انقر للتنقل بين الخيارات):</label>
+        <div class="grid-20" id="modelKeyContainer"></div>
+        
+        <!-- حفظ واعتماد المفاتيح باسم نموذج جديد -->
+        <div style="margin-top: 15px; display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="newModelNameInput" placeholder="اسم النموذج المعتمد (مثال: نموذج 1)..." value="نموذج 1" style="flex: 1; padding: 10px; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.9rem; background: #fff;">
+            <button type="button" class="save-model-btn" onclick="saveAndApplyModel()" style="width: auto; padding: 10px 20px;">حفظ واعتماد النموذج</button>
+        </div>
     </div>
 
     <div class="form-group" style="display: none;">
@@ -118,13 +121,7 @@
     <!-- بطاقة عرض النتيجة الفورية -->
     <div class="score-card">
         <h2 id="liveScoreDisplay">0 من 20 (0%)</h2>
-        <p>🎯 نتيجة الطالب الفورية بناءً على النموذج النشط</p>
-    </div>
-
-    <!-- 5. مفاتيح الإجابة النموذجية القابلة للتعديل اليدوي -->
-    <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
-        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح الإجابة النموذجية (تعديل يدوي بـ أ، ب، ج، د):</label>
-        <div class="grid-20" id="modelKeyContainer"></div>
+        <p>🎯 نتيجة الطالب الفورية بالمقارنة مع النموذج المعتمد</p>
     </div>
 
     <!-- لوحة التغذية الراجعة المفصلة -->
@@ -133,8 +130,8 @@
         <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
-    <!-- 6. اعتماد وإرسال -->
-    <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
+    <!-- 5. اعتماد وإرسال -->
+    <button class="submit-btn" onclick="processAndSendToDashboard()">5️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -155,9 +152,9 @@
 
     let allStudents = [];
     let studentAnswersState = {};
-    let customModelKeys = {}; 
+    let activeModelKeys = {}; // لتخزين مفاتيح النموذج المعتمد النشط
 
-    // بنك نصوص الأسئلة المستخرجة بدقة من نموذج 1 المرفق
+    // بنك نصوص الأسئلة المستخرجة لنموذج 1
     const baseQuestionsBank = {
         1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'كتب الطالب الدرس', B:'المعلمة نور', C:'فهم المعلمة', D:'العلمُ نورٌ' } },
         2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' } },
@@ -181,22 +178,15 @@
         20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر مرفوع بالواو', B:'خبر منصوب بالياء', C:'مبتدأ مرفوع', D:'مفعول به' } }
     };
 
-    // المفاتيح الافتراضية للنماذج
-    let modelsKeysData = {
-        "نموذج 1": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'C', 6:'A', 7:'C', 8:'C', 9:'C', 10:'A', 11:'B', 12:'A', 13:'A', 14:'B', 15:'C', 16:'A', 17:'B', 18:'C', 19:'D', 20:'A' },
-        "نموذج 2": { 1:'C', 2:'B', 3:'D', 4:'A', 5:'C', 6:'A', 7:'B', 8:'A', 9:'A', 10:'D', 11:'B', 12:'A', 13:'A', 14:'B', 15:'A', 16:'B', 17:'C', 18:'B', 19:'A', 20:'A' },
-        "نموذج 3": { 1:'A', 2:'C', 3:'A', 4:'D', 5:'A', 6:'B', 7:'A', 8:'C', 9:'C', 10:'A', 11:'D', 12:'C', 13:'B', 14:'C', 15:'B', 16:'B', 17:'A', 18:'D', 19:'A', 20:'C' },
-        "نموذج 4": { 1:'B', 2:'D', 3:'B', 4:'C', 5:'D', 6:'C', 7:'D', 8:'D', 9:'D', 10:'C', 11:'C', 12:'D', 13:'D', 14:'D', 15:'D', 16:'C', 17:'B', 18:'A', 19:'B', 20:'D' },
-        "نموذج 5": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'B', 6:'D', 7:'C', 8:'B', 9:'B', 10:'B', 11:'C', 12:'B', 13:'C', 14:'A', 15:'C', 16:'A', 17:'D', 18:'C', 19:'D', 20:'B' }
-    };
-
     window.onload = function() {
         for (let i = 1; i <= 20; i++) {
             studentAnswersState[i] = 'A';
+            activeModelKeys[i] = 'A'; // افتراضي
         }
         buildStudentAnswersGrid();
-        loadSelectedModelData();
+        buildModelKeyGrid();
         loadAllowedStudents();
+        updateComparison();
     };
 
     function buildStudentAnswersGrid() {
@@ -224,44 +214,60 @@
         }
     }
 
-    function applyQuickPaste() {
-        let text = document.getElementById('quickPasteInput').value.trim();
-        let chars = text.replace(/[^أبجدهABCDabcd]/g, '').toUpperCase();
-        const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
-        
-        let index = 0;
+    // بناء شبكة أزرار مفاتيح النموذج المعتمد (مثل الطالب تماماً)
+    function buildModelKeyGrid() {
+        const container = document.getElementById('modelKeyContainer');
+        container.innerHTML = '';
+        const keys = ['A', 'B', 'C', 'D'];
+        const labels = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'};
+
         for (let i = 1; i <= 20; i++) {
-            if (index < chars.length) {
-                let ch = chars[index];
-                let engKey = mapArabToEng[ch] || ch;
-                if (['A', 'B', 'C', 'D'].includes(engKey)) {
-                    studentAnswersState[i] = engKey;
-                    updateButtonUI(i, engKey);
-                }
-                index++;
-            }
+            let currentVal = activeModelKeys[i];
+            let optHtml = '';
+            keys.forEach(k => {
+                let activeClass = (currentVal === k) ? 'opt-btn model-btn active' : 'opt-btn model-btn';
+                optHtml += `<button type="button" class="${activeClass}" onclick="setModelKey(${i}, '${k}')">${labels[k]}</button>`;
+            });
+
+            container.innerHTML += `
+                <div class="ans-card" style="background:#f0f9ff;">
+                    <span>س ${i}</span>
+                    <div class="options-group" id="model_opts_${i}">
+                        ${optHtml}
+                    </div>
+                </div>
+            `;
         }
-        updateComparison();
-        alert('✅ تم تعبئة إجابات الطالب ومقارنتها مع النموذج النشط بنجاح!');
     }
 
-    function clearQuickPaste() {
-        document.getElementById('quickPasteInput').value = '';
-        for (let i = 1; i <= 20; i++) {
-            studentAnswersState[i] = 'A';
-            updateButtonUI(i, 'A');
-        }
+    function setModelKey(qNum, ansKey) {
+        activeModelKeys[qNum] = ansKey;
+        updateModelKeyButtonUI(qNum, ansKey);
         updateComparison();
-        alert('🗑️ تم مسح الخانة وتصفير الاختيارات بنجاح.');
+    }
+
+    function updateModelKeyButtonUI(qNum, ansKey) {
+        const container = document.getElementById(`model_opts_${qNum}`);
+        if (!container) return;
+        const buttons = container.getElementsByTagName('button');
+        const keys = ['A', 'B', 'C', 'D'];
+        
+        for(let j=0; j<buttons.length; j++) {
+            if(keys[j] === ansKey) {
+                buttons[j].className = 'opt-btn model-btn active';
+            } else {
+                buttons[j].className = 'opt-btn model-btn';
+            }
+        }
     }
 
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
-        updateButtonUI(qNum, ansKey);
+        updateStudentButtonUI(qNum, ansKey);
         updateComparison();
     }
 
-    function updateButtonUI(qNum, ansKey) {
+    function updateStudentButtonUI(qNum, ansKey) {
         const container = document.getElementById(`q_opts_${qNum}`);
         if (!container) return;
         const buttons = container.getElementsByTagName('button');
@@ -276,52 +282,46 @@
         }
     }
 
-    function loadSelectedModelData() {
-        const select = document.getElementById('targetModelSelect');
-        const modelName = select.value;
-        document.getElementById('customModelName').value = modelName;
-
-        if (modelsKeysData[modelName]) {
-            for (let i = 1; i <= 20; i++) {
-                customModelKeys[i] = modelsKeysData[modelName][i] || 'A';
-            }
-        }
-        renderModelKeyInputs();
-        updateComparison();
-    }
-
-    function renderModelKeyInputs() {
-        const keyContainer = document.getElementById('modelKeyContainer');
-        keyContainer.innerHTML = '';
-        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
-
-        for (let i = 1; i <= 20; i++) {
-            let currentVal = ansMap[customModelKeys[i]] || 'أ';
-            keyContainer.innerHTML += `
-                <div class="ans-card">
-                    <span>س ${i}</span>
-                    <input type="text" id="manualKey_${i}" class="key-input" value="${currentVal}" maxlength="1" oninput="updateManualKey(${i}, this)">
-                </div>
-            `;
-        }
-    }
-
-    function updateManualKey(qNum, inputElement) {
-        let val = inputElement.value.trim().toUpperCase();
+    function applyQuickPaste() {
+        let text = document.getElementById('quickPasteInput').value.trim();
+        let chars = text.replace(/[^أبجدهABCDabcd]/g, '').toUpperCase();
         const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
-        let engKey = mapArabToEng[val] || val;
-
-        if (['A', 'B', 'C', 'D'].includes(engKey)) {
-            customModelKeys[qNum] = engKey;
-            inputElement.value = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'}[engKey];
-            
-            const currentModel = document.getElementById('targetModelSelect').value;
-            if(modelsKeysData[currentModel]) {
-                modelsKeysData[currentModel][qNum] = engKey;
+        
+        let index = 0;
+        for (let i = 1; i <= 20; i++) {
+            if (index < chars.length) {
+                let ch = chars[index];
+                let engKey = mapArabToEng[ch] || ch;
+                if (['A', 'B', 'C', 'D'].includes(engKey)) {
+                    studentAnswersState[i] = engKey;
+                    updateStudentButtonUI(i, engKey);
+                }
+                index++;
             }
-            
-            updateComparison();
         }
+        updateComparison();
+        alert('✅ تم تعبئة إجابات الطالب ومقارنتها مع النموذج المعتمد بنجاح!');
+    }
+
+    function clearQuickPaste() {
+        document.getElementById('quickPasteInput').value = '';
+        for (let i = 1; i <= 20; i++) {
+            studentAnswersState[i] = 'A';
+            updateStudentButtonUI(i, 'A');
+        }
+        updateComparison();
+        alert('🗑️ تم مسح الخانة وتصفير الاختيارات بنجاح.');
+    }
+
+    function saveAndApplyModel() {
+        const modelName = document.getElementById('newModelNameInput').value.trim();
+        if(!modelName) {
+            alert('الرجاء كتابة اسم النموذج أولاً (مثال: نموذج 1).');
+            return;
+        }
+        document.getElementById('customModelName').value = modelName;
+        updateComparison();
+        alert(`✅ تم حفظ واعتماد مفاتيح (${modelName}) بنجاح وبدأت المقارنة الفورية!`);
     }
 
     function updateComparison() {
@@ -334,7 +334,7 @@
         for (let i = 1; i <= 20; i++) {
             const studentVal = studentAnswersState[i];
             const qObj = baseQuestionsBank[i] || { q: `سؤال ${i}`, options: { A:'أ', B:'ب', C:'ج', D:'د' } };
-            const correctVal = customModelKeys[i] || 'A';
+            const correctVal = activeModelKeys[i] || 'A';
             const isMatch = (studentVal === correctVal);
 
             if (isMatch) score++;
@@ -352,7 +352,7 @@
                         <span>${statusText}</span>
                     </div>
                     <div style="font-size:0.8rem; opacity:0.9;">
-                        إجابة الطالب: <strong>${studentVal}) ${studentOptText}</strong> | الإجابة الصحيحة المعتمدة: <strong>${correctVal}) ${correctOptText}</strong>
+                        إجابة الطالب: <strong>${studentVal}) ${studentOptText}</strong> | النموذج المعتمد: <strong>${correctVal}) ${correctOptText}</strong>
                     </div>
                 </div>
             `;
@@ -425,7 +425,7 @@
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = studentAnswersState[i]; 
             let qObj = baseQuestionsBank[i] || { q: `سؤال ${i}`, options: { A:'أ', B:'ب', C:'ج', D:'د' } };
-            let correctAnsKey = customModelKeys[i] || 'A'; 
+            let correctAnsKey = activeModelKeys[i] || 'A'; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
@@ -456,7 +456,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم النموذج (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
             
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
