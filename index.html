@@ -2,51 +2,35 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي المعتمدة - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي - ثانوية الأمير عبدالمجيد</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
-        :root { --bg: #f8fafc; --card-bg: #ffffff; --accent: #0284c7; --text-main: #1e293b; --border: #e2e8f0; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 750px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); box-sizing: border-box; }
-        h1 { color: var(--accent); font-size: 1.4rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
-        p.subtitle { text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; position: relative; }
-        label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
-        select, input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; background: #fff; box-sizing: border-box; }
-        
-        .student-select-box { position: relative; }
-        .student-dropdown-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 8px 8px; max-height: 150px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .student-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; text-align: right; }
-        .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
-
-        .comparison-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .ans-card { background: #fff; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-size: 0.8rem; }
-        .ans-card.correct-match { background: #d1fae5; border-color: #34d399; }
-        .ans-card.wrong-match { background: #fee2e2; border-color: #f87171; }
-        .ans-card select { width: 100%; padding: 2px; font-size: 0.8rem; text-align: center; margin-top: 3px; font-weight: bold; }
-
-        .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-bottom: 10px; }
-        .camera-btn:hover { background: #0369a1; }
-        #previewContainer { text-align: center; margin-bottom: 15px; display: none; }
-        #capturedImage { max-width: 100%; max-height: 150px; border-radius: 8px; border: 2px solid #10b981; }
-
-        .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-        .submit-btn:hover { background: #059669; }
-        .status-msg { font-size: 0.8rem; color: #059669; font-weight: bold; margin-bottom: 10px; text-align: center; }
-        .footer-note { text-align: center; font-size: 0.75rem; color: #64748b; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
+        body { font-family: Tahoma, sans-serif; background: #f8fafc; margin: 0; padding: 20px; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #0284c7; text-align: center; font-size: 1.3rem; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
+        select, input[type="text"] { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+        .box { background: #fff; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.8rem; }
+        .box select { width: 100%; padding: 2px; text-align: center; font-weight: bold; }
+        .btn { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-submit { background: #10b981; }
+        .dropdown { position: absolute; background: #fff; border: 1px solid #cbd5e1; width: 100%; max-height: 120px; overflow-y: auto; display: none; z-index: 10; }
+        .dropdown-item { padding: 8px; cursor: pointer; }
+        .dropdown-item:hover { background: #e0f2fe; }
     </style>
 </head>
 <body>
 
-<div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي المعتمدة (النماذج 1 إلى 5)</h1>
-    <p class="subtitle">اختر النموذج لتظهر المفاتيح المظللة، اختر اسم الطالب، صور ورقة التظليل وأرسل</p>
+<div class="container">
+    <h1>أداة التصحيح الآلي المعتمدة</h1>
 
     <div class="form-group">
         <label>اختر النموذج:</label>
-        <select id="targetModelSelect" onchange="applyModelKey()">
-            <option value="النموذج الأول (أ)" selected>النموذج الأول (أ)</option>
+        <select id="modelSelect" onchange="updateKeys()">
+            <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
             <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
             <option value="النموذج الثالث (ج)">النموذج الثالث (ج)</option>
             <option value="النموذج الرابع (د)">النموذج الرابع (د)</option>
@@ -54,41 +38,23 @@
         </select>
     </div>
 
-    <div class="form-group">
-        <label>اسم النموذج المعتمد:</label>
-        <input type="text" id="customModelName" value="النموذج الأول (أ)">
-    </div>
-
-    <div id="keyStatus" class="status-msg"></div>
-
-    <div class="form-group">
-        <label>ابحث عن اسم الطالب واختاره:</label>
-        <div class="student-select-box">
-            <input type="text" id="studentSearchInput" placeholder="اكتب اسم الطالب للبحث..." oninput="filterStudents()" onclick="showDropdown()">
-            <div id="studentDropdownList" class="student-dropdown-list"></div>
-        </div>
+    <div class="form-group" style="position:relative;">
+        <label>ابحث عن اسم الطالب:</label>
+        <input type="text" id="searchStudent" placeholder="اكتب اسم الطالب..." autocomplete="off" oninput="filterStudents()" onclick="showList()">
+        <div id="studentList" class="dropdown"></div>
     </div>
 
     <div class="form-group">
-        <label>تصوير ورقة تظليل الطالب:</label>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
-        <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
-            📸 فتح الكاميرا وتصوير ورقة الطالب
-        </button>
-        <div id="previewContainer">
-            <img id="capturedImage" src="" alt="معاينة الورقة">
-            <div style="color: #059669; font-weight: bold; font-size: 0.8rem; margin-top: 4px;">✅ تم التقاط صورة ورقة الطالب بنجاح</div>
-        </div>
+        <label>تصوير ورقة الطالب:</label>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewImage(this)">
+        <button class="btn" onclick="document.getElementById('cameraInput').click()">📸 فتح الكاميرا وتصوير الورقة</button>
+        <div id="previewText" style="color: #10b981; font-weight: bold; font-size: 0.85rem; text-align: center; display:none;">✅ تم التقاط ورقة الطالب بنجاح</div>
     </div>
 
-    <label style="margin-bottom: 5px;">مقارنة إجابات الطالب مع المفتاح المعتمد (من 1 إلى 20):</label>
-    <div class="comparison-grid" id="studentAnswersContainer"></div>
+    <label>مفاتيح الإجابة وإجابات الطالب:</label>
+    <div class="grid" id="answersGrid"></div>
 
-    <button class="submit-btn" onclick="processAndSendToDashboard()">تصحيح وإرسال الدرجة الحقيقية لوحة التحكم</button>
-
-    <div class="footer-note">
-        ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
-    </div>
+    <button class="btn btn-submit" onclick="sendResult()">تصحيح وإرسال الدرجة للوحة التحكم</button>
 </div>
 
 <script>
@@ -100,296 +66,155 @@
         messagingSenderId: "597051893949",
         appId: "1:597051893949:web:de5554ac900317a92b2fd4"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    let allStudents = [];
-    let imageCaptured = false;
+    let students = [];
+    let imageReady = false;
 
-    // مفاتيح النماذج الخمسة المعتمدة الدقيقة
-    const modelQuestionsBank = {
-        "النموذج الأول (أ)": {
-            1:{q:'الجملة الاسمية الصحيحة مما يلي هي:',options:{A:'كتب الطالب الدرس',B:'العلمُ نورٌ',C:'يَفْهَمُ المعلمُ',D:'اِكْتُبْ بجدٍ'},correct:'B'},[cite: 4]
-            2:{q:'علامة جزم الفعل المضارع في "لم أكسلْ":',options:{A:'السكون',B:'حذف حرف العلة',C:'حذف النون',D:'الضمة'},correct:'A'},[cite: 4]
-            3:{q:'الفعل المضارع المرفوع فيما يأتي:',options:{A:'لم يكتبْ',B:'لن يكتبَ',C:'يكتبُ الطالبُ',D:'اكتبْ'},correct:'C'},[cite: 4]
-            4:{q:'الفعل الماضي المبني للمجهول يُضم أوله و:',options:{A:'يُفتح ما قبل الآخر',B:'يُكسر ما قبل الآخر',C:'يُسكن آخره',D:'يبقى كما هو'},correct:'B'},[cite: 4]
-            5:{q:'الجملة المبنية للمعلوم فيما يأتي:',options:{A:'كُسِرَ الزجاجُ',B:'شُرِبَ اللبنُ',C:'فَهِمَ الطالبُ الدرسَ',D:'يُحْتَرَمُ المعلمُ'},correct:'C'},[cite: 4]
-            6:{q:'اسم "صار" في جملة "صار الطينُ خزفاً":',options:{A:'الطينُ',B:'خزفاً',C:'محذوف',D:'ضمير مستتر'},correct:'A'},[cite: 4]
-            7:{q:'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":',options:{A:'مفرد',B:'جملة فعلية',C:'جملة اسمية',D:'شبه جملة'},correct:'C'},[cite: 4]
-            8:{q:'نوع الفعل المضارع "يسعى" صحةً وعلةً:',options:{A:'صحيح الآخر',B:'معتل الآخر بالواو',C:'معتل الآخر بالألف',D:'معتل الآخر بالياء'},correct:'C'},[cite: 4]
-            9:{q:'علامة إعراب الفعل في "لن أفرطَ في وطني":',options:{A:'الضمة',B:'الفتحة الظاهرة',C:'السكون',D:'حذف النون'},correct:'B'},[cite: 4]
-            10:{q:'الفعل المضارع المبني للمجهول يُضم أوله و:',options:{A:'يُفتح ما قبل الآخر',B:'يُكسر ما قبل الآخر',C:'يُسكن آخره',D:'يُضم آخره'},correct:'A'},[cite: 4]
-            11:{q:'إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ":',options:{A:'فاعل مرفوع',B:'نائب فاعل مرفوع',C:'مفعول به',D:'خبر مرفوع'},correct:'B'},[cite: 4]
-            12:{q:'الجملة الصحيحة بعد دخول حرف ناسخ:',options:{A:'إنَّ العلمَ نافعٌ',B:'إنَّ العلمُ نافعٌ',C:'إنَّ العلمَ نافعاً',D:'إنَّ العلمِ نافعٌ'},correct:'A'},[cite: 4]
-            13:{q:'الجملة التي دخل عليها فعل ناسخ صحيحة:',options:{A:'كان الجوُّ حارّاً',B:'كان الجوُّ حارٌّ',C:'كان الجوِّ حارّاً',D:'كان الجوَّ حارٌّ'},correct:'A'},[cite: 4]
-            14:{q:'الأفعال الخمسة ترفع بـ:',options:{A:'الضمة الظاهرة',B:'ثبوت النون',C:'حذف النون',D:'الواو'},correct:'B'},[cite: 4]
-            15:{q:'عند بناء جملة "حفظَ الطالبُ القصيدةَ" للمجهول:',options:{A:'حفظَ القصيدةُ',B:'حُفِظَتِ القصيدةُ',C:'يحفظ القصيدة',D:'حفظ الطالب'},correct:'B'},[cite: 4]
-            16:{q:'(صح أم خطأ): المبتدأ دائماً مرفوع:',options:{A:'صح',B:'خطأ',C:'أحياناً مجرور',D:'منصوب دائماً'},correct:'A'},[cite: 4]
-            17:{q:'خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ":',options:{A:'السفرَ',B:'قريبٌ',C:'التاء في علمتُ',D:'مستتر'},correct:'B'},[cite: 4]
-            18:{q:'إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ":',options:{A:'نائب فاعل',B:'فاعل مرفوع',C:'مفعول به',D:'مبتدأ مرفوع'},correct:'B'},[cite: 4]
-            19:{q:'الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:',options:{A:'يكتبانِ',B:'أنتم تكتبون',C:'حضر العمال كي يعملوا',D:'لم يكتبوا'},correct:'C'},[cite: 4]
-            20:{q:'إعراب كلمة (نشيطون) في "المعلمون نشيطون":',options:{A:'خبر مرفوع بالواو',B:'خبر منصوب بالياء',C:'مبتدأ مرفوع',D:'مفعول به'},correct:'A'}[cite: 4]
-        },
-        "النموذج الثاني (ب)": {
-            1:{q:'الجملة الاسمية الصحيحة مما يلي هي:',options:{A:'كتب الطالب الدرس',B:'يَفْهَمُ المعلمُ',C:'العلمُ نورٌ',D:'اِكْتُبْ بجدٍ'},correct:'C'},[cite: 5]
-            2:{q:'علامة جزم الفعل المضارع في "لم أكسلْ":',options:{A:'الضمة',B:'السكون',C:'حذف النون',D:'حذف حرف العلة'},correct:'B'},[cite: 5]
-            3:{q:'الفعل الماضي المبني للمجهول يُضم أوله و:',options:{A:'يُفتح ما قبل الآخر',B:'يبقى كما هو',C:'يُسكن آخره',D:'يُكسر ما قبل الآخر'},correct:'D'},[cite: 5]
-            4:{q:'الفعل المضارع المرفوع فيما يأتي:',options:{A:'لم يكتبْ',B:'لن يكتبَ',C:'يكتبُ الطالبُ',D:'اكتبْ'},correct:'C'},[cite: 5]
-            5:{q:'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":',options:{A:'جملة اسمية',B:'مفرد',C:'شبه جملة',D:'جملة فعلية'},correct:'A'},[cite: 5]
-            6:{q:'الجملة المبنية للمعلوم فيما يأتي:',options:{A:'كُسِرَ الزجاجُ',B:'شُرِبَ اللبنُ',C:'يُحْتَرَمُ المعلمُ',D:'فَهِمَ الطالبُ الدرسَ'},correct:'D'},[cite: 5]
-            7:{q:'علامة إعراب الفعل في "لن أفرطَ في وطني":',options:{A:'الضمة',B:'الفتحة الظاهرة',C:'حذف النون',D:'السكون'},correct:'B'},[cite: 5]
-            8:{q:'اسم "صار" في جملة "صار الطينُ خزفاً":',options:{A:'الطينُ',B:'خزفاً',C:'ضمير مستتر',D:'محذوف'},correct:'A'},[cite: 5]
-            9:{q:'إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ":',options:{A:'فاعل مرفوع',B:'مفعول به',C:'نائب فاعل مرفوع',D:'خبر مرفوع'},correct:'C'},[cite: 5]
-            10:{q:'نوع الفعل المضارع "يسعى" صحةً وعلةً:',options:{A:'صحيح الآخر',B:'معتل الآخر بالألف',C:'معتل الآخر بالواو',D:'معتل الآخر بالياء'},correct:'B'},[cite: 5]
-            11:{q:'الجملة التي دخل عليها فعل ناسخ صحيحة:',options:{A:'كان الجوُّ حارٌّ',B:'كان الجوَّ حارٌّ',C:'كان الجوِّ حارّاً',D:'كان الجوُّ حارّاً'},correct:'D'},[cite: 5]
-            12:{q:'الفعل المضارع المبني للمجهول يُضم أوله و:',options:{A:'يُكسر ما قبل الآخر',B:'يُضم آخره',C:'يُفتح ما قبل الآخر',D:'يُسكن آخره'},correct:'C'},[cite: 5]
-            13:{q:'عند بناء جملة "حفظَ الطالبُ القصيدةَ" للمجهول:',options:{A:'حُفِظَتِ القصيدةُ',B:'حفظَ القصيدةُ',C:'حفظ الطالب',D:'يحفظ القصيدة'},correct:'A'},[cite: 5]
-            14:{q:'الجملة الصحيحة بعد دخول حرف ناسخ:',options:{A:'إنَّ العلمَ نافعٌ',B:'إنَّ العلمُ نافعٌ',C:'إنَّ العلمِ نافعٌ',D:'إنَّ العلمَ نافعاً'},correct:'A'},[cite: 5]
-            15:{q:'الأفعال الخمسة ترفع بـ:',options:{A:'الضمة الظاهرة',B:'ثبوت النون',C:'حذف النون',D:'الواو'},correct:'B'},[cite: 5]
-            16:{q:'(صح أم خطأ): المبتدأ دائماً مرفوع:',options:{A:'صح',B:'خطأ',C:'منصوب دائماً',D:'أحياناً مجرور'},correct:'A'},[cite: 5]
-            17:{q:'خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ":',options:{A:'السفرَ',B:'التاء في علمتُ',C:'قريبٌ',D:'مستتر'},correct:'C'},[cite: 5]
-            18:{q:'إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ":',options:{A:'نائب فاعل',B:'مفعول به',C:'مبتدأ مرفوع',D:'فاعل مرفوع'},correct:'D'},[cite: 5]
-            19:{q:'الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:',options:{A:'يكتبانِ',B:'حضر العمال كي يعملوا',C:'أنتم تكتبون',D:'لم يكتبوا'},correct:'B'},[cite: 5]
-            20:{q:'إعراب كلمة (نشيطون) في "المعلمون نشيطون":',options:{A:'خبر مرفوع بالواو',B:'مبتدأ مرفوع',C:'خبر منصوب بالياء',D:'مفعول به'},correct:'A'}[cite: 5]
-        },
-        "النموذج الثالث (ج)": {
-            1:{q:'الجملة الاسمية الصحيحة مما يلي هي:',options:{A:'يَفْهَمُ المعلمُ',B:'اِكْتُبْ بجدٍ',C:'كتب الطالب الدرس',D:'العلمُ نورٌ'},correct:'D'},[cite: 6]
-            2:{q:'علامة جزم الفعل المضارع في "لم أكسلْ":',options:{A:'السكون',B:'حذف حرف العلة',C:'الضمة',D:'حذف النون'},correct:'A'},[cite: 6]
-            3:{q:'الفعل الماضي المبني للمجهول يُضم أوله و:',options:{A:'يبقى كما هو',B:'يُسكن آخره',C:'يُكسر ما قبل الآخر',D:'يُفتح ما قبل الآخر'},correct:'C'},[cite: 6]
-            4:{q:'الفعل المضارع المرفوع فيما يأتي:',options:{A:'لن يكتبَ',B:'يكتبُ الطالبُ',C:'لم يكتبْ',D:'اكتبْ'},correct:'B'},[cite: 6]
-            5:{q:'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":',options:{A:'مفرد',B:'جملة اسمية',C:'جملة فعلية',D:'شبه جملة'},correct:'B'},[cite: 6]
-            6:{q:'الجملة المبنية للمعلوم فيما يأتي:',options:{A:'كُسِرَ الزجاجُ',B:'يُحْتَرَمُ المعلمُ',C:'شُرِبَ اللبنُ',D:'فَهِمَ الطالبُ الدرسَ'},correct:'D'},[cite: 6]
-            7:{q:'علامة إعراب الفعل في "لن أفرطَ في وطني":',options:{A:'الضمة',B:'حذف النون',C:'الفتحة الظاهرة',D:'السكون'},correct:'C'},[cite: 6]
-            8:{q:'اسم "صار" في جملة "صار الطينُ خزفاً":',options:{A:'خزفاً',B:'ضمير مستتر',C:'الطينُ',D:'محذوف'},correct:'C'},[cite: 6]
-            9:{q:'إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ":',options:{A:'مفعول به',B:'نائب فاعل مرفوع',C:'فاعل مرفوع',D:'خبر مرفوع'},correct:'B'},[cite: 6]
-            10:{q:'نوع الفعل المضارع "يسعى" صحةً وعلةً:',options:{A:'معتل الآخر بالواو',B:'معتل الآخر بالألف',C:'صحيح الآخر',D:'معتل الآخر بالياء'},correct:'B'},[cite: 6]
-            11:{q:'الجملة التي دخل عليها فعل ناسخ صحيحة:',options:{A:'كان الجوَّ حارٌّ',B:'كان الجوِّ حارّاً',C:'كان الجوُّ حارّاً',D:'كان الجوُّ حارٌّ'},correct:'C'},[cite: 6]
-            12:{q:'الفعل المضارع المبني للمجهول يُضم أوله و:',options:{A:'يُضم آخره',B:'يُفتح ما قبل الآخر',C:'يُكسر ما قبل الآخر',D:'يُسكن آخره'},correct:'B'},[cite: 6]
-            13:{q:'عند بناء جملة "حفظَ الطالبُ القصيدةَ" للمجهول:',options:{A:'حفظَ القصيدةُ',B:'يحفظ القصيدة',C:'حُفِظَتِ القصيدةُ',D:'حفظ الطالب'},correct:'C'},[cite: 6]
-            14:{q:'الجملة الصحيحة بعد دخول حرف ناسخ:',options:{A:'إنَّ العلمُ نافعٌ',B:'إنَّ العلمَ نافعٌ',C:'إنَّ العلمِ نافعٌ',D:'إنَّ العلمَ نافعاً'},correct:'B'},[cite: 6]
-            15:{q:'الأفعال الخمسة ترفع بـ:',options:{A:'الضمة الظاهرة',B:'حذف النون',C:'ثبوت النون',D:'الواو'},correct:'C'},[cite: 6]
-            16:{q:'(صح أم خطأ): المبتدأ دائماً مرفوع:',options:{A:'خطأ',B:'صح',C:'منصوب دائماً',D:'أحياناً مجرور'},correct:'B'},[cite: 6]
-            17:{q:'خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ":',options:{A:'التاء في علمتُ',B:'السفرَ',C:'مستتر',D:'قريبٌ'},correct:'D'},[cite: 6]
-            18:{q:'إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ":',options:{A:'مبتدأ مرفوع',B:'فاعل مرفوع',C:'مفعول به',D:'نائب فاعل'},correct:'B'},[cite: 6]
-            19:{q:'الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:',options:{A:'أنتم تكتبون',B:'حضر العمال كي يعملوا',C:'يكتبانِ',D:'لم يكتبوا'},correct:'B'},[cite: 6]
-            20:{q:'إعراب كلمة (نشيطون) في "المعلمون نشيطون":',options:{A:'خبر منصوب بالياء',B:'خبر مرفوع بالواو',C:'مبتدأ مرفوع',D:'مفعول به'},correct:'B'}[cite: 6]
-        },
-        "النموذج الرابع (د)": {
-            1:{q:'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":',options:{A:'مفرد',B:'جملة فعلية',C:'جملة اسمية',D:'شبه جملة'},correct:'C'},[cite: 7]
-            2:{q:'الجملة المبنية للمعلوم فيما يأتي:',options:{A:'كُسِرَ الزجاجُ',B:'فَهِمَ الطالبُ الدرسَ',C:'يُحْتَرَمُ المعلمُ',D:'شُرِبَ اللبنُ'},correct:'B'},[cite: 7]
-            3:{q:'عند بناء جملة "حفظَ الطالبُ القصيدةَ" للمجهول:',options:{A:'حُفِظَتِ القصيدةُ',B:'حفظَ القصيدةُ',C:'حفظ الطالب',D:'يحفظ القصيدة'},correct:'A'},[cite: 7]
-            4:{q:'علامة جزم الفعل المضارع في "لم أكسلْ":',options:{A:'حذف حرف العلة',B:'السكون',C:'حذف النون',D:'الضمة'},correct:'B'},[cite: 7]
-            5:{q:'إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ":',options:{A:'فاعل مرفوع',B:'مفعول به',C:'نائب فاعل مرفوع',D:'خبر مرفوع'},correct:'C'},[cite: 7]
-            6:{q:'الفعل المضارع المرفوع فيما يأتي:',options:{A:'يكتبُ الطالبُ',B:'لن يكتبَ',C:'اكتبْ',D:'لم يكتبْ'},correct:'A'},[cite: 7]
-            7:{q:'اسم "صار" في جملة "صار الطينُ خزفاً":',options:{A:'ضمير مستتر',B:'خزفاً',C:'محذوف',D:'الطينُ'},correct:'D'},[cite: 7]
-            8:{q:'الجملة التي دخل عليها فعل ناسخ صحيحة:',options:{A:'كان الجوُّ حارٌّ',B:'كان الجوَّ حارٌّ',C:'كان الجوُّ حارّاً',D:'كان الجوِّ حارّاً'},correct:'C'},[cite: 7]
-            9:{q:'الجملة الاسمية الصحيحة مما يلي هي:',options:{A:'كتب الطالب الدرس',B:'العلمُ نورٌ',C:'يَفْهَمُ المعلمُ',D:'اِكْتُبْ بجدٍ'},correct:'B'},[cite: 7]
-            10:{q:'علامة إعراب الفعل في "لن أفرطَ في وطني":',options:{A:'الفتحة الظاهرة',B:'الضمة',C:'السكون',D:'حذف النون'},correct:'A'},[cite: 7]
-            11:{q:'الفعل الماضي المبني للمجهول يُضم أوله و:',options:{A:'يُكسر ما قبل الآخر',B:'يبقى كما هو',C:'يُفتح ما قبل الآخر',D:'يُسكن آخره'},correct:'A'},[cite: 7]
-            12:{q:'نوع الفعل المضارع "يسعى" صحةً وعلةً:',options:{A:'صحيح الآخر',B:'معتل الآخر بالواو',C:'معتل الآخر بالياء',D:'معتل الآخر بالألف'},correct:'D'},[cite: 7]
-            13:{q:'الجملة الصحيحة بعد دخول حرف ناسخ:',options:{A:'إنَّ العلمَ نافعاً',B:'إنَّ العلمَ نافعٌ',C:'إنَّ العلمُ نافعٌ',D:'إنَّ العلمِ نافعٌ'},correct:'B'},[cite: 7]
-            14:{q:'الفعل المضارع المبني للمجهول يُضم أوله و:',options:{A:'يُفتح ما قبل الآخر',B:'يُضم آخره',C:'يُسكن آخره',D:'يُكسر ما قبل الآخر'},correct:'A'},[cite: 7]
-            15:{q:'إعراب كلمة (نشيطون) في "المعلمون نشيطون":',options:{A:'مبتدأ مرفوع',B:'خبر مرفوع بالواو',C:'خبر منصوب بالياء',D:'مفعول به'},correct:'B'},[cite: 7]
-            16:{q:'خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ":',options:{A:'قريبٌ',B:'التاء في علمتُ',C:'السفرَ',D:'مستتر'},correct:'A'},[cite: 7]
-            17:{q:'الأفعال الخمسة ترفع بـ:',options:{A:'الواو',B:'الضمة الظاهرة',C:'ثبوت النون',D:'حذف النون'},correct:'C'},[cite: 7]
-            18:{q:'الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:',options:{A:'لم يكتبوا',B:'أنتم تكتبون',C:'حضر العمال كي يعملوا',D:'يكتبانِ'},correct:'C'},[cite: 7]
-            19:{q:'(صح أم خطأ): المبتدأ دائماً مرفوع:',options:{A:'صح',B:'خطأ',C:'أحياناً مجرور',D:'منصوب دائماً'},correct:'A'},[cite: 7]
-            20:{q:'إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ":',options:{A:'نائب فاعل',B:'مبتدأ مرفوع',C:'مفعول به',D:'فاعل مرفوع'},correct:'D'}[cite: 7]
-        },
-        "النموذج الخامس (هـ)": {
-            1:{q:'خبر "إنَّ" في جملة "إنَّ الصدقَ يهدي إلى البرِّ":',options:{A:'الصدقَ',B:'جملة فعلية (يهدي)',C:'إلى البرِّ',D:'مفرد'},correct:'B'},[cite: 8]
-            2:{q:'الفعل المضارع المجزوم بـ (حذف النون) فيما يلي:',options:{A:'لا تتكاسلْ',B:'لا تهملوا واجباتكم',C:'لم يدعُ إلا الله',D:'يدرسون بجد'},correct:'B'},[cite: 8]
-            3:{q:'الجملة المشتملة على فعل مضارع معتل الآخر بالواو:',options:{A:'ينمو الزرع بالماء',B:'يسعى المؤمن للخير',C:'يقضي القاضي بالعدل',D:'يكتبُ الطالبُ درسَه'},correct:'A'},[cite: 8]
-            4:{q:'علامة رفع الأسماء الخمسة في جملة "أبوك ذو علمٍ":',options:{A:'الضمة الظاهرة',B:'الواو',C:'الألف',D:'ثبوت النون'},correct:'B'},[cite: 8]
-            5:{q:'إعراب كلمة (القاضيَ) في "لن يظلمَ القاضيَ أحدٌ":',options:{A:'فاعل مرفوع',B:'مفعول به مقدم منصوب',C:'نائب فاعل',D:'اسم لن'},correct:'B'},[cite: 8]
-            6:{q:'ضبط نائب الفاعل في "كُوفِئَ [المتفوقون]":',options:{A:'مرفوع وعلامة رفعه الواو',B:'منصوب وعلامة نصبه الياء',C:'مجرور بالياء',D:'مبني على الفتح'},correct:'A'},[cite: 8]
-            7:{q:'أي الأفعال التالية من الحروف الناصخة (إن وأخواتها)؟',options:{A:'كان',B:'أصبح',C:'لعلّ',D:'صار'},correct:'C'},[cite: 8]
-            8:{q:'علامة جزم المضارع معتل الآخر هي:',options:{A:'السكون',B:'الفتحة',C:'حذف حرف العلة',D:'ثبوت النون'},correct:'C'},[cite: 8]
-            9:{q:'عند بناء الفعل "قال" للمجهول يصبح:',options:{A:'أُقيل',B:'قِيلَ',C:'يُقالُ',D:'قُوِلَ'},correct:'B'},[cite: 8]
-            10:{q:'الضمير في "الطالبان يكتبان" يعرب:',options:{A:'ضمير متصل في محل رفع فاعل',B:'في محل نصب مفعول به',C:'مبتدأ ثاني',D:'مضاف إليه'},correct:'A'},[cite: 8]
-            11:{q:'جملة "أصبح الطالبُ مستعداً"، "مستعداً" تعرب:',options:{A:'اسم أصبح مرفوع',B:'خبر أصبح منصوب',C:'حال منصوبة',D:'مفعول به'},correct:'B'},[cite: 8]
-            12:{q:'أحد الحروف التالية ينصب الفعل المضارع:',options:{A:'لم',B:'لا الناهية',C:'كي',D:'لام الأمر'},correct:'C'},[cite: 8]
-            13:{q:'المبتدأ والخبر في جملة "الشجرتان مثمرتان" مرفوعان بـ:',options:{A:'الضمة',B:'الألف',C:'ثبوت النون',D:'الواو'},correct:'B'},[cite: 8]
-            14:{q:'الجملة المبنية للمجهول بشكل صحيح هي:',options:{A:'كُتِبَ الدرسُ',B:'كَتَبَ الدرسُ',C:'كُتِبَ الدرسَ',D:'كُتِبَ الطالبُ'},correct:'A'},[cite: 8]
-            15:{q:'الفعل المضارع "يلعبْ" في "لم يلعبْ الولد":',options:{A:'مجزوم وعلامة جزمه حذف العلة',B:'مجزوم وعلامة جزمه السكون',C:'منصوب بالفتحة',D:'مرفوع بالضمة'},correct:'B'},[cite: 8]
-            16:{q:'جملة "كان المسلمون متحدين"، كلمة "المسلمون":',options:{A:'اسم كان مرفوع بالواو',B:'خبر كان منصوب بالياء',C:'فاعل مرفوع بالواو',D:'مبتدأ مرفوع بالضمة'},correct:'A'},[cite: 8]
-            17:{q:'التغير الذي أحدثته "لیت" في: "ليت الشبابَ يعودُ":',options:{A:'نصبت المبتدأ ورفعت الخبر',B:'رفعت المبتدأ ونصبت الخبر',C:'جزم الفعل المضارع',D:'لم تؤثر إعرابياً'},correct:'A'},[cite: 8]
-            18:{q:'الفعل الذي ينتمي للأفعال الخمسة فيما يلي:',options:{A:'يكتبُ',B:'اكتبوا',C:'تحفظينَ',D:'كَتَبَا'},correct:'C'},[cite: 8]
-            19:{q:'(صح أم خطأ): "لا الناهية" تجزم فعل مضارع واحد:',options:{A:'صح',B:'خطأ',C:'تنصب الفعل',D:'ترفع الفعل'},correct:'A'},[cite: 8]
-            20:{q:'كلمة (الطبيبتان) في "إنَّ الطبيبتين ماهرتان":',options:{A:'اسم إن مرفوع بالألف',B:'خبر إن مرفوع بالضمة',C:'خبر إن مرفوع بالألف',D:'اسم إن منصوب بالياء'},correct:'C'}[cite: 8]
-        }
+    // مفاتيح الإجابة الصحيحة الثابتة للنماذج الستة/الخمسة
+    const keys = {
+        "النموذج الأول (أ)": ['B','A','C','B','C','A','C','C','B','A','B','A','A','B','B','A','B','B','C','A'],
+        "النموذج الثاني (ب)": ['C','B','D','C','A','D','B','A','C','B','D','C','A','A','B','A','C','D','B','A'],
+        "النموذج الثالث (ج)": ['D','A','C','B','B','D','C','C','B','B','C','B','C','B','C','B','D','B','B','B'],
+        "النموذج الرابع (د)": ['C','B','A','B','C','A','D','C','B','A','A','D','B','A','B','A','C','C','A','D'],
+        "النموذج الخامس (هـ)": ['B','B','A','A','B','A','C','C','B','A','B','C','B','A','B','A','A','C','A','C']
     };
 
     window.onload = function() {
-        applyModelKey();
-        loadAllowedStudents();
+        updateKeys();
+        fetchStudents();
     };
 
-    function applyModelKey() {
-        const select = document.getElementById('targetModelSelect');
-        const modelName = select.value;
-        document.getElementById('customModelName').value = modelName;
+    function updateKeys() {
+        let model = document.getElementById('modelSelect').value;
+        let modelKeys = keys[model] || keys["النموذج الأول (أ)"];
+        let grid = document.getElementById('answersGrid');
+        grid.innerHTML = '';
 
-        const currentModelData = modelQuestionsBank[modelName];
-        const container = document.getElementById('studentAnswersContainer');
-        container.innerHTML = '';
-
-        if (currentModelData) {
-            for (let i = 1; i <= 20; i++) {
-                let correctAns = currentModelData[i].correct;
-                container.innerHTML += `
-                    <div class="ans-card" id="card_${i}">
-                        <div style="font-weight:bold; color:#0284c7;">س ${i}</div>
-                        <div style="font-size:0.75rem; color:#10b981; margin:2px 0;">المفتاح: ${correctAns}</div>
-                        <select id="stud_ans_${i}" onchange="checkAnswerMatch(${i}, '${correctAns}')">
-                            <option value="A">أ</option>
-                            <option value="B">ب</option>
-                            <option value="C">ج</option>
-                            <option value="D">د</option>
-                        </select>
-                    </div>
-                `;
-                document.getElementById(`stud_ans_${i}`).value = correctAns;
-                checkAnswerMatch(i, correctAns);
-            }
-            document.getElementById('keyStatus').innerText = `✅ تم عرض مفاتيح (${modelName}) المظللة والمقارنة بنجاح!`;
+        for (let i = 0; i < 20; i++) {
+            let qNum = i + 1;
+            let correct = modelKeys[i];
+            grid.innerHTML += `
+                <div class="box" id="box_${qNum}">
+                    <div>س${qNum}</div>
+                    <div style="color:#10b981; font-weight:bold;">${correct}</div>
+                    <select id="ans_${qNum}">
+                        <option value="A">أ</option>
+                        <option value="B">ب</option>
+                        <option value="C">ج</option>
+                        <option value="D">د</option>
+                    </select>
+                </div>
+            `;
+            document.getElementById(`ans_${qNum}`).value = correct;
         }
     }
 
-    function checkAnswerMatch(qNum, correctAns) {
-        let studentAns = document.getElementById(`stud_ans_${qNum}`).value;
-        let card = document.getElementById(`card_${qNum}`);
-        if (studentAns === correctAns) {
-            card.className = "ans-card correct-match";
-        } else {
-            card.className = "ans-card wrong-match";
-        }
-    }
-
-    function loadAllowedStudents() {
-        db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
-            allStudents = [];
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                if(data.name) allStudents.push(data.name);
+    function fetchStudents() {
+        db.collection("allowed_students").get().then((snapshot) => {
+            students = [];
+            snapshot.forEach(doc => {
+                if(doc.data().name) students.push(doc.data().name);
             });
-            renderStudentDropdown(allStudents);
-        }).catch((error) => {
-            console.error("خطأ في جلب الطلاب:", error);
-        });
+            renderList(students);
+        }).catch(err => console.log(err));
     }
 
-    function renderStudentDropdown(studentsArray) {
-        const listDiv = document.getElementById('studentDropdownList');
-        listDiv.innerHTML = '';
-        if (studentsArray.length === 0) {
-            listDiv.innerHTML = '<div class="student-item" style="color:#999;">لا توجد نتائج مطابقة</div>';
+    function renderList(arr) {
+        let list = document.getElementById('studentList');
+        list.innerHTML = '';
+        if(arr.length === 0) {
+            list.innerHTML = '<div class="dropdown-item">لا توجد نتائج</div>';
             return;
         }
-        studentsArray.forEach(name => {
-            const item = document.createElement('div');
-            item.className = 'student-item';
-            item.innerText = name;
-            item.onclick = function() {
-                document.getElementById('studentSearchInput').value = name;
-                listDiv.style.display = 'none';
+        arr.forEach(name => {
+            let div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerText = name;
+            div.onclick = function() {
+                document.getElementById('searchStudent').value = name;
+                list.style.display = 'none';
             };
-            listDiv.appendChild(item);
+            list.appendChild(div);
         });
     }
 
-    function showDropdown() {
-        const listDiv = document.getElementById('studentDropdownList');
-        listDiv.style.display = 'block';
-        renderStudentDropdown(allStudents);
+    function showList() {
+        document.getElementById('studentList').style.display = 'block';
     }
 
     function filterStudents() {
-        const query = document.getElementById('studentSearchInput').value.trim().toLowerCase();
-        const filtered = allStudents.filter(name => name.toLowerCase().includes(query));
-        renderStudentDropdown(filtered);
-        document.getElementById('studentDropdownList').style.display = 'block';
+        let val = document.getElementById('searchStudent').value.toLowerCase();
+        let filtered = students.filter(s => s.toLowerCase().includes(val));
+        renderList(filtered);
+        document.getElementById('studentList').style.display = 'block';
     }
 
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.student-select-box')) {
-            document.getElementById('studentDropdownList').style.display = 'none';
-        }
-    });
-
-    function previewCapturedImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('capturedImage').src = e.target.result;
-                document.getElementById('previewContainer').style.display = 'block';
-                imageCaptured = true;
-            }
-            reader.readAsDataURL(input.files[0]);
+    function previewImage(input) {
+        if(input.files && input.files[0]) {
+            imageReady = true;
+            document.getElementById('previewText').style.display = 'block';
         }
     }
 
-    async function processAndSendToDashboard() {
-        const studentName = document.getElementById('studentSearchInput').value.trim();
-        const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
-        const selectedModel = document.getElementById('targetModelSelect').value;
-        const fileInput = document.getElementById('cameraInput');
+    async function sendResult() {
+        let name = document.getElementById('searchStudent').value.trim();
+        let model = document.getElementById('modelSelect').value;
+        let modelKeys = keys[model];
 
-        if (!studentName) {
-            alert('الرجاء اختيار اسم الطالب من القائمة أولاً.');
-            return;
-        }
-        if (!imageCaptured || fileInput.files.length === 0) {
-            alert('الرجاء التقاط صورة ورقة الطالب بالكاميرا أولاً.');
-            return;
-        }
+        if(!name) { alert('الرجاء اختيار اسم الطالب'); return; }
+        if(!imageReady) { alert('الرجاء التقاط صورة ورقة الطالب أولاً'); return; }
 
-        const currentModelData = modelQuestionsBank[selectedModel];
-        let answersDetails = [];
         let score = 0;
-        
-        for (let i = 1; i <= 20; i++) {
-            let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; 
-            let correctAnsKey = currentModelData[i].correct; 
-            let isCorrect = (studentAnsKey === correctAnsKey);
-            if (isCorrect) score++;
+        let answersDetails = [];
 
-            let qObj = currentModelData[i];
+        for(let i = 0; i < 20; i++) {
+            let qNum = i + 1;
+            let studAns = document.getElementById(`ans_${qNum}`).value;
+            let correctAns = modelKeys[i];
+            let isCorrect = (studAns === correctAns);
+            if(isCorrect) score++;
+
             answersDetails.push({
-                qText: qObj.q,
-                studentAns: `${studentAnsKey}) ${qObj.options[studentAnsKey]}`,
-                correctAns: `${correctAnsKey}) ${qObj.options[correctAnsKey]}`,
+                qText: `السؤال رقم ${qNum}`,
+                studentAns: studAns,
+                correctAns: correctAns,
                 isCorrect: isCorrect,
-                skill: i <= 4 ? 'est' : i <= 8 ? 'ikm' : i <= 12 ? 'swh' : i <= 16 ? 'arb' : 'sah'
+                skill: 'general'
             });
         }
 
-        let p = Math.round((score / 20) * 100);
-        let skillsObj = { est: p, ikm: p, swh: p, arb: p, sah: p, math: p };
+        let percent = Math.round((score / 20) * 100);
 
-        let recordData = {
-            name: studentName,
+        let data = {
+            name: name,
             score: score,
             total: 20,
-            model_id: customModelName,
+            model_id: model,
             answers: answersDetails,
-            sections: skillsObj,
+            sections: { est: percent, ikm: percent, swh: percent, arb: percent, sah: percent, math: percent },
             time: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         try {
-            await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) بنجاح!\nالدرجة: ${score} من 20 (${p}%) تحت (${customModelName})`);
-            
-            document.getElementById('studentSearchInput').value = '';
-            fileInput.value = '';
-            document.getElementById('previewContainer').style.display = 'none';
-            imageCaptured = false;
-            applyModelKey();
-        } catch (error) {
-            alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
+            await db.collection("alkfaeat_results").add(data);
+            alert(`✅ تم تصحيح وإرسال درجة الطالب (${name}) بنجاح! الدرجة: ${score} / 20`);
+            document.getElementById('searchStudent').value = '';
+            document.getElementById('previewText').style.display = 'none';
+            imageReady = false;
+            updateKeys();
+        } catch(e) {
+            alert('حدث خطأ أثناء الإرسال لقاعدة البيانات');
+            console.error(e);
         }
     }
+
+    document.addEventListener('click', function(e) {
+        if(!e.target.closest('.form-group')) {
+            document.getElementById('studentList').style.display = 'none';
+        }
+    });
 </script>
 
 </body>
