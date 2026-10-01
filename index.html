@@ -318,7 +318,7 @@
             }
         }
         updateComparison();
-        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة الكاملة بنجاح!');
+        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة الفورية بنجاح!');
     }
 
     function clearQuickPaste() {
@@ -328,7 +328,7 @@
             updateButtonUI(i, 'A');
         }
         updateComparison();
-        alert('🗑️ تم مسح الخانة وتصفير الاختيارات بنجاح، جاهز لصق إجابات الطالب التالي.');
+        alert('🗑️ تم مسح الخانة وتصفير الاختيارات بنجاح.');
     }
 
     function setStudentAns(qNum, ansKey) {
@@ -352,6 +352,7 @@
         }
     }
 
+    // هذه الدالة الآن تتفعل فور تغيير النموذج من القائمة وتحدث المفاتيح والنتيجة والتغذية الراجعة
     function applyModelKey() {
         const select = document.getElementById('targetModelSelect');
         const modelName = select.value;
@@ -511,7 +512,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة الكاملة إلى لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح بناءً على (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة الكاملة لوحة التحكم.`);
             
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
