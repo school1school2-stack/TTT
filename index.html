@@ -12,7 +12,7 @@
             --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 850px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        .scanner-container { max-width: 900px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -38,6 +38,9 @@
         .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
         
+        /* حقول إدخال مفتاح الإجابة اليدوي */
+        .key-input { width: 100%; text-align: center; font-weight: bold; font-size: 1rem; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: #f0f9ff; color: #0369a1; text-transform: uppercase; }
+
         /* أزرار خيارات الطالب (أ، ب، ج، د) */
         .options-group { display: flex; justify-content: center; gap: 3px; }
         .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
@@ -56,6 +59,9 @@
         .clear-btn { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .clear-btn:hover { background: #dc2626; }
 
+        .save-model-btn { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .save-model-btn:hover { background: #0369a1; }
+
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
@@ -65,7 +71,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
-    <p class="subtitle">ثانوية الأمير عبدالمجيد - التنسيق المعتمد</p>
+    <p class="subtitle">ثانوية الأمير عبدالمجيد - اختيار النماذج والتعديل اليدوي</p>
 
     <!-- 1. اختيار اسم الطالب في المقدمة -->
     <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
@@ -76,11 +82,11 @@
         </div>
     </div>
 
-    <!-- 2. نافذة المساعد الذكي للإجابات السريعة (خانة اللصق) -->
+    <!-- 2. نافذة التعبئة الذكية السريعة (اللصق لإجابات الطالب) -->
     <div class="ai-helper-box">
-        <label style="color: #047857; margin-bottom: 5px;">2️⃣ نافذة التعبئة الذكية السريعة (اللصق):</label>
+        <label style="color: #047857; margin-bottom: 5px;">2️⃣ نافذة لصق إجابات الطالب الفورية:</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
-            الصق الإجابات المستخرجة هنا، أو انقر على (تصفير الخانة) لمسحها ولصق إجابة طالب جديد مباشرة:
+            الصق إجابات الطالب هنا (أ، ب، ج، د)، أو انقر على (تصفير الخانة) لمسحها:
         </p>
         <div style="display: flex; gap: 8px;">
             <input type="text" id="quickPasteInput" placeholder="الصق حروف الإجابات هنا (أ، ب، ج، د)..." style="flex: 1; padding: 8px; border: 1px solid #10b981; border-radius: 8px; font-size: 0.9rem;">
@@ -89,38 +95,38 @@
         </div>
     </div>
 
-    <!-- 3. تظليل إجابات الطالب (مفاتيح الطالب) -->
+    <!-- 3. تظليل إجابات الطالب اليدوية -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">3️⃣ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
+        <label style="color: #047857; margin-bottom: 8px;">3️⃣ إجابات الطالب (للمراجعة أو التعديل الفردي):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 4. اختيار النماذج -->
+    <!-- 4. اختيار النماذج الأساسية -->
     <div class="form-group">
-        <label>4️⃣ اختر النموذج المعتمد:</label>
-        <select id="targetModelSelect" onchange="applyModelKey()">
-            <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
-            <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
-            <option value="النموذج الثالث (ج)" selected>النموذج الثالث (ج - المعتمد)</option>
-            <option value="النموذج الرابع (د)">النموذج الرابع (د)</option>
-            <option value="النموذج الخامس (هـ)">النموذج الخامس (هـ)</option>
+        <label>4️⃣ اختر النموذج المطلوب (نموذج 1، نموذج 2، ...):</label>
+        <select id="targetModelSelect" onchange="loadSelectedModelData()">
+            <option value="نموذج 1" selected>نموذج 1</option>
+            <option value="نموذج 2">نموذج 2</option>
+            <option value="نموذج 3">نموذج 3</option>
+            <option value="نموذج 4">نموذج 4</option>
+            <option value="نموذج 5">نموذج 5</option>
         </select>
     </div>
 
     <div class="form-group" style="display: none;">
-        <label>اسم النموذج في لوحة التحكم:</label>
-        <input type="text" id="customModelName" value="النموذج الثالث (ج)">
+        <label>اسم النموذج الفعلي المرسل:</label>
+        <input type="text" id="customModelName" value="نموذج 1">
     </div>
 
     <!-- بطاقة عرض النتيجة الفورية -->
     <div class="score-card">
         <h2 id="liveScoreDisplay">0 من 20 (0%)</h2>
-        <p>🎯 نتيجة الطالب الفورية قبل الاعتماد والإرسال</p>
+        <p>🎯 نتيجة الطالب الفورية بناءً على المفاتيح النشطة</p>
     </div>
 
-    <!-- 5. مفتاح النموذج (مفاتيح الإجابة النموذجية) -->
+    <!-- 5. مفاتيح الإجابة النموذجية القابلة للتعديل اليدوي -->
     <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
-        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
+        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح الإجابة النموذجية المعتمدة (تعديل يدوي بـ أ، ب، ج، د):</label>
         <div class="grid-20" id="modelKeyContainer"></div>
     </div>
 
@@ -152,119 +158,39 @@
 
     let allStudents = [];
     let studentAnswersState = {};
+    let customModelKeys = {}; // لتخزين المفاتيح المعدلة لكل نموذج
 
-    // بنك الأسئلة والمفاتيح مفصلاً ومحدثاً لكل نموذج بشكل مستقل لضمان التبديل الفوري
-    const modelQuestionsBank = {
-        "النموذج الأول (أ)": {
-            1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'D' },
-            2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' }, correct: 'A' },
-            3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' }, correct: 'C' },
-            4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' }, correct: 'B' },
-            5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' }, correct: 'B' },
-            6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' }, correct: 'D' },
-            7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' }, correct: 'C' },
-            8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'B' },
-            9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'B' },
-            10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'B' },
-            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً أ', B:'كان الجو حارّاً ب', C:'كان الجو حارّاً ج', D:'كان الجو حارّاً د' }, correct: 'A' },
-            12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'B' },
-            13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'C' },
-            14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'A' },
-            15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' }, correct: 'C' },
-            16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' }, correct: 'A' },
-            17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' }, correct: 'D' },
-            18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' }, correct: 'C' },
-            19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' }, correct: 'D' },
-            20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'B' }
-        },
-        "النموذج الثاني (ب)": {
-            1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'C' },
-            2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' }, correct: 'B' },
-            3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' }, correct: 'D' },
-            4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' }, correct: 'A' },
-            5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' }, correct: 'C' },
-            6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' }, correct: 'A' },
-            7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' }, correct: 'B' },
-            8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'A' },
-            9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'A' },
-            10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'D' },
-            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً أ', B:'كان الجو حارّاً ب', C:'كان الجو حارّاً ج', D:'كان الجو حارّاً د' }, correct: 'B' },
-            12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'A' },
-            13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'A' },
-            14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'B' },
-            15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' }, correct: 'A' },
-            16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' }, correct: 'B' },
-            17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' }, correct: 'C' },
-            18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' }, correct: 'B' },
-            19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' }, correct: 'A' },
-            20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'A' }
-        },
-        "النموذج الثالث (ج)": {
-            1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'D' },
-            2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' }, correct: 'A' },
-            3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' }, correct: 'C' },
-            4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' }, correct: 'B' },
-            5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' }, correct: 'B' },
-            6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' }, correct: 'D' },
-            7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' }, correct: 'C' },
-            8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'B' },
-            9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'B' },
-            10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'B' },
-            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً (أ)', B:'كان الجو حارّاً (ب)', C:'كان الجو حارّاً (ج)', D:'كان الجو حارّاً (د)' }, correct: 'C' },
-            12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'B' },
-            13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'C' },
-            14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'A' },
-            15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' }, correct: 'C' },
-            16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' }, correct: 'A' },
-            17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' }, correct: 'D' },
-            18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' }, correct: 'C' },
-            19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' }, correct: 'D' },
-            20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'B' }
-        },
-        "النموذج الرابع (د)": {
-            1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'A' },
-            2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' }, correct: 'C' },
-            3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' }, correct: 'A' },
-            4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' }, correct: 'D' },
-            5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' }, correct: 'A' },
-            6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' }, correct: 'B' },
-            7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' }, correct: 'A' },
-            8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'C' },
-            9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'C' },
-            10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'A' },
-            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً أ', B:'كان الجو حارّاً ب', C:'كان الجو حارّاً ج', D:'كان الجو حارّاً د' }, correct: 'D' },
-            12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'C' },
-            13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'B' },
-            14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'C' },
-            15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' }, correct: 'B' },
-            16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' }, correct: 'B' },
-            17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' }, correct: 'A' },
-            18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' }, correct: 'D' },
-            19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' }, correct: 'A' },
-            20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'C' }
-        },
-        "النموذج الخامس (هـ)": {
-            1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' }, correct: 'B' },
-            2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' }, correct: 'D' },
-            3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' }, correct: 'B' },
-            4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' }, correct: 'C' },
-            5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' }, correct: 'D' },
-            6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' }, correct: 'C' },
-            7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' }, correct: 'D' },
-            8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' }, correct: 'D' },
-            9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' }, correct: 'D' },
-            10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' }, correct: 'C' },
-            11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً أ', B:'كان الجو حارّاً ب', C:'كان الجو حارّاً ج', D:'كان الجو حارّاً د' }, correct: 'C' },
-            12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' }, correct: 'D' },
-            13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' }, correct: 'D' },
-            14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' }, correct: 'D' },
-            15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' }, correct: 'D' },
-            16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' }, correct: 'C' },
-            17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' }, correct: 'B' },
-            18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' }, correct: 'A' },
-            19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' }, correct: 'B' },
-            20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'D' }
-        }
+    // بنك نصوص الأسئلة الأساسي الداخلي
+    const baseQuestionsBank = {
+        1: { q: '1. الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'تبعة المعلمة', B:'اكتب بخط واضح', C:'كتب الطالب الدرس', D:'العلمُ نورٌ' } },
+        2: { q: '2. علامة جزم الفعل المضارع في "لم أكسل":', options: { A:'السكون', B:'حذف حرف العلة', C:'الضمة', D:'حذف النون' } },
+        3: { q: '3. الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يبقى كما هو', B:'نسكن آخره', C:'نكسر ما قبل الآخر', D:'نفتح ما قبل الآخر' } },
+        4: { q: '4. الفعل المضارع المرفوع فيما يأتي:', options: { A:'لن يكتب', B:'كتب الطالب', C:'لم يكتب', D:'اكتب' } },
+        5: { q: '5. نوع الخبر في جملة "المعلمة شرحة واضح":', options: { A:'مفرد', B:'جملة اسمية', C:'جملة فعلية', D:'شبه جملة' } },
+        6: { q: '6. الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كسر الزجاج', B:'شرب اللبن', C:'يُحترم المعلم', D:'فهم الطالب الدرس' } },
+        7: { q: '7. علامة إعراب الفعل في "لن أفرط في وطني":', options: { A:'الضمة', B:'حذف النون', C:'الفتحة الظاهرة', D:'السكون' } },
+        8: { q: '8. اسم "صار" في جملة "صار الطين خزفاً":', options: { A:'خزفاً', B:'الطين', C:'ضمير مستتر', D:'محذوف' } },
+        9: { q: '9. إعراب كلمة (الدرس) في جملة "فهم الدرس":', options: { A:'مفعول به', B:'نائب فاعل مرفوع', C:'فاعل مرفوع', D:'خبر مرفوع' } },
+        10: { q: '10. نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'معتل الآخر بالواو', B:'معتل الآخر بالألف', C:'صحيح الآخر', D:'معتل الآخر بالياء' } },
+        11: { q: '11. الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجو حارّاً أ', B:'كان الجو حارّاً ب', C:'كان الجو حارّاً ج', D:'كان الجو حارّاً د' } },
+        12: { q: '12. الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'نضم آخره', B:'نفتح ما قبل الآخر', C:'نسكن آخره', D:'نكسر ما قبل الآخر' } },
+        13: { q: '13. عند بناء جملة "حفظ الطالب القصيدة" للمجهول:', options: { A:'حفظ القصيدة', B:'يحفظ القصيدة', C:'حفظت القصيدة', D:'حفظ الطالب' } },
+        14: { q: '14. الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنّ العلم نافع', B:'إنّ العلم نافعاً', C:'إنّ العلم نافقة', D:'إنّ العلم نافق' } },
+        15: { q: '15. الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'حذف النون', C:'ثبوت النون', D:'الواو' } },
+        16: { q: '16. (صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'منصوب دائماً', D:'أحياناً مجرور' } },
+        17: { q: '17. خبر "إنّ" في جملة "علمتُ أنَّ السفر قريب":', options: { A:'التاء في علمتُ', B:'السفر', C:'مستتر', D:'قريب' } },
+        18: { q: '18. إعراب كلمة (الطالب) في "فهم الطالب الدرس":', options: { A:'مبتدأ مرفوع', B:'مفعول به', C:'فاعل مرفوع', D:'نائب فاعل' } },
+        19: { q: '19. الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'لم يكتبوا', B:'يكتبان', C:'أنتم تكتبون', D:'حضر العمال كي يعملوا' } },
+        20: { q: '20. إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر منصوب بالياء', B:'خبر مرفوع بالواو', C:'مبتدأ مرفوع', D:'مفعول به' } }
+    };
+
+    // المفاتيح الافتراضية لكل نموذج (يمكنك زيادتها أو تعديلها هنا مباشرة)
+    let modelsKeysData = {
+        "نموذج 1": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'B', 6:'D', 7:'C', 8:'B', 9:'B', 10:'B', 11:'C', 12:'B', 13:'C', 14:'A', 15:'C', 16:'A', 17:'D', 18:'C', 19:'D', 20:'B' },
+        "نموذج 2": { 1:'C', 2:'B', 3:'D', 4:'A', 5:'C', 6:'A', 7:'B', 8:'A', 9:'A', 10:'D', 11:'B', 12:'A', 13:'A', 14:'B', 15:'A', 16:'B', 17:'C', 18:'B', 19:'A', 20:'A' },
+        "نموذج 3": { 1:'A', 2:'C', 3:'A', 4:'D', 5:'A', 6:'B', 7:'A', 8:'C', 9:'C', 10:'A', 11:'D', 12:'C', 13:'B', 14:'C', 15:'B', 16:'B', 17:'A', 18:'D', 19:'A', 20:'C' },
+        "نموذج 4": { 1:'B', 2:'D', 3:'B', 4:'C', 5:'D', 6:'C', 7:'D', 8:'D', 9:'D', 10:'C', 11:'C', 12:'D', 13:'D', 14:'D', 15:'D', 16:'C', 17:'B', 18:'A', 19:'B', 20:'D' },
+        "نموذج 5": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'B', 6:'D', 7:'C', 8:'B', 9:'B', 10:'B', 11:'C', 12:'B', 13:'C', 14:'A', 15:'C', 16:'A', 17:'D', 18:'C', 19:'D', 20:'B' }
     };
 
     window.onload = function() {
@@ -272,7 +198,7 @@
             studentAnswersState[i] = 'A';
         }
         buildStudentAnswersGrid();
-        applyModelKey();
+        loadSelectedModelData();
         loadAllowedStudents();
     };
 
@@ -319,7 +245,7 @@
             }
         }
         updateComparison();
-        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة الفورية بنجاح!');
+        alert('✅ تم تعبئة إجابات الطالب ومقارنتها مع النموذج النشط بنجاح!');
     }
 
     function clearQuickPaste() {
@@ -353,33 +279,59 @@
         }
     }
 
-    // تحديث مفاتيح الإجابة النموذجية فور تغيير النموذج من القائمة المنسدلة
-    function applyModelKey() {
+    // تحميل بيانات النموذج عند تغييره من القائمة
+    function loadSelectedModelData() {
         const select = document.getElementById('targetModelSelect');
         const modelName = select.value;
         document.getElementById('customModelName').value = modelName;
 
-        const currentModelData = modelQuestionsBank[modelName];
-        const keyContainer = document.getElementById('modelKeyContainer');
-        keyContainer.innerHTML = '';
-
-        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
-
-        for (let i = 1; i <= 20; i++) {
-            let correctKey = currentModelData[i].correct;
-            keyContainer.innerHTML += `
-                <div class="ans-card" style="background:#e0f2fe;">
-                    <span>س ${i}</span>
-                    <strong style="color:#0369a1; font-size:0.9rem;">${ansMap[correctKey]}</strong>
-                </div>
-            `;
+        if (modelsKeysData[modelName]) {
+            for (let i = 1; i <= 20; i++) {
+                customModelKeys[i] = modelsKeysData[modelName][i] || 'A';
+            }
         }
+        renderModelKeyInputs();
         updateComparison();
     }
 
+    // رسم خانات إدخال المفاتيح للتعديل اليدوي المباشر
+    function renderModelKeyInputs() {
+        const keyContainer = document.getElementById('modelKeyContainer');
+        keyContainer.innerHTML = '';
+        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+
+        for (let i = 1; i <= 20; i++) {
+            let currentVal = ansMap[customModelKeys[i]] || 'أ';
+            keyContainer.innerHTML += `
+                <div class="ans-card">
+                    <span>س ${i}</span>
+                    <input type="text" id="manualKey_${i}" class="key-input" value="${currentVal}" maxlength="1" oninput="updateManualKey(${i}, this)">
+                </div>
+            `;
+        }
+    }
+
+    // تحديث المفتاح يدوياً عند كتابة الحرف (أ، ب، ج، د)
+    function updateManualKey(qNum, inputElement) {
+        let val = inputElement.value.trim().toUpperCase();
+        const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
+        let engKey = mapArabToEng[val] || val;
+
+        if (['A', 'B', 'C', 'D'].includes(engKey)) {
+            customModelKeys[qNum] = engKey;
+            inputElement.value = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'}[engKey];
+            
+            // تحديث المفتاح في الذاكرة للنموذج الحالي مباشرة
+            const currentModel = document.getElementById('targetModelSelect').value;
+            if(modelsKeysData[currentModel]) {
+                modelsKeysData[currentModel][qNum] = engKey;
+            }
+            
+            updateComparison();
+        }
+    }
+
     function updateComparison() {
-        const selectedModel = document.getElementById('targetModelSelect').value;
-        const currentModelData = modelQuestionsBank[selectedModel];
         const diffContainer = document.getElementById('diffGridContainer');
         diffContainer.innerHTML = '';
 
@@ -388,8 +340,8 @@
 
         for (let i = 1; i <= 20; i++) {
             const studentVal = studentAnswersState[i];
-            const qObj = currentModelData[i];
-            const correctVal = qObj.correct;
+            const qObj = baseQuestionsBank[i] || { q: `سؤال ${i}`, options: { A:'أ', B:'ب', C:'ج', D:'د' } };
+            const correctVal = customModelKeys[i] || 'A';
             const isMatch = (studentVal === correctVal);
 
             if (isMatch) score++;
@@ -407,7 +359,7 @@
                         <span>${statusText}</span>
                     </div>
                     <div style="font-size:0.8rem; opacity:0.9;">
-                        إجابة الطالب: <strong>${studentVal}) ${studentOptText}</strong> | الإجابة الصحيحة: <strong>${correctVal}) ${correctOptText}</strong>
+                        إجابة الطالب: <strong>${studentVal}) ${studentOptText}</strong> | الإجابة الصحيحة المعتمدة: <strong>${correctVal}) ${correctOptText}</strong>
                     </div>
                 </div>
             `;
@@ -466,23 +418,21 @@
 
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
-        const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
-        const selectedModel = document.getElementById('targetModelSelect').value;
+        const customModelName = document.getElementById('customModelName').value.trim() || "نموذج 1";
 
         if (!studentName) {
             alert('الرجاء اختيار اسم الطالب من القائمة أولاً.');
             return;
         }
 
-        const currentModelData = modelQuestionsBank[selectedModel];
         let answersDetails = [];
         let score = 0;
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
         
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = studentAnswersState[i]; 
-            let qObj = currentModelData[i];
-            let correctAnsKey = qObj.correct; 
+            let qObj = baseQuestionsBank[i] || { q: `سؤال ${i}`, options: { A:'أ', B:'ب', C:'ج', D:'د' } };
+            let correctAnsKey = customModelKeys[i] || 'A'; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
@@ -513,7 +463,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح بناءً على (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة الكاملة لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم النموذج (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
             
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
