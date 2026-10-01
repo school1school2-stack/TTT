@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -44,11 +44,9 @@
         .diff-item.match { background: #ecfdf5; border-color: #10b981; color: #065f46; }
         .diff-item.diff { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
 
-        .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
-        .camera-btn:hover { background: #0369a1; }
-        
-        #previewContainer { text-align: center; margin-bottom: 15px; display: none; }
-        #capturedImage { max-width: 100%; max-height: 180px; border-radius: 10px; border: 2px solid #10b981; }
+        .ai-helper-box { background: #f0fdf4; border: 1px solid #10b981; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .ai-btn { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; display: inline-block; text-decoration: none; text-align: center; }
+        .ai-btn:hover { background: #059669; }
 
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
@@ -59,7 +57,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والمقارنة الذكية المعتمدة</h1>
-    <p class="subtitle">اختر النموذج، صور ورقة الطالب، طابق تظليله مع التحليل واعتمد النتيجة</p>
+    <p class="subtitle">حلل الورقة، الصق الإجابات المستخرجة، طابقها مع النموذج واعتمدها</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
@@ -84,6 +82,18 @@
         <div class="grid-20" id="modelKeyContainer"></div>
     </div>
 
+    <!-- نافذة المساعد الذكي لإدخال وتعبئة إجابات الطالب المستخرجة بسرعة -->
+    <div class="ai-helper-box">
+        <label style="color: #047857; margin-bottom: 5px;">🤖 نافذة التعبئة الذكية السريعة:</label>
+        <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
+            ارسل صورة ورقة الطالب في المحادثة معي، وخذ الإجابات المستخرجة والصقها هنا بمسافات أو حروف (مثلاً: ج ج ج أ ب ...) لتتعبى الخانات تلقائياً بضغطة زر!
+        </p>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="quickPasteInput" placeholder="الصق حروف الإجابات هنا (أ، ب، ج، د)..." style="flex: 1; padding: 8px; border: 1px solid #10b981; border-radius: 8px; font-size: 0.9rem;">
+            <button type="button" class="ai-btn" onclick="applyQuickPaste()">تعبئة تلقائية فورية</button>
+        </div>
+    </div>
+
     <!-- 3. اختيار اسم الطالب -->
     <div class="form-group">
         <label>ابحث عن اسم الطالب واختاره:</label>
@@ -93,26 +103,13 @@
         </div>
     </div>
 
-    <!-- 4. التقاط صورة ورقة الطالب -->
-    <div class="form-group">
-        <label>تصوير ورقة تظليل الطالب:</label>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
-        <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
-            📸 فتح الكاميرا وتصوير ورقة تظليل الطالب
-        </button>
-        <div id="previewContainer">
-            <img id="capturedImage" src="" alt="معاينة الورقة">
-            <div style="color: #059669; font-weight: bold; font-size: 0.85rem; margin-top: 5px;">✅ تم التقاط صورة ورقة الطالب بنجاح</div>
-        </div>
-    </div>
-
-    <!-- 5. تظليل إجابات الطالب (أزرار سريعة لكل سؤال أ، ب، ج، د) -->
+    <!-- 4. تظليل إجابات الطالب (أزرار سريعة لكل سؤال أ، ب، ج، د) -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️ حدد تظليل إجابات الطالب (مطابقة لما ظهر في تحليل صورة ورقة الطالب):</label>
+        <label style="color: #047857; margin-bottom: 8px;">✍️ إجابات الطالب (قابلة للمراجعة والتعديل اليدوي أو عبر التعبئة السريعة):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 6. لوحة مقارنة الفروق بلون مختلف -->
+    <!-- 5. لوحة مقارنة الفروق بلون مختلف -->
     <div class="form-group">
         <label>🔍 لوحة مقارنة الفروق (النموذج مقابل تظليل الطالب):</label>
         <div class="diff-grid" id="diffGridContainer"></div>
@@ -138,7 +135,6 @@
     const db = firebase.firestore();
 
     let allStudents = [];
-    let imageCaptured = false;
     let studentAnswersState = {};
 
     // بنك مفاتيح النماذج الخمسة المعتمدة
@@ -184,9 +180,32 @@
         }
     }
 
+    // دالة التعبئة التلقائية السريعة بناءً على النص الملصق من تحليلي للصورة
+    function applyQuickPaste() {
+        let text = document.getElementById('quickPasteInput').value.trim();
+        // تنظيف النص واستخراج الأحرف العربية أو الإنجليزية المتاحة
+        let chars = text.replace(/[^أبجدهABCDabcd]/g, '').toUpperCase();
+        
+        const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
+        
+        let index = 0;
+        for (let i = 1; i <= 20; i++) {
+            if (index < chars.length) {
+                let ch = chars[index];
+                let engKey = mapArabToEng[ch] || ch;
+                if (['A', 'B', 'C', 'D'].includes(engKey)) {
+                    setStudentAns(i, engKey);
+                }
+                index++;
+            }
+        }
+        alert('✅ تم تعبئة إجابات الطالب بنجاح بناءً على النص المُدخل!');
+    }
+
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
         const container = document.getElementById(`q_opts_${qNum}`);
+        if (!container) return;
         const buttons = container.getElementsByTagName('button');
         const keys = ['A', 'B', 'C', 'D'];
         
@@ -241,7 +260,7 @@
 
             diffContainer.innerHTML += `
                 <div class="${itemClass}">
-                    <span><strong>س${i}:</strong> تظليل الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
+                    <span><strong>س${i}:</strong> إجابة الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
                     <span><strong>${statusText}</strong></span>
                 </div>
             `;
@@ -295,30 +314,13 @@
         }
     });
 
-    function previewCapturedImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('capturedImage').src = e.target.result;
-                document.getElementById('previewContainer').style.display = 'block';
-                imageCaptured = true;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
         const selectedModel = document.getElementById('targetModelSelect').value;
-        const fileInput = document.getElementById('cameraInput');
 
         if (!studentName) {
             alert('الرجاء اختيار اسم الطالب من القائمة أولاً.');
-            return;
-        }
-        if (!imageCaptured || fileInput.files.length === 0) {
-            alert('الرجاء التقاط صورة ورقة الطالب بالكاميرا أولاً.');
             return;
         }
 
@@ -360,9 +362,7 @@
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) تحت (${customModelName}) وتم إرسالها وحفظها في لوحة التحكم.`);
             
             document.getElementById('studentSearchInput').value = '';
-            fileInput.value = '';
-            document.getElementById('previewContainer').style.display = 'none';
-            imageCaptured = false;
+            document.getElementById('quickPasteInput').value = '';
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
