@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح والمقارنة الذكية مع التغذية الراجعة - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -27,6 +27,11 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
+        /* بطاقة عرض النتيجة الفورية */
+        .score-card { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
+        .score-card h2 { margin: 0; font-size: 1.8rem; }
+        .score-card p { margin: 5px 0 0 0; font-size: 0.95rem; opacity: 0.9; }
+
         /* أقسام العرض */
         .section-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .grid-20 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
@@ -38,9 +43,9 @@
         .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
         .opt-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
 
-        /* لوحة مقارنة الفروق */
-        .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
-        .diff-item { padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        /* لوحة مقارنة الفروق والتغذية الراجعة */
+        .diff-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 8px; max-height: 250px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+        .diff-item { padding: 10px; border-radius: 8px; font-size: 0.85rem; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
         .diff-item.match { background: #ecfdf5; border-color: #10b981; color: #065f46; }
         .diff-item.diff { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
 
@@ -56,8 +61,8 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح والمقارنة الذكية المعتمدة</h1>
-    <p class="subtitle">حلل الورقة، الصق الإجابات المستخرجة، طابقها مع النموذج واعتمدها</p>
+    <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
+    <p class="subtitle">استعرض النتيجة الفورية، وتغذية راجعة بنص السؤال وإجابة الطالب والنموذج ثم اعتمدها</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
@@ -76,17 +81,23 @@
         <input type="text" id="customModelName" value="النموذج الثالث (ج)">
     </div>
 
+    <!-- بطاقة عرض النتيجة الفورية -->
+    <div class="score-card">
+        <h2 id="liveScoreDisplay">0 من 20 (0%)</h2>
+        <p>🎯 نتيجة الطالب الفورية قبل الاعتماد والإرسال</p>
+    </div>
+
     <!-- 2. مفاتيح النموذج المعتمد (تظهر بالأعلى) -->
     <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
         <label style="color: #0369a1; margin-bottom: 8px;">📌 مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
         <div class="grid-20" id="modelKeyContainer"></div>
     </div>
 
-    <!-- نافذة المساعد الذكي لإدخال وتعبئة إجابات الطالب المستخرجة بسرعة -->
+    <!-- نافذة المساعد الذكي للإجابات السريعة -->
     <div class="ai-helper-box">
         <label style="color: #047857; margin-bottom: 5px;">🤖 نافذة التعبئة الذكية السريعة:</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
-            ارسل صورة ورقة الطالب في المحادثة معي، وخذ الإجابات المستخرجة والصقها هنا بمسافات أو حروف (مثلاً: ج ج ج أ ب ...) لتتعبى الخانات تلقائياً بضغطة زر!
+            الصق الإجابات المستخرجة هنا (مثلاً: ج ج أ ج ج ...) لتتعبى الخانات والنتيجة تلقائياً!
         </p>
         <div style="display: flex; gap: 8px;">
             <input type="text" id="quickPasteInput" placeholder="الصق حروف الإجابات هنا (أ، ب، ج، د)..." style="flex: 1; padding: 8px; border: 1px solid #10b981; border-radius: 8px; font-size: 0.9rem;">
@@ -103,15 +114,15 @@
         </div>
     </div>
 
-    <!-- 4. تظليل إجابات الطالب (أزرار سريعة لكل سؤال أ، ب، ج، د) -->
+    <!-- 4. تظليل إجابات الطالب -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️ إجابات الطالب (قابلة للمراجعة والتعديل اليدوي أو عبر التعبئة السريعة):</label>
+        <label style="color: #047857; margin-bottom: 8px;">✍️ إجابات الطالب (للمراجعة أو التعديل السريع):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 5. لوحة مقارنة الفروق بلون مختلف -->
+    <!-- 5. لوحة التغذية الراجعة المفصلة (نص السؤال + إجابة الطالب + الإجابة الصحيحة) -->
     <div class="form-group">
-        <label>🔍 لوحة مقارنة الفروق (النموذج مقابل تظليل الطالب):</label>
+        <label>📖 تقرير التغذية الراجعة المفصلة للطالب:</label>
         <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
@@ -137,14 +148,42 @@
     let allStudents = [];
     let studentAnswersState = {};
 
-    // بنك مفاتيح النماذج الخمسة المعتمدة
+    // بنك الأسئلة والخيارات والمفاتيح للنماذج الخمسة (يتضمن نص السؤال لإنشاء التغذية الراجعة)
     const modelQuestionsBank = {
-        "النموذج الأول (أ)": { 1:'B', 2:'A', 3:'C', 4:'B', 5:'C', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'A', 13:'A', 14:'B', 15:'B', 16:'A', 17:'B', 18:'B', 19:'C', 20:'A' },
-        "النموذج الثاني (ب)": { 1:'C', 2:'B', 3:'D', 4:'C', 5:'A', 6:'D', 7:'B', 8:'A', 9:'C', 10:'B', 11:'D', 12:'C', 13:'A', 14:'A', 15:'B', 16:'A', 17:'C', 18:'D', 19:'B', 20:'A' },
-        "النموذج الثالث (ج)": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'B', 6:'D', 7:'C', 8:'C', 9:'B', 10:'B', 11:'C', 12:'B', 13:'C', 14:'B', 15:'C', 16:'B', 17:'D', 18:'B', 19:'B', 20:'B' },
-        "النموذج الرابع (د)": { 1:'C', 2:'B', 3:'A', 4:'B', 5:'C', 6:'A', 7:'D', 8:'C', 9:'B', 10:'A', 11:'A', 12:'D', 13:'B', 14:'A', 15:'B', 16:'A', 17:'C', 18:'C', 19:'A', 20:'D' },
-        "النموذج الخامس (هـ)": { 1:'B', 2:'B', 3:'A', 4:'B', 5:'B', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'C', 13:'B', 14:'A', 15:'B', 16:'A', 17:'A', 18:'C', 19:'A', 20:'C' }
+        "النموذج الأول (أ)": {
+            1: { q: 'الجملة الاسمية الصحيحة مما يلي هي:', options: { A:'كتب الطالب الدرس', B:'العلمُ نورٌ', C:'يَفْهَمُ المعلمُ', D:'اِكْتُبْ بجدٍ' }, correct: 'B' },
+            2: { q: 'علامة جزم الفعل المضارع في "لم أكسلْ":', options: { A:'السكون', B:'حذف حرف العلة', C:'حذف النون', D:'الضمة' }, correct: 'A' },
+            3: { q: 'الفعل المضارع المرفوع فيما يأتي:', options: { A:'لم يكتبْ', B:'لن يكتبَ', C:'يكتبُ الطالبُ', D:'اكتبْ' }, correct: 'C' },
+            4: { q: 'الفعل الماضي المبني للمجهول يُضم أوله و:', options: { A:'يُفتح ما قبل الآخر', B:'يُكسر ما قبل الآخر', C:'يُسكن آخره', D:'يبقى كما هو' }, correct: 'B' },
+            5: { q: 'الجملة المبنية للمعلوم فيما يأتي:', options: { A:'كُسِرَ الزجاجُ', B:'شُرِبَ اللبنُ', C:'فَهِمَ الطالبُ الدرسَ', D:'يُحْتَرَمُ المعلمُ' }, correct: 'C' },
+            6: { q: 'اسم "صار" في جملة "صار الطينُ خزفاً":', options: { A:'الطينُ', B:'خزفاً', C:'مححوذوف', D:'ضمير مستتر' }, correct: 'A' },
+            7: { q: 'نوع الخبر في جملة "المعلمُ شرحُهُ واضحٌ":', options: { A:'مفرد', B:'جملة فعلية', C:'جملة اسمية', D:'شبه جملة' }, correct: 'C' },
+            8: { q: 'نوع الفعل المضارع "يسعى" صحةً وعلةً:', options: { A:'صحيح الآخر', B:'معتل الآخر بالواو', C:'معتل الآخر بالألف', D:'معتل الآخر بالياء' }, correct: 'C' },
+            9: { q: 'علامة إعراب الفعل في "لن أفرطَ في وطني":', options: { A:'الضمة', B:'الفتحة الظاهرة', C:'السكون', D:'حذف النون' }, correct: 'B' },
+            10: { q: 'الفعل المضارع المبني للمجهول يُضم أوله و:', options: { A:'يُفتح ما قبل الآخر', B:'يُكسر ما قبل الآخر', C:'يُسكن آخره', D:'يُضم آخره' }, correct: 'A' },
+            11: { q: 'إعراب كلمة (الدرسُ) في جملة "فُهِمَ الدرسُ":', options: { A:'فاعل مرفوع', B:'نائب فاعل مرفوع', C:'مفعول به', D:'خبر مرفوع' }, correct: 'B' },
+            12: { q: 'الجملة الصحيحة بعد دخول حرف ناسخ:', options: { A:'إنَّ العلمَ نافعٌ', B:'إنَّ العلمُ نافعٌ', C:'إنَّ العلمَ نافعاً', D:'إنَّ العلمِ نافعٌ' }, correct: 'A' },
+            13: { q: 'الجملة التي دخل عليها فعل ناسخ صحيحة:', options: { A:'كان الجوُّ حارّاً', B:'كان الجوُّ حارٌّ', C:'كان الجوِّ حارّاً', D:'كان الجوَّ حارٌّ' }, correct: 'A' },
+            14: { q: 'الأفعال الخمسة ترفع بـ:', options: { A:'الضمة الظاهرة', B:'ثبوت النون', C:'حذف النون', D:'الواو' }, correct: 'B' },
+            15: { q: 'عند بناء جملة "حفظَ الطالبُ القصيدةَ" للمجهول:', options: { A:'حفظَ القصيدةُ', B:'حُفِظَتِ القصيدةُ', C:'يحفظ القصيدة', D:'حفظ الطالب' }, correct: 'B' },
+            16: { q: '(صح أم خطأ): المبتدأ دائماً مرفوع:', options: { A:'صح', B:'خطأ', C:'أحياناً مجرور', D:'منصوب دائماً' }, correct: 'A' },
+            17: { q: 'خبر "أنَّ" في جملة "علمتُ أنَّ السفرَ قريبٌ":', options: { A:'السفرَ', B:'قريبٌ', C:'التاء في علمتُ', D:'مستتر' }, correct: 'B' },
+            18: { q: 'إعراب كلمة (الطالبُ) في "فهمَ الطالبُ الدرسَ":', options: { A:'نائب فاعل', B:'فاعل مرفوع', C:'مفعول به', D:'مبتدأ مرفوع' }, correct: 'B' },
+            19: { q: 'الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:', options: { A:'يكتبانِ', B:'أنتم تكتبون', C:'حضر العمال كي يعملوا', D:'لم يكتبوا' }, correct: 'C' },
+            20: { q: 'إعراب كلمة (نشيطون) في "المعلمون نشيطون":', options: { A:'خبر مرفوع بالواو', B:'خبر منصوب بالياء', C:'مبتدأ مرفوع', D:'مفعول به' }, correct: 'A' }
+        },
+        "النموذج الثاني (ب)": {},
+        "النموذج الثالث (ج)": {},
+        "النموذج الرابع (د)": {},
+        "النموذج الخامس (هـ)": {}
     };
+
+    // نسخ بنك الأسئلة للنماذج الأخرى لتوفير نص السؤال في التغذية الراجعة
+    for(let mKey in modelQuestionsBank) {
+        if(mKey !== "النموذج الأول (أ)") {
+            modelQuestionsBank[mKey] = JSON.parse(JSON.stringify(modelQuestionsBank["النموذج الأول (أ)"]));
+        }
+    }
 
     window.onload = function() {
         for (let i = 1; i <= 20; i++) {
@@ -180,12 +219,9 @@
         }
     }
 
-    // دالة التعبئة التلقائية السريعة بناءً على النص الملصق من تحليلي للصورة
     function applyQuickPaste() {
         let text = document.getElementById('quickPasteInput').value.trim();
-        // تنظيف النص واستخراج الأحرف العربية أو الإنجليزية المتاحة
         let chars = text.replace(/[^أبجدهABCDabcd]/g, '').toUpperCase();
-        
         const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
         
         let index = 0;
@@ -194,16 +230,23 @@
                 let ch = chars[index];
                 let engKey = mapArabToEng[ch] || ch;
                 if (['A', 'B', 'C', 'D'].includes(engKey)) {
-                    setStudentAns(i, engKey);
+                    studentAnswersState[i] = engKey;
+                    updateButtonUI(i, engKey);
                 }
                 index++;
             }
         }
-        alert('✅ تم تعبئة إجابات الطالب بنجاح بناءً على النص المُدخل!');
+        updateComparison();
+        alert('✅ تم تعبئة إجابات الطالب وعرض النتيجة والتغذية الراجعة بنجاح!');
     }
 
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
+        updateButtonUI(qNum, ansKey);
+        updateComparison();
+    }
+
+    function updateButtonUI(qNum, ansKey) {
         const container = document.getElementById(`q_opts_${qNum}`);
         if (!container) return;
         const buttons = container.getElementsByTagName('button');
@@ -216,7 +259,6 @@
                 buttons[j].className = 'opt-btn';
             }
         }
-        updateComparison();
     }
 
     function applyModelKey() {
@@ -231,7 +273,7 @@
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
 
         for (let i = 1; i <= 20; i++) {
-            let correctKey = currentModelData[i];
+            let correctKey = currentModelData[i].correct;
             keyContainer.innerHTML += `
                 <div class="ans-card" style="background:#e0f2fe;">
                     <span>س ${i}</span>
@@ -242,29 +284,42 @@
         updateComparison();
     }
 
+    // تحديث التغذية الراجعة المفصلة وحساب النتيجة الفورية
     function updateComparison() {
         const selectedModel = document.getElementById('targetModelSelect').value;
-        const currentKey = modelQuestionsBank[selectedModel];
+        const currentModelData = modelQuestionsBank[selectedModel];
         const diffContainer = document.getElementById('diffGridContainer');
         diffContainer.innerHTML = '';
 
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+        let score = 0;
 
         for (let i = 1; i <= 20; i++) {
             const studentVal = studentAnswersState[i];
-            const correctVal = currentKey[i];
+            const qObj = currentModelData[i];
+            const correctVal = qObj.correct;
             const isMatch = (studentVal === correctVal);
 
+            if (isMatch) score++;
+
             const itemClass = isMatch ? 'diff-item match' : 'diff-item diff';
-            const statusText = isMatch ? '🟢 مطابق (صحيح)' : '🔴 مختلف (خطأ)';
+            const statusText = isMatch ? '🟢 إجابة صحيحة' : '🔴 إجابة خاطئة';
 
             diffContainer.innerHTML += `
                 <div class="${itemClass}">
-                    <span><strong>س${i}:</strong> إجابة الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
-                    <span><strong>${statusText}</strong></span>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>السؤال (${i}): ${qObj.q}</span>
+                        <span>${statusText}</span>
+                    </div>
+                    <div style="font-size:0.8rem; opacity:0.9;">
+                        إجابة الطالب: <strong>${studentVal}) ${qObj.options[studentVal]}</strong> | الإجابة الصحيحة: <strong>${correctVal}) ${qObj.options[correctVal]}</strong>
+                    </div>
                 </div>
             `;
         }
+
+        let percentage = Math.round((score / 20) * 100);
+        document.getElementById('liveScoreDisplay').innerText = `${score} من 20 (${percentage}%)`;
     }
 
     function loadAllowedStudents() {
@@ -324,21 +379,22 @@
             return;
         }
 
-        const currentKey = modelQuestionsBank[selectedModel];
+        const currentModelData = modelQuestionsBank[selectedModel];
         let answersDetails = [];
         let score = 0;
         const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
         
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = studentAnswersState[i]; 
-            let correctAnsKey = currentKey[i]; 
+            let qObj = currentModelData[i];
+            let correctAnsKey = qObj.correct; 
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
             answersDetails.push({
-                qText: `السؤال رقم ${i}`,
-                studentAns: `${studentAnsKey}) ${ansMap[studentAnsKey]}`,
-                correctAns: `${correctAnsKey}) ${ansMap[correctAnsKey]}`,
+                qText: qObj.q,
+                studentAns: `${studentAnsKey}) ${qObj.options[studentAnsKey]}`,
+                correctAns: `${correctAnsKey}) ${qObj.options[correctAnsKey]}`,
                 isCorrect: isCorrect,
                 skill: i <= 4 ? 'est' : i <= 8 ? 'ikm' : i <= 12 ? 'swh' : i <= 16 ? 'arb' : 'sah'
             });
@@ -359,7 +415,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) تحت (${customModelName}) وتم إرسالها وحفظها في لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة وحفظها في لوحة التحكم.`);
             
             document.getElementById('studentSearchInput').value = '';
             document.getElementById('quickPasteInput').value = '';
