@@ -59,7 +59,7 @@
         .clear-btn { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .clear-btn:hover { background: #dc2626; }
 
-        .save-model-btn { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; width: auto; }
+        .save-model-btn { background: #0284c7; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .save-model-btn:hover { background: #0369a1; }
 
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
@@ -71,7 +71,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
-    <p class="subtitle">ثانوية الأمير عبدالمجيد - نموذج 1 المعتمد</p>
+    <p class="subtitle">ثانوية الأمير عبدالمجيد - استدعاء النماذج من السحابة</p>
 
     <!-- 1. اختيار اسم الطالب في المقدمة -->
     <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
@@ -82,9 +82,20 @@
         </div>
     </div>
 
-    <!-- 2. نافذة التعبئة الذكية السريعة (اللصق لإجابات الطالب) -->
+    <!-- 2. نافذة اختيار واستدعاء النموذج المعتمد من السحابة -->
+    <div class="form-group" style="background: #f0fdf4; padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0;">
+        <label style="color: #166534; font-size: 1rem; margin-bottom: 8px;">2️⃣ استدعاء أو اختيار النموذج المعتمد من السحابة:</label>
+        <div style="display: flex; gap: 8px;">
+            <select id="cloudModelSelect" onchange="loadModelFromCloud()" style="flex: 1;">
+                <option value="">-- اختر نموذجاً محفوظاً --</option>
+            </select>
+            <button type="button" class="ai-btn" onclick="fetchCloudModelsList()">تحديث القائمة</button>
+        </div>
+    </div>
+
+    <!-- 3. نافذة التعبئة الذكية السريعة (اللصق لإجابات الطالب) -->
     <div class="ai-helper-box">
-        <label style="color: #047857; margin-bottom: 5px;">2️⃣ نافذة لصق إجابات الطالب الفورية:</label>
+        <label style="color: #047857; margin-bottom: 5px;">3️⃣ نافذة لصق إجابات الطالب الفورية:</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
             الصق إجابات الطالب هنا (أ، ب، ج، د)، أو انقر على (تصفير الخانة) لمسحها:
         </p>
@@ -95,20 +106,20 @@
         </div>
     </div>
 
-    <!-- 3. تظليل إجابات الطالب اليدوية -->
+    <!-- 4. تظليل إجابات الطالب اليدوية -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">3️⃣ إجابات الطالب (للمراجعة أو التعديل الفردي):</label>
+        <label style="color: #047857; margin-bottom: 8px;">4️⃣ إجابات الطالب (للمراجعة أو التعديل الفردي):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 4. مفاتيح الإجابة النموذجية المعتمدة (تفاعل أ، ب، ج، د) -->
+    <!-- 5. مفاتيح الإجابة النموذجية المعتمدة (تفاعل أ، ب، ج، د وحفظ بالسحابة) -->
     <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
-        <label style="color: #0369a1; margin-bottom: 8px;">4️⃣ مفاتيح النموذج المعتمد (انقر للتنقل بين الخيارات والتعديل):</label>
+        <label style="color: #0369a1; margin-bottom: 8px;">5️⃣ مفاتيح النموذج المعتمد (انقر للتنقل بين الخيارات والتعديل):</label>
         <div class="grid-20" id="modelKeyContainer"></div>
         
         <div style="margin-top: 15px; display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="newModelNameInput" placeholder="اسم النموذج (مثال: نموذج 1)..." value="نموذج 1" style="flex: 1; padding: 10px; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.9rem; background: #fff;">
-            <button type="button" class="save-model-btn" onclick="saveAndApplyModel()">حفظ واعتماد النموذج</button>
+            <input type="text" id="newModelNameInput" placeholder="اسم النموذج للحفظ (مثال: نموذج 1)..." value="نموذج 1" style="flex: 1; padding: 10px; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.9rem; background: #fff;">
+            <button type="button" class="save-model-btn" onclick="saveModelToCloud()">حفظ النموذج في السحابة</button>
         </div>
     </div>
 
@@ -129,8 +140,8 @@
         <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
-    <!-- 5. اعتماد وإرسال -->
-    <button class="submit-btn" onclick="processAndSendToDashboard()">5️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
+    <!-- 6. اعتماد وإرسال -->
+    <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -153,7 +164,6 @@
     let studentAnswersState = {};
     let activeModelKeys = {}; // تخزين المفاتيح المعتمدة للأسئلة
 
-    // بنك الأسئلة والمفاتيح الصحيحة المستخرجة بدقة من نموذج 1 المعتمد
     const modelQuestionsJson = [
         {
             "questionNumber": 1,
@@ -344,7 +354,7 @@
         },
         {
             "questionNumber": 18,
-            "question": "إعراب كلمة (الطالبُ) في \"فَهِمَ الطالبُ الدرسَ\":",
+            "question": "إعراب كلمة (الطالبُ) في \"فَهِمَ الطالبُ الدرسُ\":",
             "answerOptions": [
                 { "answerText": "نائب فاعل", "isCorrect": false },
                 { "answerText": "فاعل مرفوع", "isCorrect": true },
@@ -380,8 +390,6 @@
     window.onload = function() {
         for (let i = 1; i <= 20; i++) {
             studentAnswersState[i] = 'A';
-            
-            // تحديد المفتاح الصحيح افتراضياً لكل سؤال بناءً على مصفوفة JSON
             let qData = modelQuestionsJson[i-1];
             let correctIndex = qData.answerOptions.findIndex(opt => opt.isCorrect);
             let mapIdxToKey = ['A', 'B', 'C', 'D'];
@@ -390,6 +398,7 @@
         buildStudentAnswersGrid();
         buildModelKeyGrid();
         loadAllowedStudents();
+        fetchCloudModelsList();
         updateComparison();
     };
 
@@ -503,7 +512,6 @@
             }
         }
         updateComparison();
-        alert('✅ تم تعبئة إجابات الطالب ومقارنتها مع النموذج المعتمد بنجاح!');
     }
 
     function clearQuickPaste() {
@@ -513,18 +521,70 @@
             updateStudentButtonUI(i, 'A');
         }
         updateComparison();
-        alert('🗑️ تم مسح الخانة وتصفير الاختيارات بنجاح.');
     }
 
-    function saveAndApplyModel() {
+    // حفظ النموذج المعتمد مباشرة في السحابة (Firebase)
+    async function saveModelToCloud() {
         const modelName = document.getElementById('newModelNameInput').value.trim();
         if(!modelName) {
             alert('الرجاء كتابة اسم النموذج أولاً (مثال: نموذج 1).');
             return;
         }
-        document.getElementById('customModelName').value = modelName;
-        updateComparison();
-        alert(`✅ تم حفظ واعتماد مفاتيح (${modelName}) بنجاح وبدأت المقارنة الفورية!`);
+
+        try {
+            await db.collection("approved_models").doc(modelName).set({
+                model_name: modelName,
+                keys: activeModelKeys,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            document.getElementById('customModelName').value = modelName;
+            alert(`✅ تم حفظ مفاتيح (${modelName}) في السحابة بنجاح!`);
+            fetchCloudModelsList();
+        } catch (error) {
+            alert("حدث خطأ أثناء حفظ النموذج في السحابة.");
+        }
+    }
+
+    // جلب قائمة النماذج المحفوظة من السحابة
+    function fetchCloudModelsList() {
+        const select = document.getElementById('cloudModelSelect');
+        db.collection("approved_models").get().then((snapshot) => {
+            select.innerHTML = '<option value="">-- اختر نموذجاً محفوظاً من السحابة --</option>';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if(data.model_name) {
+                    let opt = document.createElement('option');
+                    opt.value = data.model_name;
+                    opt.textContent = data.model_name;
+                    select.appendChild(opt);
+                }
+            });
+        });
+    }
+
+    // استدعاء النموذج المحدد من السحابة وتعبئة أزراره تلقائياً
+    async function loadModelFromCloud() {
+        const modelName = document.getElementById('cloudModelSelect').value;
+        if(!modelName) return;
+
+        try {
+            const docRef = await db.collection("approved_models").doc(modelName).get();
+            if(docRef.exists) {
+                const data = docRef.data();
+                activeModelKeys = data.keys || {};
+                document.getElementById('newModelNameInput').value = modelName;
+                document.getElementById('customModelName').value = modelName;
+                
+                buildModelKeyGrid();
+                updateComparison();
+                alert(`✅ تم استدعاء (${modelName}) من السحابة بنجاح وجاهز للتصحيح!`);
+            } else {
+                alert("النموذج غير موجود في السحابة.");
+            }
+        } catch (error) {
+            alert("حدث خطأ أثناء استدعاء النموذج.");
+        }
     }
 
     function updateComparison() {
@@ -671,6 +731,7 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
             
+            // ملاحظة: عند إرسال درجة الطالب، يتم تصفير خانة الطالب واسمه فقط لتصحيح طالب جديد، بينما يظل النموذج المعتمد مخزناً ولا يتصفر!
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
         } catch (error) {
