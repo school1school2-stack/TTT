@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -33,7 +33,7 @@
         .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
         
-        /* أزرار خيارات الطالب (أ، ب، ج، د) بشكل سلس وسريع للنقر */
+        /* أزرار خيارات الطالب (أ، ب، ج، د) */
         .options-group { display: flex; justify-content: center; gap: 3px; }
         .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
         .opt-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
@@ -58,8 +58,8 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح والمقارنة السريعة</h1>
-    <p class="subtitle">صور ورقة الطالب، انقر على خيارات تظليله الظاهرة في الصورة، قارن واعتمد النتيجة فوراً</p>
+    <h1>📷 أداة التصحيح والمقارنة الذكية المعتمدة</h1>
+    <p class="subtitle">اختر النموذج، صور ورقة الطالب، طابق تظليله مع التحليل واعتمد النتيجة</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
@@ -108,7 +108,7 @@
 
     <!-- 5. تظليل إجابات الطالب (أزرار سريعة لكل سؤال أ، ب، ج، د) -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️ حدد تظليل إجابات الطالب (انقر على الخيار الظاهر في صورة الورقة):</label>
+        <label style="color: #047857; margin-bottom: 8px;">✍️ حدد تظليل إجابات الطالب (مطابقة لما ظهر في تحليل صورة ورقة الطالب):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
@@ -118,7 +118,7 @@
         <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
-    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد النتيجة وإرسالها للوحة التحكم</button>
+    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -139,7 +139,7 @@
 
     let allStudents = [];
     let imageCaptured = false;
-    let studentAnswersState = {}; // لتخزين إجابات الطالب لكل سؤال
+    let studentAnswersState = {};
 
     // بنك مفاتيح النماذج الخمسة المعتمدة
     const modelQuestionsBank = {
@@ -151,7 +151,6 @@
     };
 
     window.onload = function() {
-        // تهيئة إجابات الطالب الافتراضية (أ) لكل الأسئلة من 1 إلى 20
         for (let i = 1; i <= 20; i++) {
             studentAnswersState[i] = 'A';
         }
@@ -185,11 +184,8 @@
         }
     }
 
-    // تحديث إجابة الطالب عند النقر على الزر السريع
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
-        
-        // تحديث شكل الأزرار بصرياً فوراً
         const container = document.getElementById(`q_opts_${qNum}`);
         const buttons = container.getElementsByTagName('button');
         const keys = ['A', 'B', 'C', 'D'];
@@ -204,7 +200,6 @@
         updateComparison();
     }
 
-    // عرض مفاتيح النموذج المعتمد بالأعلى وتحديث المقارنة
     function applyModelKey() {
         const select = document.getElementById('targetModelSelect');
         const modelName = select.value;
@@ -228,7 +223,6 @@
         updateComparison();
     }
 
-    // تحديث لوحة المقارنة وتلوين الفروق (أخضر للمطابقة، أحمر للاختلاف)
     function updateComparison() {
         const selectedModel = document.getElementById('targetModelSelect').value;
         const currentKey = modelQuestionsBank[selectedModel];
@@ -313,7 +307,6 @@
         }
     }
 
-    // اعتماد النتيجة النهائية وإرسالها لقاعدة البيانات
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -366,7 +359,6 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) تحت (${customModelName}) وتم إرسالها وحفظها في لوحة التحكم.`);
             
-            // إعادة ضبط الحقول للطالب التالي
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
