@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي الذكية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي والمقارنة اليدوية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -12,7 +12,7 @@
             --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 750px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        .scanner-container { max-width: 800px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -27,12 +27,19 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
-        /* شبكة مقارنة إجابات الطالب مع المفتاح المعتمد */
-        .comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .comparison-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; }
-        .comparison-item.correct { border-color: #10b981; background: #ecfdf5; }
-        .comparison-item.wrong { border-color: #ef4444; background: #fef2f2; }
-        
+        /* أقسام العرض */
+        .section-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .grid-20 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
+        .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
+        .ans-card select { width: 100%; padding: 3px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
+
+        /* لوحة مقارنة الفروق */
+        .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+        .diff-item { padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .diff-item.match { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+        .diff-item.diff { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+
         .camera-btn { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; transition: 0.2s; }
         .camera-btn:hover { background: #0369a1; }
         
@@ -41,20 +48,19 @@
 
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
-        .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي مع المقارنة البصرية</h1>
-    <p class="subtitle">صور ورقة تظليل الطالب، أدخل خياراته المرصودة للمقارنة الفورية وإرسال الدرجة بدقة 100%</p>
+    <h1>📷 أداة التصحيح والمقارنة الذكية</h1>
+    <p class="subtitle">اعرض مفاتيح النموذج، صور ورقة الطالب، قارن الفروق وعدلها يدوياً ثم اعتمدها</p>
 
-    <!-- قائمة النماذج الخمسة المعتمدة -->
+    <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
         <label>اختر النموذج المعتمد:</label>
-        <select id="targetModelSelect" onchange="updateModelSelection()">
+        <select id="targetModelSelect" onchange="applyModelKey()">
             <option value="النموذج الأول (أ)" selected>النموذج الأول (أ)</option>
             <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
             <option value="النموذج الثالث (ج)">النموذج الثالث (ج)</option>
@@ -68,7 +74,13 @@
         <input type="text" id="customModelName" value="النموذج الأول (أ)">
     </div>
 
-    <!-- اختيار اسم الطالب -->
+    <!-- 2. مفاتيح النموذج المعتمد (تظهر بالأعلى) -->
+    <div class="section-box" style="border-color: #0284c7; background: #f0f9ff;">
+        <label style="color: #0369a1; margin-bottom: 8px;">📌 مفاتيح الإجابة النموذجية المعتمدة (من 1 إلى 20):</label>
+        <div class="grid-20" id="modelKeyContainer"></div>
+    </div>
+
+    <!-- 3. اختيار اسم الطالب -->
     <div class="form-group">
         <label>ابحث عن اسم الطالب واختاره:</label>
         <div class="student-select-box">
@@ -77,10 +89,10 @@
         </div>
     </div>
 
-    <!-- فتح الكاميرا لتصوير ورقة الطالب -->
+    <!-- 4. التقاط صورة ورقة الطالب -->
     <div class="form-group">
         <label>تصوير ورقة تظليل الطالب:</label>
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewAndAnalyze(this)">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
         <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
             📸 فتح الكاميرا وتصوير ورقة الطالب
         </button>
@@ -90,19 +102,21 @@
         </div>
     </div>
 
-    <!-- إدخال إجابات الطالب المرصودة من الصورة -->
+    <!-- 5. مفاتيح إجابات الطالب (تظهر تحت النموذج لتعديلها أو مطابقتها بعد التصوير) -->
+    <div class="section-box" style="border-color: #10b981; background: #fecvdf5;">
+        <label style="color: #047857; margin-bottom: 8px;">✍️ مفاتيح إجابات الطالب (يمكنك تعديلها بناءً على ما توضح في الصورة):</label>
+        <div class="grid-20" id="studentAnswersContainer"></div>
+    </div>
+
+    <!-- 6. لوحة مقارنة الفروق بلون مختلف -->
     <div class="form-group">
-        <label>إجابات الطالب الظاهرة في الورقة (أو حددها مطابقة لما صورته):</label>
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 10px;" id="studentInputsContainer"></div>
+        <label>🔍 لوحة مقارنة الفروق (النموذج مقابل إجابة الطالب):</label>
+        <div class="diff-grid" id="diffGridContainer">
+            <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 15px;">قم بتصوير ورقة الطالب لتظهر الفروق والمطابقات هنا...</div>
+        </div>
     </div>
 
-    <!-- لوحة المقارنة البصرية الفورية -->
-    <label style="margin-bottom: 5px;">لوحة المقارنة البصرية (طالب vs المفتاح المعتمد):</label>
-    <div class="comparison-grid" id="comparisonGridContainer">
-        <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 20px;">قم بتصوير الورقة وإدخال الإجابات لتظهر نتائج المقارنة الفورية هنا...</div>
-    </div>
-
-    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد الدرجة الحقيقية وإرسالها للوحة التحكم</button>
+    <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد النتيجة وإرسالها للوحة التحكم</button>
 
     <div class="footer-note">
         ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
@@ -124,44 +138,29 @@
     let allStudents = [];
     let imageCaptured = false;
 
-    // بنك المفاتيح المعتمدة بدقة 100% للنماذج الخمسة
+    // بنك مفاتيح النماذج الخمسة المعتمدة
     const modelQuestionsBank = {
-        "النموذج الأول (أ)": {
-            1: 'B', 2: 'A', 3: 'C', 4: 'B', 5: 'C', 6: 'A', 7: 'C', 8: 'C', 9: 'B', 10: 'A',
-            11: 'B', 12: 'A', 13: 'A', 14: 'B', 15: 'B', 16: 'A', 17: 'B', 18: 'B', 19: 'C', 20: 'A'
-        },
-        "النموذج الثاني (ب)": {
-            1: 'C', 2: 'B', 3: 'D', 4: 'C', 5: 'A', 6: 'D', 7: 'B', 8: 'A', 9: 'C', 10: 'B',
-            11: 'D', 12: 'C', 13: 'A', 14: 'A', 15: 'B', 16: 'A', 17: 'C', 18: 'D', 19: 'B', 20: 'A'
-        },
-        "النموذج الثالث (ج)": {
-            1: 'D', 2: 'A', 3: 'C', 4: 'B', 5: 'B', 6: 'D', 7: 'C', 8: 'C', 9: 'B', 10: 'B',
-            11: 'C', 12: 'B', 13: 'C', 14: 'B', 15: 'C', 16: 'B', 17: 'D', 18: 'B', 19: 'B', 20: 'B'
-        },
-        "النموذج الرابع (د)": {
-            1: 'C', 2: 'B', 3: 'A', 4: 'B', 5: 'C', 6: 'A', 7: 'D', 8: 'C', 9: 'B', 10: 'A',
-            11: 'A', 12: 'D', 13: 'B', 14: 'A', 15: 'B', 16: 'A', 17: 'C', 18: 'C', 19: 'A', 20: 'D'
-        },
-        "النموذج الخامس (هـ)": {
-            1: 'B', 2: 'B', 3: 'A', 4: 'B', 5: 'B', 6: 'A', 7: 'C', 8: 'C', 9: 'B', 10: 'A',
-            11: 'B', 12: 'C', 13: 'B', 14: 'A', 15: 'B', 16: 'A', 17: 'A', 18: 'C', 19: 'A', 20: 'C'
-        }
+        "النموذج الأول (أ)": { 1:'B', 2:'A', 3:'C', 4:'B', 5:'C', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'A', 13:'A', 14:'B', 15:'B', 16:'A', 17:'B', 18:'B', 19:'C', 20:'A' },
+        "النموذج الثاني (ب)": { 1:'C', 2:'B', 3:'D', 4:'C', 5:'A', 6:'D', 7:'B', 8:'A', 9:'C', 10:'B', 11:'D', 12:'C', 13:'A', 14:'A', 15:'B', 16:'A', 17:'C', 18:'D', 19:'B', 20:'A' },
+        "النموذج الثالث (ج)": { 1:'D', 2:'A', 3:'C', 4:'B', 5:'B', 6:'D', 7:'C', 8:'C', 9:'B', 10:'B', 11:'C', 12:'B', 13:'C', 14:'B', 15:'C', 16:'B', 17:'D', 18:'B', 19:'B', 20:'B' },
+        "النموذج الرابع (د)": { 1:'C', 2:'B', 3:'A', 4:'B', 5:'C', 6:'A', 7:'D', 8:'C', 9:'B', 10:'A', 11:'A', 12:'D', 13:'B', 14:'A', 15:'B', 16:'A', 17:'C', 18:'C', 19:'A', 20:'D' },
+        "النموذج الخامس (هـ)": { 1:'B', 2:'B', 3:'A', 4:'B', 5:'B', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'C', 13:'B', 14:'A', 15:'B', 16:'A', 17:'A', 18:'C', 19:'A', 20:'C' }
     };
 
     window.onload = function() {
-        buildStudentInputs();
+        buildStudentAnswersGrid();
+        applyModelKey();
         loadAllowedStudents();
-        updateComparison();
     };
 
-    function buildStudentInputs() {
-        const container = document.getElementById('studentInputsContainer');
+    function buildStudentAnswersGrid() {
+        const container = document.getElementById('studentAnswersContainer');
         container.innerHTML = '';
         for (let i = 1; i <= 20; i++) {
             container.innerHTML += `
-                <div style="display:flex; flex-direction:column; align-items:center; background:#fff; padding:4px; border:1px solid var(--border); border-radius:6px;">
-                    <span style="font-size:0.75rem; font-weight:bold; color:#0284c7;">س${i}</span>
-                    <select id="stud_ans_${i}" onchange="updateComparison()" style="border:1px solid var(--border); border-radius:4px; padding:2px; font-size:0.8rem; font-weight:bold;">
+                <div class="ans-card">
+                    <span>س ${i}</span>
+                    <select id="stud_ans_${i}" onchange="updateComparison()">
                         <option value="A">أ</option>
                         <option value="B">ب</option>
                         <option value="C">ج</option>
@@ -172,33 +171,51 @@
         }
     }
 
-    function updateModelSelection() {
+    // عرض مفاتيح النموذج المعتمد بالأعلى وتحديث المقارنة
+    function applyModelKey() {
         const select = document.getElementById('targetModelSelect');
-        document.getElementById('customModelName').value = select.value;
+        const modelName = select.value;
+        document.getElementById('customModelName').value = modelName;
+
+        const currentModelData = modelQuestionsBank[modelName];
+        const keyContainer = document.getElementById('modelKeyContainer');
+        keyContainer.innerHTML = '';
+
+        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+
+        for (let i = 1; i <= 20; i++) {
+            let correctKey = currentModelData[i];
+            keyContainer.innerHTML += `
+                <div class="ans-card" style="background:#e0f2fe;">
+                    <span>س ${i}</span>
+                    <strong style="color:#0369a1; font-size:0.9rem;">${ansMap[correctKey]}</strong>
+                </div>
+            `;
+        }
         updateComparison();
     }
 
-    // إجراء المقارنة البصرية الفورية بين إجابات الطالب والمفتاح المعتمد وعرض الدوائر الملونة
+    // تحديث لوحة المقارنة وتلوين الفروق (أخضر للمطابقة، أحمر للاختلاف)
     function updateComparison() {
         const selectedModel = document.getElementById('targetModelSelect').value;
         const currentKey = modelQuestionsBank[selectedModel];
-        const gridContainer = document.getElementById('comparisonGridContainer');
-        gridContainer.innerHTML = '';
+        const diffContainer = document.getElementById('diffGridContainer');
+        diffContainer.innerHTML = '';
+
+        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
 
         for (let i = 1; i <= 20; i++) {
-            const studentAns = document.getElementById(`stud_ans_${i}`).value;
-            const correctAns = currentKey[i];
-            const isMatch = (studentAns === correctAns);
+            const studentVal = document.getElementById(`stud_ans_${i}`).value;
+            const correctVal = currentKey[i];
+            const isMatch = (studentVal === correctVal);
 
-            const itemClass = isMatch ? 'comparison-item correct' : 'comparison-item wrong';
-            const iconBadge = isMatch ? '🟢' : '🔴 دائرة خاطئة';
-            
-            const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+            const itemClass = isMatch ? 'diff-item match' : 'diff-item diff';
+            const statusText = isMatch ? '🟢 مطابق' : '🔴 مختلف (خطأ)';
 
-            gridContainer.innerHTML += `
+            diffContainer.innerHTML += `
                 <div class="${itemClass}">
-                    <span><strong>س${i}:</strong> الطالب (${ansMap[studentAns]}) | الصحيح (${ansMap[correctAns]})</span>
-                    <span>${iconBadge}</span>
+                    <span><strong>س${i}:</strong> الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
+                    <span><strong>${statusText}</strong></span>
                 </div>
             `;
         }
@@ -251,7 +268,7 @@
         }
     });
 
-    function previewAndAnalyze(input) {
+    function previewCapturedImage(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -263,7 +280,7 @@
         }
     }
 
-    // اعتماد النتيجة وحساب الدرجة بناءً على المطابقة الحقيقية وإرسالها للوحة التحكم
+    // اعتماد النتيجة النهائية وإرسالها لقاعدة البيانات
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -282,6 +299,7 @@
         const currentKey = modelQuestionsBank[selectedModel];
         let answersDetails = [];
         let score = 0;
+        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
         
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = document.getElementById(`stud_ans_${i}`).value; 
@@ -289,7 +307,6 @@
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
-            let ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
             answersDetails.push({
                 qText: `السؤال رقم ${i}`,
                 studentAns: `${studentAnsKey}) ${ansMap[studentAnsKey]}`,
@@ -314,9 +331,9 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم الاعتماد والتصحيح بنجاح للطالب (${studentName})!\nالدرجة الحقيقية:ين ${score} من 20 (${p}%) تحت (${customModelName}) وتم حفظها في لوحة التحكم.`);
+            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح!\nالدرجة النهائية: ${score} من 20 (${p}%) تحت (${customModelName}) وتم إرسالها وحفظها في لوحة التحكم.`);
             
-            // إعادة التعيين للطالب التالي
+            // إعادة ضبط الحقول للطالب التالي
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
