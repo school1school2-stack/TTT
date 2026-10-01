@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي المرتبطة بنماذج GitHub - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -30,8 +30,6 @@
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
-        .btn-fetch-github { width: 100%; background: #0ea5e9; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; margin-bottom: 15px; transition: 0.2s; }
-        .btn-fetch-github:hover { background: #0284c7; }
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
         .submit-btn:hover { background: #059669; }
         .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
@@ -41,40 +39,32 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي المرتبطة بـ GitHub</h1>
-    <p class="subtitle">اختر النموذج لجلب مفتاحه من مستودعك، سمّ اختبارك، واصحح لطلابك</p>
+    <h1>📷 أداة التصحيح الآلي السريعة</h1>
+    <p class="subtitle">اختر النموذج لتتغير مفاتيح الإجابة فوراً، ثم صحح لطلابك</p>
 
-    <!-- قائمة النماذج الستة مع روابط مستودعات GitHub الخاصة بك -->
+    <!-- قائمة النماذج الستة -->
     <div class="form-group">
         <label>اختر النموذج:</label>
-        <select id="targetModelSelect" onchange="updateModelNameAndLink()">
-            <option value="النموذج (1)" data-url="https://اسم-مستودعك-الاول.github.io/path/">النموذج الأول</option>
-            <option value="النموذج (2)" data-url="https://اسم-مستودعك-الثاني.github.io/path/">النموذج الثاني</option>
-            <option value="النموذج (3)" data-url="https://اسم-مستودعك-الثالث.github.io/path/">النموذج الثالث</option>
-            <option value="النموذج (4)" data-url="https://اسم-مستودعك-الرابع.github.io/path/">النموذج الرابع</option>
-            <option value="النموذج (5)" data-url="https://اسم-مستودعك-الخامس.github.io/path/">النموذج الخامس</option>
-            <option value="النموذج السادس (هـ)" data-url="https://school1school2-stack.github.io/TTT1/">النموذج السادس (هـ)</option>
+        <select id="targetModelSelect" onchange="applyModelKey()">
+            <option value="النموذج (1)">النموذج الأول</option>
+            <option value="النموذج (2)">النموذج الثاني</option>
+            <option value="النموذج (3)">النموذج الثالث</option>
+            <option value="النموذج (4)">النموذج الرابع</option>
+            <option value="النموذج (5)">النموذج الخامس</option>
+            <option value="النموذج السادس (هـ)" selected>النموذج السادس (هـ) - رابط: TTT1</option>
         </select>
     </div>
 
-    <!-- رابط المستودع الخاص بالنموذج (يمكن تعديله أو وضعه تلقائياً) -->
+    <!-- اسم النموذج في لوحة التحكم -->
     <div class="form-group">
-        <label>رابط مستودع النموذج على GitHub:</label>
-        <input type="text" id="repoUrlInput" value="https://school1school2-stack.github.io/TTT1/" placeholder="أدخل رابط مستودع GitHub...">
+        <label>اسم النموذج المراد إرساله للوحة التحكم:</label>
+        <input type="text" id="customModelName" value="النموذج السادس (هـ)">
     </div>
 
-    <button class="btn-fetch-github" onclick="fetchAnswersFromGitHub()">🔗 سحب مفتاح الإجابة من رابط GitHub</button>
-    <div id="keyStatus" class="status-msg" style="margin-bottom: 15px;"></div>
-
-    <!-- اسم النموذج الذي سيظهر في لوحة التحكم -->
-    <div class="form-group">
-        <label>اسم النموذج في لوحة التحكم:</label>
-        <input type="text" id="customModelName" value="النموذج السادس (هـ)" placeholder="اكتب اسم النموذج...">
-    </div>
-
-    <!-- مفتاح الإجابة (يتم تعبئته آلياً أو يدوياً) -->
+    <!-- مفتاح الإجابة (يتغير تلقائياً عند تغيير النموذج) -->
     <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة النموذجية (20 سؤالاً):</div>
     <div class="answer-key-grid" id="answerKeyContainer"></div>
+    <div id="keyStatus" class="status-msg" style="margin-bottom: 15px;"></div>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 20px;">
 
@@ -114,6 +104,16 @@
 
     let allStudents = [];
 
+    // مفاتيح الإجابة النموذجية الافتراضية لكل نموذج (يمكنك تعديلها هنا بحسب أسئلتك)
+    const predefinedKeys = {
+        "النموذج (1)": {1:"A", 2:"B", 3:"C", 4:"D", 5:"A", 6:"B", 7:"C", 8:"D", 9:"A", 10:"B", 11:"C", 12:"D", 13:"A", 14:"B", 15:"C", 16:"D", 17:"A", 18:"B", 19:"C", 20:"D"},
+        "النموذج (2)": {1:"B", 2:"C", 3:"D", 4:"A", 5:"B", 6:"C", 7:"D", 8:"A", 9:"B", 10:"C", 11:"D", 12:"A", 13:"B", 14:"C", 15:"D", 16:"A", 17:"B", 18:"C", 19:"D", 20:"A"},
+        "النموذج (3)": {1:"C", 2:"D", 3:"A", 4:"B", 5:"C", 6:"D", 7:"A", 8:"B", 9:"C", 10:"D", 11:"A", 12:"B", 13:"C", 14:"D", 15:"A", 16:"B", 17:"C", 18:"D", 19:"A", 20:"B"},
+        "النموذج (4)": {1:"D", 2:"A", 3:"B", 4:"C", 5:"D", 6:"A", 7:"B", 8:"C", 9:"D", 10:"A", 11:"B", 12:"C", 13:"D", 14:"A", 15:"B", 16:"C", 17:"D", 18:"A", 19:"B", 20:"C"},
+        "النموذج (5)": {1:"A", 2:"C", 3:"B", 4:"D", 5:"A", 6:"C", 7:"B", 8:"D", 9:"A", 10:"C", 11:"B", 12:"D", 13:"A", 14:"C", 15:"B", 16:"D", 17:"A", 18:"C", 19:"B", 20:"D"},
+        "النموذج السادس (هـ)": {1:"B", 2:"A", 3:"C", 4:"D", 5:"B", 6:"A", 7:"C", 8:"D", 9:"B", 10:"A", 11:"C", 12:"D", 13:"B", 14:"A", 15:"C", 16:"D", 17:"B", 18:"A", 19:"C", 20:"D"}
+    };
+
     window.onload = function() {
         const container = document.getElementById('answerKeyContainer');
         container.innerHTML = '';
@@ -130,37 +130,28 @@
                 </div>
             `;
         }
+        applyModelKey();
         loadAllowedStudents();
     };
 
-    // تحديث الرابط والاسم عند تغيير النموذج من القائمة
-    function updateModelNameAndLink() {
+    // تطبيق مفتاح الإجابة فور تغيير النموذج
+    function applyModelKey() {
         const select = document.getElementById('targetModelSelect');
-        const selectedOption = select.options[select.selectedIndex];
-        document.getElementById('customModelName').value = selectedOption.text;
-        document.getElementById('repoUrlInput').value = selectedOption.getAttribute('data-url') || "";
-    }
+        const modelName = select.value;
+        document.getElementById('customModelName').value = modelName;
 
-    // جلب بيانات الإجابات من رابط مستودع GitHub
-    async function fetchAnswersFromGitHub() {
-        const repoUrl = document.getElementById('repoUrlInput').value.trim();
-        const statusDiv = document.getElementById('keyStatus');
-        if (!repoUrl) {
-            alert('الرجاء إدخال رابط المستودع الصحيح.');
-            return;
-        }
-
-        statusDiv.innerText = "⏳ جاري الاتصال بمستودع GitHub وجلب مفتاح الإجابة...";
-        
-        try {
-            // محاكاة جلب المفتاح المعتمد المرتبط برابط المستودع (يمكن ربطه بملف answers.json داخل المستودع مباشرة)
-            statusDiv.innerText = "✅ تم جلب مفتاح الإجابة من مستودع GitHub بنجاح واستخدامه في التصحيح!";
-        } catch (error) {
-            statusDiv.innerText = "⚠️ تعذر جلب الملف من الرابط، يمكنك ضبط المفتاح يدوياً.";
+        const keyMap = predefinedKeys[modelName];
+        if (keyMap) {
+            for (let i = 1; i <= 20; i++) {
+                if (keyMap[i]) {
+                    document.getElementById(`key_ans_${i}`).value = keyMap[i];
+                }
+            }
+            document.getElementById('keyStatus').innerText = `✅ تم تحميل مفتاح الإجابة الخاص بـ (${modelName}) تلقائياً بنجاح!`;
         }
     }
 
-    // جلب قائمة الطلاب المعتمدين من فايربيس
+    // جلب قائمة الطلاب من فايربيس
     function loadAllowedStudents() {
         db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
             allStudents = [];
@@ -208,7 +199,7 @@
         }
     });
 
-    // تصحيح ورقة الطالب وإرسال النتيجة بالاسم المخصص للوحة التحكم
+    // تصحيح وإرسال النتيجة للوحة التحكم
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -252,7 +243,7 @@
             name: studentName,
             score: score,
             total: 20,
-            model_id: customModelName, // اسم النموذج المرتبط بمستودع GitHub
+            model_id: customModelName, // يرسل للوحة التحكم تحت اسم النموذج المحدد بدقة
             answers: answersDetails,
             sections: skillsObj,
             time: firebase.firestore.FieldValue.serverTimestamp()
