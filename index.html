@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي السحابية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -23,13 +23,15 @@
         label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; }
         input[type="text"], input[type="file"], select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
         
-        /* قائمة اختيار الطالب الذكية */
+        /* تصميم حقل البحث واختيار الطالب الذكي */
         .student-select-box { position: relative; width: 100%; }
         .student-search-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #fff; }
         .student-dropdown-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 10px 10px; max-height: 180px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .student-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
         .student-item:hover { background: #e0f2fe; color: #0369a1; font-weight: bold; }
 
+        .btn-save-key { width: 100%; background: #0284c7; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.95rem; margin-bottom: 15px; transition: 0.2s; }
+        .btn-save-key:hover { background: #0369a1; }
         .submit-btn { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-top: 10px; }
         .submit-btn:hover { background: #059669; }
         .status-msg { font-size: 0.85rem; color: #059669; font-weight: bold; margin-top: 5px; text-align: center; }
@@ -39,31 +41,32 @@
 <body>
 
 <div class="scanner-container">
-    <h1>📷 أداة التصحيح الآلي المعتمدة</h1>
-    <p class="subtitle">تم ضبط مفاتيح الإجابة بدقة مطابقة تماماً لملف اختبار النحو (النموذج 6)</p>
+    <h1>📷 أداة التصحيح الآلي السحابية</h1>
+    <p class="subtitle">اختر النموذج لاستدعاء مفتاحه تلقائياً، سمّ اختبارك، واصحح لطلابك</p>
 
-    <!-- قائمة النماذج -->
+    <!-- اختيار النموذج لاستدعاء مفتاحه من السحابة -->
     <div class="form-group">
-        <label>اختر النموذج:</label>
-        <select id="targetModelSelect" onchange="applyModelKey()">
-            <option value="النموذج (1)">النموذج الأول</option>
-            <option value="النموذج (2)">النموذج الثاني</option>
-            <option value="النموذج (3)">النموذج الثالث</option>
-            <option value="النموذج (4)">النموذج الرابع</option>
-            <option value="النموذج (5)">النموذج الخامس</option>
-            <option value="النموذج السادس (هـ)" selected>النموذج السادس (هـ) - اختبار النحو</option>
+        <label>اختر النموذج أو الاختبار:</label>
+        <select id="targetModelSelect" onchange="loadAnswerKeyFromCloud()">
+            <option value="النموذج (1)">النموذج (1)</option>
+            <option value="النموذج (2)">النموذج (2)</option>
+            <option value="النموذج (3)">النموذج (3)</option>
+            <option value="النموذج (4)">النموذج (4)</option>
+            <option value="النموذج (5)">النموذج (5)</option>
         </select>
     </div>
 
-    <!-- اسم النموذج في لوحة التحكم -->
+    <!-- تسمية النموذج المخصصة التي ستظهر في لوحة التحكم -->
     <div class="form-group">
-        <label>اسم النموذج المراد إرساله للوحة التحكم:</label>
-        <input type="text" id="customModelName" value="النموذج السادس (هـ)">
+        <label>اسم النموذج المخصص (الذي سيظهر في لوحة التحكم):</label>
+        <input type="text" id="customModelName" value="النموذج (1)" placeholder="اكتب اسم الاختبار أو النموذج...">
     </div>
 
-    <!-- مفتاح الإجابة المطابق لملفك -->
+    <!-- مفتاح الإجابة الصحيحة -->
     <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 8px;">مفتاح الإجابة النموذجية (20 سؤالاً):</div>
     <div class="answer-key-grid" id="answerKeyContainer"></div>
+    
+    <button class="btn-save-key" onclick="saveAnswerKeyToCloud()">☁️ حفظ مفتاح الإجابة في السحابة</button>
     <div id="keyStatus" class="status-msg" style="margin-bottom: 15px;"></div>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 20px;">
@@ -104,21 +107,6 @@
 
     let allStudents = [];
 
-    // مفاتيح الإجابة المستخرجة بدقة مطابقة 100% لملف HTML الخاص بك (النموذج السادس - هـ)
-    const predefinedKeys = {
-        "النموذج السادس (هـ)": {
-            1: "B", 2: "B", 3: "A", 4: "B", 5: "B", 
-            6: "A", 7: "C", 8: "C", 9: "B", 10: "A", 
-            11: "B", 12: "C", 13: "B", 14: "A", 15: "B", 
-            16: "A", 17: "A", 18: "C", 19: "A", 20: "C"
-        },
-        "النموذج (1)": {1:"A", 2:"B", 3:"C", 4:"D", 5:"A", 6:"B", 7:"C", 8:"D", 9:"A", 10:"B", 11:"C", 12:"D", 13:"A", 14:"B", 15:"C", 16:"D", 17:"A", 18:"B", 19:"C", 20:"D"},
-        "النموذج (2)": {1:"B", 2:"C", 3:"D", 4:"A", 5:"B", 6:"C", 7:"D", 8:"A", 9:"B", 10:"C", 11:"D", 12:"A", 13:"B", 14:"C", 15:"D", 16:"A", 17:"B", 18:"C", 19:"D", 20:"A"},
-        "النموذج (3)": {1:"C", 2:"D", 3:"A", 4:"B", 5:"C", 6:"D", 7:"A", 8:"B", 9:"C", 10:"D", 11:"A", 12:"B", 13:"C", 14:"D", 15:"A", 16:"B", 17:"C", 18:"D", 19:"A", 20:"B"},
-        "النموذج (4)": {1:"D", 2:"A", 3:"B", 4:"C", 5:"D", 6:"A", 7:"B", 8:"C", 9:"D", 10:"A", 11:"B", 12:"C", 13:"D", 14:"A", 15:"B", 16:"C", 17:"D", 18:"A", 19:"B", 20:"C"},
-        "النموذج (5)": {1:"A", 2:"C", 3:"B", 4:"D", 5:"A", 6:"C", 7:"B", 8:"D", 9:"A", 10:"C", 11:"B", 12:"D", 13:"A", 14:"C", 15:"B", 16:"D", 17:"A", 18:"C", 19:"B", 20:"D"}
-    };
-
     window.onload = function() {
         const container = document.getElementById('answerKeyContainer');
         container.innerHTML = '';
@@ -135,24 +123,58 @@
                 </div>
             `;
         }
-        applyModelKey();
         loadAllowedStudents();
+        loadAnswerKeyFromCloud(); // استدعاء المفتاح فور فتح الصفحة للنموذج الافتراضي
     };
 
-    function applyModelKey() {
-        const select = document.getElementById('targetModelSelect');
-        const modelName = select.value;
-        document.getElementById('customModelName').value = modelName;
+    // مزامنة الاسم المخصص مع القائمة المنسدلة للنموذج
+    document.getElementById('targetModelSelect').addEventListener('change', function() {
+        document.getElementById('customModelName').value = this.value;
+        loadAnswerKeyFromCloud();
+    });
 
-        const keyMap = predefinedKeys[modelName] || predefinedKeys["النموذج السادس (هـ)"];
-        for (let i = 1; i <= 20; i++) {
-            if (keyMap[i]) {
-                document.getElementById(`key_ans_${i}`).value = keyMap[i];
+    // جلب مفتاح الإجابة للنموذج الحالي من قاعدة بيانات Firebase سحابياً
+    async function loadAnswerKeyFromCloud() {
+        const modelId = document.getElementById('targetModelSelect').value;
+        const statusDiv = document.getElementById('keyStatus');
+        statusDiv.innerText = "⏳ جاري البحث عن مفتاح الإجابة في السحابة...";
+
+        try {
+            const docRef = await db.collection("answer_keys").doc(modelId).get();
+            if (docRef.exists) {
+                const data = docRef.data();
+                for (let i = 1; i <= 20; i++) {
+                    if (data[i]) {
+                        document.getElementById(`key_ans_${i}`).value = data[i];
+                    }
+                }
+                statusDiv.innerText = "✅ تم استدعاء مفتاح الإجابة الخاص بهذا النموذج من السحابة بنجاح!";
+            } else {
+                statusDiv.innerText = "ℹ️ لم يتم العثور على مفتاح محفوظ لهذا النموذج. حدده يدوياً واحفظه.";
             }
+        } catch (error) {
+            console.error(error);
+            statusDiv.innerText = "⚠️ تعذر الاتصال بالسحابة لجلب المفتاح.";
         }
-        document.getElementById('keyStatus').innerText = `✅ تم تعيين مفتاح الإجابة الخاص بـ (${modelName}) بدقة مطابقة لملفك بنجاح!`;
     }
 
+    // حفظ مفتاح الإجابة سحابياً في Firebase
+    async function saveAnswerKeyToCloud() {
+        const modelId = document.getElementById('targetModelSelect').value;
+        let keyData = {};
+        for (let i = 1; i <= 20; i++) {
+            keyData[i] = document.getElementById(`key_ans_${i}`).value;
+        }
+
+        try {
+            await db.collection("answer_keys").doc(modelId).set(keyData);
+            document.getElementById('keyStatus').innerText = "☁️✅ تم حفظ مفتاح الإجابة في السحابة بنجاح ولن يضيع أبداً!";
+        } catch (error) {
+            alert("حدث خطأ أثناء حفظ المفتاح في السحابة.");
+        }
+    }
+
+    // جلب قائمة الطلاب المعتمدين من مجموعة allowed_students
     function loadAllowedStudents() {
         db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
             allStudents = [];
@@ -200,6 +222,7 @@
         }
     });
 
+    // تصحيح ورقة الطالب وإرسال النتيجة بالاسم المخصص للوحة التحكم
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
         const customModelName = document.getElementById('customModelName').value.trim() || "أوراق التظليل";
@@ -214,6 +237,7 @@
             return;
         }
 
+        // جمع الإجابات النموذجية الحالية للمطابقة
         let currentKey = {};
         for (let i = 1; i <= 20; i++) {
             currentKey[i] = document.getElementById(`key_ans_${i}`).value;
@@ -243,7 +267,7 @@
             name: studentName,
             score: score,
             total: 20,
-            model_id: customModelName,
+            model_id: customModelName, // إرسال الاسم المخصص الذي كتبته للوحة التحكم
             answers: answersDetails,
             sections: skillsObj,
             time: firebase.firestore.FieldValue.serverTimestamp()
@@ -251,7 +275,7 @@
 
         try {
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها للوحة تحت (${customModelName}) بنجاح!\nالدرجة: ${score} من 20 (${p}%)`);
+            alert(`✅ تم تصحيح ورقة الطالب (${studentName}) وإرسالها للوحة تحت اسم (${customModelName}) بنجاح!\nالدرجة: ${score} من 20 (${p}%)`);
             document.getElementById('studentSearchInput').value = '';
             fileInput.value = '';
         } catch (error) {
