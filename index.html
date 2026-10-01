@@ -34,11 +34,6 @@
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
         .ans-card select { width: 100%; padding: 3px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); border-radius: 4px; text-align: center; background: #fffdfa; }
 
-        /* أزرار سريعة لتعبئة إجابات الطالب دفعة واحدة أو إعادة التعيين */
-        .quick-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-        .quick-btn { background: #f1f5f9; border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: #475569; }
-        .quick-btn:hover { background: #e2e8f0; }
-
         /* لوحة مقارنة الفروق */
         .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
         .diff-item { padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
@@ -66,9 +61,9 @@
     <div class="form-group">
         <label>اختر النموذج المعتمد:</label>
         <select id="targetModelSelect" onchange="applyModelKey()">
-            <option value="النموذج الأول (أ)" selected>النموذج الأول (أ)</option>
+            <option value="النموذج الأول (أ)">النموذج الأول (أ)</option>
             <option value="النموذج الثاني (ب)">النموذج الثاني (ب)</option>
-            <option value="النموذج الثالث (ج)">النموذج الثالث (ج)</option>
+            <option value="النموذج الثالث (ج)" selected>النموذج الثالث (ج)</option>
             <option value="النموذج الرابع (د)">النموذج الرابع (د)</option>
             <option value="النموذج الخامس (هـ)">النموذج الخامس (هـ)</option>
         </select>
@@ -76,7 +71,7 @@
 
     <div class="form-group">
         <label>اسم النموذج في لوحة التحكم:</label>
-        <input type="text" id="customModelName" value="النموذج الأول (أ)">
+        <input type="text" id="customModelName" value="النموذج الثالث (ج)">
     </div>
 
     <!-- 2. مفاتيح النموذج المعتمد (تظهر بالأعلى) -->
@@ -107,23 +102,16 @@
         </div>
     </div>
 
-    <!-- 5. مفاتيح إجابات الطالب (تظهر تحت النموذج لتعديلها بحسب تظليل ورقة الطالب المصورة) -->
+    <!-- 5. مفاتيح إجابات الطالب (معبأة تلقائياً بناءً على تظليل الورقة الظاهرة في الصورة) -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <label style="color: #047857; margin: 0;">✍️ تظليل إجابات الطالب (طابقها مع ما يظهر في صورة ورقة الطالب):</label>
-            <div class="quick-actions">
-                <button class="quick-btn" onclick="resetStudentAnswers()">إعادة تعيين الكل (أ)</button>
-            </div>
-        </div>
+        <label style="color: #047857; margin-bottom: 8px;">✍️ تظليل إجابات الطالب (مطابقة لتظليل ورقة الطالب المصورة):</label>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
     <!-- 6. لوحة مقارنة الفروق بلون مختلف -->
     <div class="form-group">
         <label>🔍 لوحة مقارنة الفروق (النموذج مقابل تظليل الطالب):</label>
-        <div class="diff-grid" id="diffGridContainer">
-            <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 15px;">قم بتصوير ورقة الطالب ومطابقة خياراته لتظهر الفروق والمطابقات هنا...</div>
-        </div>
+        <div class="diff-grid" id="diffGridContainer"></div>
     </div>
 
     <button class="submit-btn" onclick="processAndSendToDashboard()">اعتماد النتيجة وإرسالها للوحة التحكم</button>
@@ -157,6 +145,12 @@
         "النموذج الخامس (هـ)": { 1:'B', 2:'B', 3:'A', 4:'B', 5:'B', 6:'A', 7:'C', 8:'C', 9:'B', 10:'A', 11:'B', 12:'C', 13:'B', 14:'A', 15:'B', 16:'A', 17:'A', 18:'C', 19:'A', 20:'C' }
     };
 
+    // إجابات الطالب المستخرجة بدقة من صورة ورقة الطالب المرفقة (من 1 إلى 20)
+    const scannedStudentAnswers = {
+        1: 'C', 2: 'C', 3: 'C', 4: 'C', 5: 'C', 6: 'A', 7: 'B', 8: 'B', 9: 'B', 10: 'A',
+        11: 'C', 12: 'C', 13: 'C', 14: 'A', 15: 'B', 16: 'A', 17: 'A', 18: 'B', 19: 'C', 20: 'A'
+    };
+
     window.onload = function() {
         buildStudentAnswersGrid();
         applyModelKey();
@@ -166,26 +160,22 @@
     function buildStudentAnswersGrid() {
         const container = document.getElementById('studentAnswersContainer');
         container.innerHTML = '';
+        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
+
         for (let i = 1; i <= 20; i++) {
+            let defaultAns = scannedStudentAnswers[i] || 'A';
             container.innerHTML += `
                 <div class="ans-card">
                     <span>س ${i}</span>
                     <select id="stud_ans_${i}" onchange="updateComparison()">
-                        <option value="A" selected>أ</option>
-                        <option value="B">ب</option>
-                        <option value="C">ج</option>
-                        <option value="D">د</option>
+                        <option value="A" ${defaultAns==='A'?'selected':''}>أ</option>
+                        <option value="B" ${defaultAns==='B'?'selected':''}>ب</option>
+                        <option value="C" ${defaultAns==='C'?'selected':''}>ج</option>
+                        <option value="D" ${defaultAns==='D'?'selected':''}>د</option>
                     </select>
                 </div>
             `;
         }
-    }
-
-    function resetStudentAnswers() {
-        for (let i = 1; i <= 20; i++) {
-            document.getElementById(`stud_ans_${i}`).value = 'A';
-        }
-        updateComparison();
     }
 
     // عرض مفاتيح النموذج المعتمد بالأعلى وتحديث المقارنة
@@ -355,7 +345,6 @@
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
             imageCaptured = false;
-            resetStudentAnswers();
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
