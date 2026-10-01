@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>أداة التصحيح الآلي والمقارنة اليدوية - ثانوية الأمير عبدالمجيد</title>
+    <title>أداة التصحيح الآلي والمقارنة الذكية - ثانوية الأمير عبدالمجيد</title>
     <!-- مكتبة Firebase للاتصال بقاعدة بيانات لوحتك -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -32,7 +32,12 @@
         .grid-20 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
         .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
         .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
-        .ans-card select { width: 100%; padding: 3px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
+        .ans-card select { width: 100%; padding: 3px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border); border-radius: 4px; text-align: center; background: #fffdfa; }
+
+        /* أزرار سريعة لتعبئة إجابات الطالب دفعة واحدة أو إعادة التعيين */
+        .quick-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+        .quick-btn { background: #f1f5f9; border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold; color: #475569; }
+        .quick-btn:hover { background: #e2e8f0; }
 
         /* لوحة مقارنة الفروق */
         .diff-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
@@ -55,7 +60,7 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والمقارنة الذكية</h1>
-    <p class="subtitle">اعرض مفاتيح النموذج، صور ورقة الطالب، قارن الفروق وعدلها يدوياً ثم اعتمدها</p>
+    <p class="subtitle">اعرض مفاتيح النموذج، صور ورقة تظليل الطالب، طابق خياراته الظاهرة في الصورة ثم اعتمدها</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group">
@@ -94,7 +99,7 @@
         <label>تصوير ورقة تظليل الطالب:</label>
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="previewCapturedImage(this)">
         <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
-            📸 فتح الكاميرا وتصوير ورقة الطالب
+            📸 فتح الكاميرا وتصوير ورقة تظليل الطالب
         </button>
         <div id="previewContainer">
             <img id="capturedImage" src="" alt="معاينة الورقة">
@@ -102,17 +107,22 @@
         </div>
     </div>
 
-    <!-- 5. مفاتيح إجابات الطالب (تظهر تحت النموذج لتعديلها أو مطابقتها بعد التصوير) -->
-    <div class="section-box" style="border-color: #10b981; background: #fecvdf5;">
-        <label style="color: #047857; margin-bottom: 8px;">✍️ مفاتيح إجابات الطالب (يمكنك تعديلها بناءً على ما توضح في الصورة):</label>
+    <!-- 5. مفاتيح إجابات الطالب (تظهر تحت النموذج لتعديلها بحسب تظليل ورقة الطالب المصورة) -->
+    <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="color: #047857; margin: 0;">✍️ تظليل إجابات الطالب (طابقها مع ما يظهر في صورة ورقة الطالب):</label>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="resetStudentAnswers()">إعادة تعيين الكل (أ)</button>
+            </div>
+        </div>
         <div class="grid-20" id="studentAnswersContainer"></div>
     </div>
 
     <!-- 6. لوحة مقارنة الفروق بلون مختلف -->
     <div class="form-group">
-        <label>🔍 لوحة مقارنة الفروق (النموذج مقابل إجابة الطالب):</label>
+        <label>🔍 لوحة مقارنة الفروق (النموذج مقابل تظليل الطالب):</label>
         <div class="diff-grid" id="diffGridContainer">
-            <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 15px;">قم بتصوير ورقة الطالب لتظهر الفروق والمطابقات هنا...</div>
+            <div style="grid-column: span 2; text-align: center; color: #64748b; padding: 15px;">قم بتصوير ورقة الطالب ومطابقة خياراته لتظهر الفروق والمطابقات هنا...</div>
         </div>
     </div>
 
@@ -161,7 +171,7 @@
                 <div class="ans-card">
                     <span>س ${i}</span>
                     <select id="stud_ans_${i}" onchange="updateComparison()">
-                        <option value="A">أ</option>
+                        <option value="A" selected>أ</option>
                         <option value="B">ب</option>
                         <option value="C">ج</option>
                         <option value="D">د</option>
@@ -169,6 +179,13 @@
                 </div>
             `;
         }
+    }
+
+    function resetStudentAnswers() {
+        for (let i = 1; i <= 20; i++) {
+            document.getElementById(`stud_ans_${i}`).value = 'A';
+        }
+        updateComparison();
     }
 
     // عرض مفاتيح النموذج المعتمد بالأعلى وتحديث المقارنة
@@ -210,11 +227,11 @@
             const isMatch = (studentVal === correctVal);
 
             const itemClass = isMatch ? 'diff-item match' : 'diff-item diff';
-            const statusText = isMatch ? '🟢 مطابق' : '🔴 مختلف (خطأ)';
+            const statusText = isMatch ? '🟢 مطابق (صحيح)' : '🔴 مختلف (خطأ)';
 
             diffContainer.innerHTML += `
                 <div class="${itemClass}">
-                    <span><strong>س${i}:</strong> الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
+                    <span><strong>س${i}:</strong> تظليل الطالب (${ansMap[studentVal]}) | النموذج (${ansMap[correctVal]})</span>
                     <span><strong>${statusText}</strong></span>
                 </div>
             `;
@@ -338,6 +355,7 @@
             fileInput.value = '';
             document.getElementById('previewContainer').style.display = 'none';
             imageCaptured = false;
+            resetStudentAnswers();
         } catch (error) {
             alert("حدث خطأ أثناء الإرسال لقاعدة البيانات.");
         }
