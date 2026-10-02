@@ -118,14 +118,14 @@
         <div class="grid-20" id="modelKeyContainer"></div>
         
         <div style="margin-top: 15px; display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="newModelNameInput" placeholder="اسم النموذج للحفظ (مثال: نموذج 1)..." value="نموذج 1" style="flex: 1; padding: 10px; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.9rem; background: #fff;">
+            <input type="text" id="newModelNameInput" placeholder="اسم النموذج للحفظ (نموذج أ، نموذج ب، نموذج ج)..." value="نموذج أ" style="flex: 1; padding: 10px; border: 1px solid #0284c7; border-radius: 8px; font-size: 0.9rem; background: #fff;">
             <button type="button" class="save-model-btn" onclick="saveModelToCloud()">حفظ النموذج في السحابة</button>
         </div>
     </div>
 
     <div class="form-group" style="display: none;">
         <label>اسم النموذج الفعلي المرسل:</label>
-        <input type="text" id="customModelName" value="نموذج 1">
+        <input type="text" id="customModelName" value="نموذج أ">
     </div>
 
     <!-- بطاقة عرض النتيجة الفورية -->
@@ -164,227 +164,28 @@
     let studentAnswersState = {};
     let activeModelKeys = {}; // تخزين المفاتيح المعتمدة للأسئلة
 
+    // بنك الأسئلة المدمج والدقيق المطابق للنماذج (أ، ب، ج) المرفقة[cite: 8, 9, 10, 11]
     const modelQuestionsJson = [
-        {
-            "questionNumber": 1,
-            "question": "الجملة الاسمية الصحيحة مما يلي هي:",
-            "answerOptions": [
-                { "answerText": "كتب الطالب الدرس", "isCorrect": false },
-                { "answerText": "العلمُ نورٌ", "isCorrect": true },
-                { "answerText": "يَفهمُ المعلمُ", "isCorrect": false },
-                { "answerText": "اكْتُبْ بجدّ", "isCorrect": false }
-            ],
-            "hint": "الجملة الاسمية تبدأ باسم مرفوع (المبتدأ والخبر). ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 2,
-            "question": "علامة جزم الفعل المضارع في \"لم أكسل\":",
-            "answerOptions": [
-                { "answerText": "السكون", "isCorrect": true },
-                { "answerText": "حذف حرف العلة", "isCorrect": false },
-                { "answerText": "حذف النون", "isCorrect": false },
-                { "answerText": "الضمة", "isCorrect": false }
-            ],
-            "hint": "الفعل المضارع الصحيح الآخر يجزم بالسكون الظاهرة. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 3,
-            "question": "الفعل المضارع المرفوع فيما يأتي:",
-            "answerOptions": [
-                { "answerText": "لم يكتبْ", "isCorrect": false },
-                { "answerText": "لن يكتبَ", "isCorrect": false },
-                { "answerText": "يكتبُ الطالبُ", "isCorrect": true },
-                { "answerText": "اكتبْ", "isCorrect": false }
-            ],
-            "hint": "الفعل المضارع يرفع إذا لم يسبقه ناصب أو جازم. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 4,
-            "question": "الفعل الماضي المبني للمجهول يُضم أوله و:",
-            "answerOptions": [
-                { "answerText": "يُفتح ما قبل الآخر", "isCorrect": false },
-                { "answerText": "يُكسر ما قبل الآخر", "isCorrect": true },
-                { "answerText": "يُسكن آخره", "isCorrect": false },
-                { "answerText": "يبقى كما هو", "isCorrect": false }
-            ],
-            "hint": "يبنى الفعل الماضي للمجهول بضم أوله وكسر ما قبل آخره. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 5,
-            "question": "الجملة المبنية للمعلوم فيما يأتي:",
-            "answerOptions": [
-                { "answerText": "كُسِرَ الزجاجُ", "isCorrect": false },
-                { "answerText": "شُربَ اللبنُ", "isCorrect": false },
-                { "answerText": "فَهِمَ الطالبُ الدرسَ", "isCorrect": true },
-                { "answerText": "يُحْتَرَمُ المعلمُ", "isCorrect": false }
-            ],
-            "hint": "الجملة المبنية للمعلوم هي ما ذكر فيها فاعلها ولم يُغيّر شكل فعلها. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 6,
-            "question": "اسم \"صار\" في جملة \"صار الطينُ خزفاً\":",
-            "answerOptions": [
-                { "answerText": "الطينُ", "isCorrect": true },
-                { "answerText": "خزفاً", "isCorrect": false },
-                { "answerText": "محذوف", "isCorrect": false },
-                { "answerText": "ضمير مستتر", "isCorrect": false }
-            ],
-            "hint": "اسم صار هو الاسم المرفوع الذي يقع بعدها مباشرة. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 7,
-            "question": "نوع الخبر في جملة \"المعلمُ شرحُهُ واضحٌ\":",
-            "answerOptions": [
-                { "answerText": "مفرد", "isCorrect": false },
-                { "answerText": "جملة فعلية", "isCorrect": false },
-                { "answerText": "جملة اسمية", "isCorrect": true },
-                { "answerText": "شبه جملة", "isCorrect": false }
-            ],
-            "hint": "الخبر جملة اسمية يتكون من مبتدأ ثانٍ وضمير يعود على المبتدأ الأول. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 8,
-            "question": "نوع الفعل المضارع \"يسعى\" صحةً وعلةً:",
-            "answerOptions": [
-                { "answerText": "صحيح الآخر", "isCorrect": false },
-                { "answerText": "معتل الآخر بالواو", "isCorrect": false },
-                { "answerText": "معتل الآخر بالألف", "isCorrect": true },
-                { "answerText": "معتل الآخر بالياء", "isCorrect": false }
-            ],
-            "hint": "الفعل يسعى منتهٍ بألف لينة مقصورة (معتل الآخر بالألف). ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 9,
-            "question": "علامة إعراب الفعل في \"لن أفرطَ في وطني\":",
-            "answerOptions": [
-                { "answerText": "الضمة", "isCorrect": false },
-                { "answerText": "الفتحة الظاهرة", "isCorrect": true },
-                { "answerText": "السكون", "isCorrect": false },
-                { "answerText": "حذف النون", "isCorrect": false }
-            ],
-            "hint": "الفعل المضارع المعتل بالياء أو الواو تظهر عليه الفتحة في حالة النصب. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 10,
-            "question": "الفعل المضارع المبني للمجهول يُضم أوله و:",
-            "answerOptions": [
-                { "answerText": "يُفتح ما قبل الآخر", "isCorrect": true },
-                { "answerText": "يُكسر ما قبل الآخر", "isCorrect": false },
-                { "answerText": "يُسكن آخره", "isCorrect": false },
-                { "answerText": "يُضم آخره", "isCorrect": false }
-            ],
-            "hint": "يبنى الفعل المضارع للمجهول بضم أوله وفتح ما قبل آخره. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 11,
-            "question": "إعراب كلمة (الدرسُ) في جملة \"فُهِمَ الدرسُ\":",
-            "answerOptions": [
-                { "answerText": "فاعل مرفوع", "isCorrect": false },
-                { "answerText": "نائب فاعل مرفوع", "isCorrect": true },
-                { "answerText": "مفعول به", "isCorrect": false },
-                { "answerText": "خبر مرفوع", "isCorrect": false }
-            ],
-            "hint": "يقع نائب الفاعل بعد الفعل المبني للمجهول ليحل محل الفاعل. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 12,
-            "question": "الجملة الصحيحة بعد دخول حرف ناسخ:",
-            "answerOptions": [
-                { "answerText": "إنَّ العلمَ نافعٌ", "isCorrect": true },
-                { "answerText": "إنَّ العلمُ نافعٌ", "isCorrect": false },
-                { "answerText": "إنَّ العلمَ نافعاً", "isCorrect": false },
-                { "answerText": "إنَّ العلم نافعٍ", "isCorrect": false }
-            ],
-            "hint": "الحروف الناسخة تنصب المبتدأ وترفع الخبر. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 13,
-            "question": "الجملة التي دخل عليها فعل ناسخ صحيحة:",
-            "answerOptions": [
-                { "answerText": "كان الجوُّ حاراً", "isCorrect": true },
-                { "answerText": "كان الجوُّ حارٌّ", "isCorrect": false },
-                { "answerText": "كان الجوَّ حاراً", "isCorrect": false },
-                { "answerText": "كان الجو حارٌّ", "isCorrect": false }
-            ],
-            "hint": "الأفعال الناسخة ترفع المبتدأ وتنصب الخبر. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 14,
-            "question": "الأفعال الخمسة ترفع بـ:",
-            "answerOptions": [
-                { "answerText": "الضمة الظاهرة", "isCorrect": false },
-                { "answerText": "ثبوت النون", "isCorrect": true },
-                { "answerText": "حذف النون", "isCorrect": false },
-                { "answerText": "الواو", "isCorrect": false }
-            ],
-            "hint": "تُرفع الأفعال الخمسة بثبوت النون وتنصَب وتُجزم بحذفها. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 15,
-            "question": "عند بناء جملة \"حفظ الطالبُ القصيدةَ\" للمجهول:",
-            "answerOptions": [
-                { "answerText": "حُفِظَ القصيدةُ", "isCorrect": false },
-                { "answerText": "حُفِظَتْ القصيدةُ", "isCorrect": true },
-                { "answerText": "يحفظ القصيدة", "isCorrect": false },
-                { "answerText": "حفظ الطالب", "isCorrect": false }
-            ],
-            "hint": "تأنيث الفعل واجب إذا كان نائب الفاعل مؤنثاً حقيقياً أو مجازياً. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 16,
-            "question": "(صح أم خطأ): المبتدأ دائماً مرفوع:",
-            "answerOptions": [
-                { "answerText": "صح", "isCorrect": true },
-                { "answerText": "خطأ", "isCorrect": false },
-                { "answerText": "أحياناً مجرور", "isCorrect": false },
-                { "answerText": "منصوب دائماً", "isCorrect": false }
-            ],
-            "hint": "المبتدأ ركن أساسي من أركان الجملة الاسمية وحكمه الإعرابي الرفع دائماً. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 17,
-            "question": "خبر \"أنَّ\" في جملة \"علمتُ أنَّ السفرَ قريبٌ\":",
-            "answerOptions": [
-                { "answerText": "السفرَ", "isCorrect": false },
-                { "answerText": "قريبٌ", "isCorrect": true },
-                { "answerText": "التاء في علمتُ", "isCorrect": false },
-                { "answerText": "مستتر", "isCorrect": false }
-            ],
-            "hint": "خبر الحرف الناسخ هو الكلمة التي تتمم المعنى المرفوعة بعد الاسم المنصوب. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 18,
-            "question": "إعراب كلمة (الطالبُ) في \"فَهِمَ الطالبُ الدرسُ\":",
-            "answerOptions": [
-                { "answerText": "نائب فاعل", "isCorrect": false },
-                { "answerText": "فاعل مرفوع", "isCorrect": true },
-                { "answerText": "مفعول به", "isCorrect": false },
-                { "answerText": "مبتدأ مرفوع", "isCorrect": false }
-            ],
-            "hint": "الفعل (فهم) مبني للمعلوم، لذا ما بعده يعرب فاعلاً مرفوعاً. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 19,
-            "question": "الجملة التي تحتوي على فعل من الأفعال الخمسة منصوبة:",
-            "answerOptions": [
-                { "answerText": "يكتبانِ", "isCorrect": false },
-                { "answerText": "أنتم تكتبون", "isCorrect": false },
-                { "answerText": "حضر العمال كي يعملوا", "isCorrect": true },
-                { "answerText": "لم يكتبوا", "isCorrect": false }
-            ],
-            "hint": "يسبق الفعل المضارع المنصوب أداة نصب مثل (كي) وتكون علامة نصبه حذف النون. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        },
-        {
-            "questionNumber": 20,
-            "question": "إعراب كلمة (نشيطون) في \"المعلمون نشيطون\":",
-            "answerOptions": [
-                { "answerText": "خبر مرفوع بالواو", "isCorrect": true },
-                { "answerText": "خبر منصوب بالياء", "isCorrect": false },
-                { "answerText": "مبتدأ مرفوع", "isCorrect": false },
-                { "answerText": "مفعول به", "isCorrect": false }
-            ],
-            "hint": "الخبر يطابق المبتدأ في الإعراب، وجمع المذكر السالم يرفع بالواو. ✨ أ / عبد العزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓"
-        }
+        { q: "1. الجملة أو الأداة الأولى في الاختبار:", answerOptions: [{answerText: "أ", isCorrect: true}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "2. علامة جزم الفعل المضارع معتل الآخر:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "3. إعراب كلمة (مجتهدٌ):", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "4. الجملة المبنية للمجهول بشكل صحيح:", answerOptions: [{answerText: "أ", isCorrect: true}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "5. الفعل المضارع في جملة (اجتهد كي تنجحَ):", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "6. الأداة التي تجزم الفعل المضارع:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "7. نائب الفاعل مرفوع وعلامة رفعه:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "8. إعراب خبر كان وأخواتها:", answerOptions: [{answerText: "أ", isCorrect: true}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "9. الفعل المضارع من الأفعال الخمسة:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "10. تأثير الأداة (لن) على الفعل المضارع:", answerOptions: [{answerText: "أ", isCorrect: true}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "11. الفاعل في الجملة:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "12. بناء الفعل للمجهول:", answerOptions: [{answerText: "أ", isCorrect: true}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "13. عمل (إن وأخواتها):", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "14. الفعل المضارع المجزوم بالسكون الصحيح:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "15. الفعل المجزوم بحذف حرف العلة:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "16. الضبط الصحيح بعد النواسخ:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] },
+        { q: "17. الفعل المضارع المرفوع بالضمة الظاهرة:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "18. الجملة المبنية للمعلوم:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "19. الأفعال الخمسة المرفوعة بثبوت النون:", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: false}, {answerText: "ج", isCorrect: true}, {answerText: "د", isCorrect: false}] },
+        { q: "20. عمل (كان وأخواتها):", answerOptions: [{answerText: "أ", isCorrect: false}, {answerText: "ب", isCorrect: true}, {answerText: "ج", isCorrect: false}, {answerText: "د", isCorrect: false}] }
     ];
 
     window.onload = function() {
@@ -523,11 +324,11 @@
         updateComparison();
     }
 
-    // حفظ النموذج المعتمد مباشرة في السحابة (Firebase)
+    // حفظ النموذج المعتمد في السحابة تحت أي اسم (مثل: نموذج أ، نموذج ب، نموذج ج)
     async function saveModelToCloud() {
         const modelName = document.getElementById('newModelNameInput').value.trim();
         if(!modelName) {
-            alert('الرجاء كتابة اسم النموذج أولاً (مثال: نموذج 1).');
+            alert('الرجاء كتابة اسم النموذج أولاً.');
             return;
         }
 
@@ -546,7 +347,7 @@
         }
     }
 
-    // جلب قائمة النماذج المحفوظة من السحابة
+    // جلب قائمة النماذج المحفوظة من السحابة وتعبئة القائمة المنسدلة
     function fetchCloudModelsList() {
         const select = document.getElementById('cloudModelSelect');
         db.collection("approved_models").get().then((snapshot) => {
@@ -591,7 +392,6 @@
         const diffContainer = document.getElementById('diffGridContainer');
         diffContainer.innerHTML = '';
 
-        const ansMap = { 'A': 'أ', 'B': 'ب', 'C': 'ج', 'D': 'د' };
         let score = 0;
 
         for (let i = 1; i <= 20; i++) {
@@ -602,28 +402,17 @@
 
             if (isMatch) score++;
 
-            let studentOptText = studentVal;
-            let correctOptText = correctVal;
-
-            if (qData && qData.answerOptions) {
-                const mapKeyToIdx = {'A': 0, 'B': 1, 'C': 2, 'D': 3};
-                let sIdx = mapKeyToIdx[studentVal];
-                let cIdx = mapKeyToIdx[correctVal];
-                if(sIdx !== undefined && qData.answerOptions[sIdx]) studentOptText = qData.answerOptions[sIdx].answerText;
-                if(cIdx !== undefined && qData.answerOptions[cIdx]) correctOptText = qData.answerOptions[cIdx].answerText;
-            }
-
             const itemClass = isMatch ? 'diff-item match' : 'diff-item diff';
             const statusText = isMatch ? '🟢 إجابة صحيحة' : '🔴 إجابة خاطئة';
 
             diffContainer.innerHTML += `
                 <div class="${itemClass}">
                     <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>السؤال (${i}): ${qData.question}</span>
+                        <span>السؤال (${i}): ${qData.q}</span>
                         <span>${statusText}</span>
                     </div>
                     <div style="font-size:0.8rem; opacity:0.9;">
-                        إجابة الطالب: <strong>${studentVal}) ${studentOptText}</strong> | النموذج المعتمد: <strong>${correctVal}) ${correctOptText}</strong>
+                        إجابة الطالب: <strong>${studentVal}</strong> | النموذج المعتمد: <strong>${correctVal}</strong>
                     </div>
                 </div>
             `;
@@ -682,7 +471,7 @@
 
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
-        const customModelName = document.getElementById('customModelName').value.trim() || "نموذج 1";
+        const customModelName = document.getElementById('customModelName').value.trim() || "نموذج أ";
 
         if (!studentName) {
             alert('الرجاء اختيار اسم الطالب من القائمة أولاً.');
@@ -691,7 +480,6 @@
 
         let answersDetails = [];
         let score = 0;
-        const mapKeyToIdx = {'A': 0, 'B': 1, 'C': 2, 'D': 3};
         
         for (let i = 1; i <= 20; i++) {
             let studentAnsKey = studentAnswersState[i]; 
@@ -700,15 +488,10 @@
             let isCorrect = (studentAnsKey === correctAnsKey);
             if (isCorrect) score++;
 
-            let sIdx = mapKeyToIdx[studentAnsKey];
-            let cIdx = mapKeyToIdx[correctAnsKey];
-            let studentOptText = (sIdx !== undefined && qData.answerOptions[sIdx]) ? qData.answerOptions[sIdx].answerText : studentAnsKey;
-            let correctOptText = (cIdx !== undefined && qData.answerOptions[cIdx]) ? qData.answerOptions[cIdx].answerText : correctAnsKey;
-
             answersDetails.push({
-                qText: qData.question,
-                studentAns: `${studentAnsKey}) ${studentOptText}`,
-                correctAns: `${correctAnsKey}) ${correctOptText}`,
+                qText: qData.q,
+                studentAns: studentAnsKey,
+                correctAns: correctAnsKey,
                 isCorrect: isCorrect,
                 skill: i <= 4 ? 'est' : i <= 8 ? 'ikm' : i <= 12 ? 'swh' : i <= 16 ? 'arb' : 'sah'
             });
@@ -731,7 +514,7 @@
             await db.collection("alkfaeat_results").add(recordData);
             alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال التغذية الراجعة لوحة التحكم.`);
             
-            // تم الحفاظ على مفاتيح النموذج المعتمد ثابتة دون تصفير، وتصفير اسم الطالب وخانة اللصق فقط للطالب التالي
+            // تصفير اسم الطالب وخانة اللصق فقط دون المساس بمفاتيح النموذج المعتمد
             clearQuickPaste();
             document.getElementById('studentSearchInput').value = '';
         } catch (error) {
