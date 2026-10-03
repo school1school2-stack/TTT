@@ -12,7 +12,7 @@
             --text-main: #1e293b; --text-sub: #64748b; --border: #e2e8f0;
         }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .scanner-container { max-width: 900px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
+        .scanner-container { max-width: 950px; width: 100%; background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px dashed var(--accent); }
         h1 { color: var(--accent); font-size: 1.5rem; text-align: center; margin-top: 0; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: var(--text-sub); font-size: 0.9rem; margin-bottom: 25px; }
         
@@ -32,17 +32,20 @@
         .score-card h2 { margin: 0; font-size: 1.8rem; }
         .score-card p { margin: 5px 0 0 0; font-size: 0.95rem; opacity: 0.9; }
 
-        /* أقسام العرض */
+        /* أقسام العرض بترتيب ورقة الاختبار (عمودين: اليمين 1-10، اليسار 11-20) */
         .section-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .grid-20 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
-        .ans-card span { font-size: 0.75rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 2px; }
+        
+        .grid-columns-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .sub-column { display: flex; flex-direction: column; gap: 6px; }
+
+        .ans-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .ans-card span { font-size: 0.85rem; font-weight: bold; color: var(--accent); }
         
         /* أزرار خيارات الطالب ونموذج الإجابة (أ، ب، ج، د) */
-        .options-group { display: flex; justify-content: center; gap: 3px; }
-        .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; color: #334155; }
+        .options-group { display: flex; gap: 4px; }
+        .opt-btn { background: #f1f5f9; border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; font-weight: bold; cursor: pointer; color: #334155; }
         
-        /* ألوان التمييز الجديدة لخيارات الطالب */
+        /* ألوان التمييز لخيارات الطالب */
         .opt-btn.active-correct { background: #059669 !important; color: white !important; border-color: #059669 !important; }
         .opt-btn.active-wrong { background: #f97316 !important; color: white !important; border-color: #f97316 !important; }
         
@@ -56,8 +59,6 @@
         .diff-item.diff { background: #fff7ed; border-color: #f97316; color: #9a3412; }
 
         .ai-helper-box { background: #f0fdf4; border: 1px solid #10b981; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .ai-btn { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; display: inline-block; text-decoration: none; text-align: center; }
-        .ai-btn:hover { background: #059669; }
         
         .clear-btn { background: #ef4444; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
         .clear-btn:hover { background: #dc2626; }
@@ -71,8 +72,8 @@
 
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
-    <p class="subtitle">   
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓   </p>
+    <p class="subtitle">
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026</p>
 
     <!-- 1. اختيار النموذج المعتمد -->
     <div class="form-group" style="background: #ecfdf5; padding: 15px; border-radius: 12px; border: 1px solid #a7f3d0;">
@@ -95,29 +96,28 @@
         </div>
     </div>
 
-    <!-- 3. نافذة التعبئة الذكية السريعة (اللصق لإجابات الطالب) -->
+    <!-- 3. نافذة التعبئة الذكية الفورية اللحظية (تتوقف عند 20) -->
     <div class="ai-helper-box">
-        <label style="color: #047857; margin-bottom: 5px;">3️⃣ نافذة لصق إجابات الطالب الفورية:</label>
-        <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;">
-            الصق إجابات الطالب هنا (أ، ب، ج، د)، أو انقر على (تصفير الخانة) لمسحها:
+        <label style="color: #047857; margin-bottom: 5px;">3️⃣ خانة إدخال الإجابات الفورية (تتوقف تلقائياً عند السؤال 20):</label>
+        <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;" id="inputCounterStatus">
+            المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: 0 / 20):
         </p>
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="quickPasteInput" placeholder="الصق حروف الإجابات هنا (أ، ب، ج، د)..." style="flex: 1; padding: 8px; border: 1px solid #10b981; border-radius: 8px; font-size: 0.9rem;">
-            <button type="button" class="ai-btn" onclick="applyQuickPaste()">تعبئة فورية</button>
-            <button type="button" class="clear-btn" onclick="clearQuickPaste()">تصفير الخانة</button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="quickPasteInput" maxlength="20" placeholder="اكتب الحروف هنا (أ، ب، ج، د)..." style="flex: 1; padding: 10px; border: 1px solid #10b981; border-radius: 8px; font-size: 1rem;" oninput="applyInstantPaste()">
+            <button type="button" class="clear-btn" onclick="clearQuickPaste()">🗑️ تصفير الحقل</button>
         </div>
     </div>
 
-    <!-- 4. تظليل إجابات الطالب اليدوية -->
+    <!-- 4. تظليل إجابات الطالب اللحظية -->
     <div class="section-box" style="border-color: #10b981; background: #f0fdf4;">
-        <label style="color: #047857; margin-bottom: 8px;">4️⃣ إجابات الطالب (الصحيحة بالخضراء والخاطئة بالبرتقالية المميزة):</label>
-        <div class="grid-20" id="studentAnswersContainer"></div>
+        <label style="color: #047857; margin-bottom: 8px;">4️⃣ إجابات الطالب (تتحدث لحظياً حسب الإدخال - نفس ترتيب ورقة الاختبار):</label>
+        <div class="grid-columns-container" id="studentAnswersContainer"></div>
     </div>
 
-    <!-- 5. مفاتيح الإجابة النموذجية المعتمدة للنموذج المختار -->
+    <!-- 5. مفاتيح الإجابة النموذجية المعتمدة -->
     <div class="section-box" style="border-color: #059669; background: #ecfdf5;">
         <label style="color: #065f46; margin-bottom: 8px;">5️⃣ مفاتيح النموذج المعتمد الثابتة:</label>
-        <div class="grid-20" id="modelKeyContainer"></div>
+        <div class="grid-columns-container" id="modelKeyContainer"></div>
     </div>
 
     <!-- بطاقة عرض النتيجة الفورية -->
@@ -136,7 +136,8 @@
     <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓
+        
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026
     </div>
 </div>
 
@@ -186,7 +187,7 @@
             name: "نموذج ب",
             questions: [
                 { q: "1. علامة جزم الفعل المضارع معتل الآخر بـ (لم) هي:", options: { A: "السكون الظاهر", B: "ثبوت النون", C: "حذف حرف العلة", D: "الفتحة المقدرة" }, ans: "C" },
-                { q: "2. الجملة المبنية للمجهول بشكل صحيح هي:", options: { A: "شُرِحَ الدرسُ", B: "شَرَحَ المعلمُ الدرسَ", C: "شُرِحَ الدرسَ", D: "يُشْرَحُ المعلمُ" }, ans: "A" },
+                { q: "2. الجملة المبنية للمجهول بشكل صحيح هي:", options: { A: "شُرِحَ الدرسُ", B: "شَرَحَ المعلمُ الدرسُ", C: "شُرِحَ الدرسَ", D: "يُشْرَحُ المعلمُ" }, ans: "A" },
                 { q: "3. الفعل المضارع \"ينجحَ\" في جملة \"اجتهدْ كي تنجحَ\" هو:", options: { A: "مرفوع بالضمة", B: "منصوب وعلامة نصبه الفتحة", C: "مجزوم بالسكون", D: "مبني على الفتح" }, ans: "B" },
                 { q: "4. الجملة المشتملة على حرف ناسخ هي:", options: { A: "كان الطالبُ نشيطاً", B: "أصبح الجوُّ جميلاً", C: "إنَّ العلمَ نورٌ", D: "صار الماءُ ثلجاً" }, ans: "C" },
                 { q: "5. نائب الفاعل في جملة \"كُوفِئَ المتفوقُ\" مرفوع وعلامة رفعه:", options: { A: "الفتحة", B: "الضمة الظاهرة", C: "الألف", D: "ثبوت النون" }, ans: "B" },
@@ -222,7 +223,7 @@
                 { q: "10. الأداة \"لن\" تؤثر في الفعل المضارع بـ:", options: { A: "النصب", B: "الجزم", C: "الرفع", D: "الجر" }, ans: "A" },
                 { q: "11. الفاعل في جملة \"قرأَ الطالبُ الكتابَ\" هو:", options: { A: "قرأَ", B: "الكتابَ", C: "الطالبُ", D: "ضمير مستتر" }, ans: "C" },
                 { q: "12. عند بناء الفعل \"كَتَبَ\" للمجهول يطابق الضبط فيصبح:", options: { A: "يُكْتَبُ", B: "كُتِبَ", C: "أُكْتِبَ", D: "كَاتَبَ" }, ans: "B" },
-                { q: "13. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "ترفع المبتدأ وتنصب الخبر", C: "ترفع المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
+                { q: "13. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "تنصب المبتدأ وتنصب الخبر", C: "ترفع المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
                 { q: "14. الفعل المضارع المجزوم بـ (لم) بالسكون الصحيح هو:", options: { A: "لم يسعَ", B: "لم يكتبْ", C: "لم يدعُ", D: "لم يقضِ" }, ans: "B" },
                 { q: "15. الفعل \"يدعو\" في جملة \"لم يدعُ المسلمُ إلا اللهَ\" مجزوم وعلامة جزمه:", options: { A: "السكون", B: "حذف حرف العلة (الواو)", C: "حذف النون", D: "الفتحة المقدرة" }, ans: "B" },
                 { q: "16. الضبط الصحيح لكلمة (الجو) في \"إنَّ الجوَّ جميلٌ\":", options: { A: "الجوُّ (بالضم)", B: "الجوَّ (بالفتح)", C: "الجوِّ (بالكسر)", D: "الجوٌّ (بالتنوین)" }, ans: "B" },
@@ -274,7 +275,7 @@
                 { q: "12. الفعل المضارع \"يهملوا\" في جملة \"لم يهملوا\":", options: { A: "مجزوم بحذف النون", B: "منصوب بالفتحة", C: "مرفوع بثبوت النون", D: "مجزوم بالسكون" }, ans: "A" },
                 { q: "13. الضبط الصحيح لكلمة (الجو) في \"إنَّ الجوَّ جميلٌ\":", options: { A: "الجوُّ (بالضم)", B: "الجوَّ (بالفتح)", C: "الجوِّ (بالكسر)", D: "الجوٌّ (بالتنوین)" }, ans: "B" },
                 { q: "14. الفعل المضارع المرفوع بالضمة الظاهرة فيما يلي:", options: { A: "لن يكتبَ", B: "لم يكتبْ", C: "يكتبُ الطالبُ", D: "يكتبون بجد" }, ans: "C" },
-                { q: "15. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "ترفع المبتدأ وتنصب الخبر", C: "ترفع المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
+                { q: "15. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "تنصب المبتدأ وترفع الخبر", C: "تنصب المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
                 { q: "16. الفعل \"يدعو\" في جملة \"لم يدعُ المسلمُ إلا اللهَ\" مجزوم وعلامة جزمه:", options: { A: "السكون", B: "حذف حرف العلة (الواو)", C: "حذف النون", D: "الفتحة المقدرة" }, ans: "B" },
                 { q: "17. من الأفعال الخمسة المرفوعة بثبوت النون:", options: { A: "يدرسون", B: "لن يدرسوا", C: "لم يدرسوا", D: "ادرسوا" }, ans: "A" },
                 { q: "18. الفعل المضارع المجزوم بـ (لم) بالسكون الصحيح هو:", options: { A: "لم يسعَ", B: "لم يكتبْ", C: "لم يدعُ", D: "لم يقضِ" }, ans: "B" },
@@ -286,110 +287,155 @@
 
     window.onload = function() {
         for (let i = 1; i <= 20; i++) {
-            studentAnswersState[i] = 'A';
+            studentAnswersState[i] = '';
         }
-        buildStudentAnswersGrid();
-        buildModelKeyGrid();
+        buildGrids();
         loadAllowedStudents();
         updateComparison();
     };
 
     function switchModel(modelKey) {
         currentModelKey = modelKey;
-        buildModelKeyGrid();
-        buildStudentAnswersGrid();
+        for (let i = 1; i <= 20; i++) {
+            studentAnswersState[i] = '';
+        }
+        document.getElementById('quickPasteInput').value = '';
+        document.getElementById('inputCounterStatus').innerText = "المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: 0 / 20):";
+        buildGrids();
         updateComparison();
     }
 
-    function buildStudentAnswersGrid() {
-        const container = document.getElementById('studentAnswersContainer');
-        container.innerHTML = '';
+    function buildGrids() {
+        const studentContainer = document.getElementById('studentAnswersContainer');
+        const modelContainer = document.getElementById('modelKeyContainer');
+        
+        studentContainer.innerHTML = '';
+        modelContainer.innerHTML = '';
+
         const keys = ['A', 'B', 'C', 'D'];
         const labels = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'};
         const currentQuestions = modelsData[currentModelKey].questions;
 
+        let rightColStudent = '<div class="sub-column">';
+        let leftColStudent = '<div class="sub-column">';
+        let rightColModel = '<div class="sub-column">';
+        let leftColModel = '<div class="sub-column">';
+
         for (let i = 1; i <= 20; i++) {
             let currentVal = studentAnswersState[i];
             let correctVal = currentQuestions[i-1].ans;
-            let optHtml = '';
-
+            
+            let studentOptHtml = '';
             keys.forEach(k => {
                 let activeClass = 'opt-btn';
                 if (currentVal === k) {
                     activeClass = (k === correctVal) ? 'opt-btn active-correct' : 'opt-btn active-wrong';
                 }
-                optHtml += `<button type="button" class="${activeClass}" onclick="setStudentAns(${i}, '${k}')">${labels[k]}</button>`;
+                studentOptHtml += `<button type="button" class="${activeClass}" onclick="setStudentAns(${i}, '${k}')">${labels[k]}</button>`;
             });
 
-            container.innerHTML += `
+            let studentCardHtml = `
                 <div class="ans-card">
                     <span>س ${i}</span>
-                    <div class="options-group" id="q_opts_${i}">
-                        ${optHtml}
-                    </div>
+                    <div class="options-group">${studentOptHtml}</div>
                 </div>
             `;
-        }
-    }
 
-    function buildModelKeyGrid() {
-        const container = document.getElementById('modelKeyContainer');
-        container.innerHTML = '';
-        const keys = ['A', 'B', 'C', 'D'];
-        const labels = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'};
-        const currentQuestions = modelsData[currentModelKey].questions;
-
-        for (let i = 1; i <= 20; i++) {
-            let correctVal = currentQuestions[i-1].ans;
-            let optHtml = '';
+            let modelOptHtml = '';
             keys.forEach(k => {
                 let activeClass = (correctVal === k) ? 'opt-btn model-btn active' : 'opt-btn model-btn';
-                optHtml += `<button type="button" class="${activeClass}" disabled>${labels[k]}</button>`;
+                modelOptHtml += `<button type="button" class="${activeClass}" disabled>${labels[k]}</button>`;
             });
 
-            container.innerHTML += `
+            let modelCardHtml = `
                 <div class="ans-card" style="background:#ecfdf5;">
                     <span>س ${i}</span>
-                    <div class="options-group">
-                        ${optHtml}
-                    </div>
+                    <div class="options-group">${modelOptHtml}</div>
                 </div>
             `;
+
+            if (i <= 10) {
+                rightColStudent += studentCardHtml;
+                rightColModel += modelCardHtml;
+            } else {
+                leftColStudent += studentCardHtml;
+                leftColModel += modelCardHtml;
+            }
         }
+
+        rightColStudent += '</div>';
+        leftColStudent += '</div>';
+        rightColModel += '</div>';
+        leftColModel += '</div>';
+
+        studentContainer.innerHTML = rightColStudent + leftColStudent;
+        modelContainer.innerHTML = rightColModel + leftColModel;
     }
 
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
-        buildStudentAnswersGrid();
+        buildGrids();
         updateComparison();
     }
 
-    function applyQuickPaste() {
-        let text = document.getElementById('quickPasteInput').value.trim();
-        let chars = text.replace(/[^أبجدهABCDabcd]/g, '').toUpperCase();
-        const mapArabToEng = {'أ': 'A', 'ب': 'B', 'ج': 'C', 'د': 'D'};
+    // المعالجة اللحظية مع قفل الإدخال عند الوصول للسؤال 20
+    function applyInstantPaste() {
+        let inputField = document.getElementById('quickPasteInput');
+        let text = inputField.value;
+        
+        let cleaned = '';
+        for (let i = 0; i < text.length; i++) {
+            let ch = text[i];
+            if (['أ', 'إ', 'آ', 'ا', 'A', 'a'].includes(ch)) {
+                cleaned += 'A';
+            } else if (['ب', 'B', 'b'].includes(ch)) {
+                cleaned += 'B';
+            } else if (['ج', 'C', 'c'].includes(ch)) {
+                cleaned += 'C';
+            } else if (['د', 'D', 'd'].includes(ch)) {
+                cleaned += 'D';
+            }
+            
+            // قفل الإدخال تماماً عند الوصول لـ 20 حرفاً
+            if (cleaned.length >= 20) {
+                cleaned = cleaned.substring(0, 20);
+                break;
+            }
+        }
+
+        // تحديث الحقل إذا تم استبعاد رموز غير صالحة أو تجاوز 20
+        if (inputField.value !== cleaned) {
+            inputField.value = cleaned;
+        }
+
+        // تحديث عداد الإدخال على الشاشة
+        let count = cleaned.length;
+        let statusText = `المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: ${count} / 20):`;
+        if (count === 20) {
+            statusText += " ✅ تم اكتمال الإدخال بنجاح!";
+        }
+        document.getElementById('inputCounterStatus').innerText = statusText;
         
         let index = 0;
         for (let i = 1; i <= 20; i++) {
-            if (index < chars.length) {
-                let ch = chars[index];
-                let engKey = mapArabToEng[ch] || ch;
-                if (['A', 'B', 'C', 'D'].includes(engKey)) {
-                    studentAnswersState[i] = engKey;
-                }
+            if (index < cleaned.length) {
+                studentAnswersState[i] = cleaned[index];
                 index++;
+            } else {
+                studentAnswersState[i] = ''; 
             }
         }
-        buildStudentAnswersGrid();
+        buildGrids();
         updateComparison();
     }
 
     function clearQuickPaste() {
         document.getElementById('quickPasteInput').value = '';
+        document.getElementById('inputCounterStatus').innerText = "المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: 0 / 20):";
         for (let i = 1; i <= 20; i++) {
-            studentAnswersState[i] = 'A';
+            studentAnswersState[i] = '';
         }
-        buildStudentAnswersGrid();
+        buildGrids();
         updateComparison();
     }
 
@@ -405,8 +451,10 @@
             const studentKey = studentAnswersState[i];
             const qData = currentQuestions[i-1];
             const correctKey = qData.ans;
-            const isMatch = (studentKey === correctKey);
+            
+            if (!studentKey) continue; 
 
+            const isMatch = (studentKey === correctKey);
             if (isMatch) score++;
 
             let studentText = qData.options[studentKey] || studentKey;
@@ -497,7 +545,7 @@
         const labelsMap = {'A':'أ', 'B':'ب', 'C':'ج', 'D':'د'};
         
         for (let i = 1; i <= 20; i++) {
-            let studentKey = studentAnswersState[i]; 
+            let studentKey = studentAnswersState[i] || 'A'; 
             let qData = currentQuestions[i-1];
             let correctKey = qData.ans; 
             let isCorrect = (studentKey === correctKey);
