@@ -66,13 +66,22 @@
         .submit-btn { width: 100%; background: #059669; color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .submit-btn:hover { background: #047857; }
         
-        /* تصميم نافذة التنبيه الحمراء الواضحة */
-        #alertModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .alert-box { background: #ffffff; border: 4px solid #dc2626; border-radius: 16px; width: 90%; max-width: 450px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3); animation: shake 0.3s ease-in-out; }
-        .alert-box h3 { color: #dc2626; font-size: 1.4rem; margin-top: 0; margin-bottom: 10px; }
-        .alert-box p { color: #1e293b; font-size: 1rem; line-height: 1.6; margin-bottom: 20px; font-weight: bold; }
-        .alert-btn { background: #dc2626; color: white; border: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .alert-btn:hover { background: #b91c1c; }
+        /* تصميم النوافذ المنبثقة (Modals) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        
+        /* النافذة الحمراء للتحذير */
+        .alert-box-red { background: #ffffff; border: 4px solid #dc2626; border-radius: 16px; width: 90%; max-width: 450px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3); animation: shake 0.3s ease-in-out; }
+        .alert-box-red h3 { color: #dc2626; font-size: 1.4rem; margin-top: 0; margin-bottom: 10px; }
+        .alert-box-red p { color: #1e293b; font-size: 1rem; line-height: 1.6; margin-bottom: 20px; font-weight: bold; }
+        .alert-btn-red { background: #dc2626; color: white; border: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .alert-btn-red:hover { background: #b91c1c; }
+
+        /* النافذة الخضراء للنجاح والاعتماد */
+        .alert-box-green { background: #ffffff; border: 4px solid #059669; border-radius: 16px; width: 90%; max-width: 450px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3); animation: popUp 0.3s ease-in-out; }
+        .alert-box-green h3 { color: #059669; font-size: 1.4rem; margin-top: 0; margin-bottom: 10px; }
+        .alert-box-green p { color: #1e293b; font-size: 1rem; line-height: 1.6; margin-bottom: 20px; font-weight: bold; }
+        .alert-btn-green { background: #059669; color: white; border: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .alert-btn-green:hover { background: #047857; }
 
         @keyframes shake {
             0% { transform: translateX(0); }
@@ -80,6 +89,11 @@
             50% { transform: translateX(6px); }
             75% { transform: translateX(-6px); }
             100% { transform: translateX(0); }
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .footer-note { text-align: center; font-size: 0.75rem; color: var(--text-sub); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px; }
@@ -90,7 +104,7 @@
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
     <p class="subtitle">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026
     </p>
 
     <!-- 1. اختيار النموذج المعتمد -->
@@ -158,12 +172,21 @@
     </div>
 </div>
 
-<!-- نافذة التنبيه الحمراء الواضحة المنبثقة -->
-<div id="alertModal">
-    <div class="alert-box">
-        <h3>🚨 تنبيه هام جداً!</h3>
-        <p id="alertModalText">تم رصد نتيجة هذا الطالب من قبل!</p>
-        <button type="button" class="alert-btn" onclick="closeAlertModal()">حسناً، فهمت</button>
+<!-- نافذة التنبيه الحمراء (للتكرار) -->
+<div id="alertModalRed" class="modal-overlay">
+    <div class="alert-box-red">
+        <h3>🚨 تنبيه تكرار الرصد!</h3>
+        <p id="alertModalRedText">تم رصد نتيجة هذا الطالب من قبل!</p>
+        <button type="button" class="alert-btn-red" onclick="closeModal('alertModalRed')">حسناً، فهمت</button>
+    </div>
+</div>
+
+<!-- نافذة الاعتماد الخضراء (للنجاح) -->
+<div id="alertModalGreen" class="modal-overlay">
+    <div class="alert-box-green">
+        <h3>✅ تم اعتماد النتيجة بنجاح!</h3>
+        <p id="alertModalGreenText">تم حفظ وتصدير درجة الطالب لوحة التحكم.</p>
+        <button type="button" class="alert-btn-green" onclick="closeModal('alertModalGreen')">رصد طالب جديد</button>
     </div>
 </div>
 
@@ -552,15 +575,22 @@
         }
     });
 
-    // إظهار نافذة التنبيه الحمراء المنبثقة
-    function showAlertModal(msg) {
-        document.getElementById('alertModalText').innerText = msg;
-        document.getElementById('alertModal').style.display = 'flex';
+    // دوال التحكم بالنافذة المنبثقة
+    function showModal(modalId, text) {
+        if (modalId === 'alertModalRed') {
+            document.getElementById('alertModalRedText').innerText = text;
+        } else {
+            document.getElementById('alertModalGreenText').innerHTML = text;
+        }
+        document.getElementById(modalId).style.display = 'flex';
     }
 
-    // إغلاق نافذة التنبيه
-    function closeAlertModal() {
-        document.getElementById('alertModal').style.display = 'none';
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        if (modalId === 'alertModalGreen') {
+            clearQuickPaste();
+            document.getElementById('studentSearchInput').value = '';
+        }
     }
 
     async function processAndSendToDashboard() {
@@ -568,7 +598,7 @@
         const customModelName = modelsData[currentModelKey].name;
 
         if (!studentName) {
-            showAlertModal('الرجاء اختيار اسم الطالب من القائمة أولاً.');
+            showModal('alertModalRed', 'الرجاء اختيار اسم الطالب من القائمة أولاً.');
             return;
         }
 
@@ -580,7 +610,7 @@
                 .get();
 
             if (!existingCheck.empty) {
-                showAlertModal(`⚠️ تنبيه تكرار:\nتم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
+                showModal('alertModalRed', `⚠️ تنبيه تكرار:\nتم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
                 return;
             }
 
@@ -622,13 +652,12 @@
             };
 
             await db.collection("alkfaeat_results").add(recordData);
-            alert(`✅ تم اعتماد درجة الطالب (${studentName}) بنجاح تحت اسم (${customModelName})!\nالدرجة النهائية: ${score} من 20 (${p}%) وتم إرسال تفاصيل التغذية الراجعة لوحة التحكم.`);
             
-            clearQuickPaste();
-            document.getElementById('studentSearchInput').value = '';
+            // إظهار نافذة النجاح الخضراء المنبثقة
+            showModal('alertModalGreen', `✅ تم اعتماد درجة الطالب: <strong>${studentName}</strong><br>تحت اسم: <strong>${customModelName}</strong><br>الدرجة النهائية: <strong>${score} من 20 (${p}%)</strong><br><span style="font-size:0.85rem; color:#047857;">تم إرسال التفاصيل لوحة التحكم بنجاح.</span>`);
 
         } catch (error) {
-            showAlertModal("حدث خطأ أثناء فحص أو إرسال البيانات لقاعدة البيانات.");
+            showModal('alertModalRed', "حدث خطأ أثناء فحص أو إرسال البيانات لقاعدة البيانات.");
         }
     }
 </script>
