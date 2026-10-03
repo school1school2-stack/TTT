@@ -172,11 +172,11 @@
     </div>
 </div>
 
-<!-- نافذة التنبيه الحمراء (للتكرار) -->
+<!-- نافذة التنبيه الحمراء (للأخطاء والتنبيهات) -->
 <div id="alertModalRed" class="modal-overlay">
     <div class="alert-box-red">
-        <h3>🚨 تنبيه تكرار الرصد!</h3>
-        <p id="alertModalRedText">تم رصد نتيجة هذا الطالب من قبل!</p>
+        <h3>🚨 تنبيه هام!</h3>
+        <p id="alertModalRedText">حدث خطأ ما.</p>
         <button type="button" class="alert-btn-red" onclick="closeModal('alertModalRed')">حسناً، فهمت</button>
     </div>
 </div>
@@ -578,7 +578,7 @@
     // دوال التحكم بالنافذة المنبثقة
     function showModal(modalId, text) {
         if (modalId === 'alertModalRed') {
-            document.getElementById('alertModalRedText').innerText = text;
+            document.getElementById('alertModalRedText').innerHTML = text;
         } else {
             document.getElementById('alertModalGreenText').innerHTML = text;
         }
@@ -595,22 +595,30 @@
 
     async function processAndSendToDashboard() {
         const studentName = document.getElementById('studentSearchInput').value.trim();
+        const quickInputVal = document.getElementById('quickPasteInput').value.trim();
         const customModelName = modelsData[currentModelKey].name;
 
+        // 1. التحقق من اختيار اسم الطالب
         if (!studentName) {
-            showModal('alertModalRed', 'الرجاء اختيار اسم الطالب من القائمة أولاً.');
+            showModal('alertModalRed', '⚠️ تنبيه:<br>الرجاء اختيار اسم الطالب من القائمة أولاً.');
+            return;
+        }
+
+        // 2. التحقق من وجود إجابات مضافة في الحقل
+        if (!quickInputVal || quickInputVal.length === 0) {
+            showModal('alertModalRed', '⚠️ تنبيه خطأ في الإدخال:<br>لم تقم بإضافة أي إجابات للطالب في حقل الإدخال الفوري! يرجى كتابة أو لصق الإجابات أولاً.');
             return;
         }
 
         try {
-            // فحص ما إذا كان الطالب قد أرسل لنفس النموذج مسبقاً
+            // 3. فحص ما إذا كان الطالب قد أرسل لنفس النموذج مسبقاً
             const existingCheck = await db.collection("alkfaeat_results")
                 .where("name", "==", studentName)
                 .where("model_id", "==", customModelName)
                 .get();
 
             if (!existingCheck.empty) {
-                showModal('alertModalRed', `⚠️ تنبيه تكرار:\nتم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
+                showModal('alertModalRed', `⚠️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
                 return;
             }
 
