@@ -129,11 +129,11 @@
         </div>
     </div>
 
-    <!-- خيار استعراض نماذج الطالب السابقة المسجلة -->
+    <!-- خيار استعراض النماذج الستة المتاحة للطالب -->
     <div class="form-group" id="studentModelsGroup" style="display: none; background: #fef3c7; padding: 15px; border-radius: 12px; border: 1px solid #f59e0b;">
-        <label style="color: #b45309; font-size: 1rem; margin-bottom: 8px;">📂 نماذج الاختبار التي اختبرها الطالب مسبقاً (اختر لاستعراضها):</label>
+        <label style="color: #b45309; font-size: 1rem; margin-bottom: 8px;">📂 النماذج الستة (اختر نموذجاً لاستعراض إجابات الطالب إن وجدت):</label>
         <select id="studentSavedModelsSelector" onchange="loadStudentSpecificModel(this.value)" style="border-color: #f59e0b; font-weight: bold; color: #b45309;">
-            <!-- تُعبأ تلقائياً عند اختيار الطالب -->
+            <!-- تُعبأ بالنماذج الستة الثابتة فقط -->
         </select>
     </div>
 
@@ -214,7 +214,7 @@
     let allStudents = [];
     let studentAnswersState = {};
     let currentModelKey = 'modelA';
-    let studentRecordsCache = []; // لتخزين جميع اختبارات الطالب المسترجعة
+    let studentRecordsCache = {}; // خريطة لتخزين سجلات النماذج الستة الخاصة بالطالب فقط
 
     const modelsData = {
         modelA: {
@@ -334,7 +334,7 @@
                 { q: "12. الفعل المضارع \"يهملوا\" في جملة \"لم يهملوا\":", options: { A: "مجزوم بحذف النون", B: "منصوب بالفتحة", C: "مرفوع بثبوت النون", D: "مجزوم بالسكون" }, ans: "A" },
                 { q: "13. الضبط الصحيح لكلمة (الجو) في \"إنَّ الجوَّ جميلٌ\":", options: { A: "الجوُّ (بالضم)", B: "الجوَّ (بالفتح)", C: "الجوِّ (بالكسر)", D: "الجوٌّ (بالتنوین)" }, ans: "B" },
                 { q: "14. الفعل المضارع المرفوع بالضمة الظاهرة فيما يلي:", options: { A: "لن يكتبَ", B: "لم يكتبْ", C: "يكتبُ الطالبُ", D: "يكتبون بجد" }, ans: "C" },
-                { q: "15. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "تنصب المبتدأ وترفع الخبر", C: "ترفع المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
+                { q: "15. \"إنَّ وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "ترفع المبتدأ وتنصب الخبر", C: "ترفع المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "A" },
                 { q: "16. الفعل \"يدعو\" في جملة \"لم يدعُ المسلمُ إلا اللهَ\" مجزوم وعلامة جزمه:", options: { A: "السكون", B: "حذف حرف العلة (الواو)", C: "حذف النون", D: "الفتحة المقدرة" }, ans: "B" },
                 { q: "17. من الأفعال الخمسة المرفوعة بثبوت النون:", options: { A: "يدرسون", B: "لن يدرسوا", C: "لم يدرسوا", D: "ادرسوا" }, ans: "A" },
                 { q: "18. الفعل المضارع المجزوم بـ (لم) بالسكون الصحيح هو:", options: { A: "لم يسعَ", B: "لم يكتبْ", C: "لم يدعُ", D: "لم يقضِ" }, ans: "B" },
@@ -362,7 +362,7 @@
                 { q: "15. الفعل المضارع المرفوع بالضمة المقدرة فيما يلي هو:", options: { A: "يكتبُ", B: "يدعو", C: "لن يكتبْ", D: "لم يكتبْ" }, ans: "B" },
                 { q: "16. عند إدخال الأداة (لم) على الفعل \"يمشي\" تكتب الجملة:", options: { A: "لم يمشي", B: "لم يمشِ", C: "لم يمشَ", D: "لم يمشو" }, ans: "B" },
                 { q: "17. عند بناء الفعل المضارع \"يَشْرَحُ\" للمجهول يُضبط بـ:", options: { A: "شُرِحَ", B: "يُشْرَحُ", C: "أشْرَحُ", D: "شَارَحَ" }, ans: "B" },
-                { q: "18. الأداة التي تنصب الفعل المضارع من الأدوات التالية هي:", options: { A: "لم", B: "إنَّ", C: "كي", D: "كان" }, ans: "C" },
+                { q: "18. الأداة التي تنصب الفعل المضارع من الأدوات التالية هي:", options: { A: "لم", B: "إنَّ", C: "كي",D: "كان" }, ans: "C" },
                 { q: "19. الجملة المبنية للمعلوم هي:", options: { A: "رُفِعَ العلمُ", B: "قُرِئَتِ القصّةُ", C: "زرعَ الفلاحُ الأرضَ", D: "أُكِلَ الطعامُ" }, ans: "C" },
                 { q: "20. علامة نصب الأفعال الخمسة بـ (لن) هي:", options: { A: "حذف النون", B: "ثبوت النون", C: "الفتحة", D: "السكون" }, ans: "A" }
             ]
@@ -456,11 +456,9 @@
         modelContainer.innerHTML = rightColModel + leftColModel;
     }
 
-    // تعديل دالة الضغط اليدوي لتحديث الحقل الفوري تلقائياً
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
         
-        // إعادة بناء نص الحقل الفوري بناءً على الحالة الحالية للأسئلة
         let updatedText = '';
         for (let i = 1; i <= 20; i++) {
             let val = studentAnswersState[i];
@@ -609,71 +607,74 @@
             item.onclick = function() {
                 document.getElementById('studentSearchInput').value = name;
                 listDiv.style.display = 'none';
-                // جلب كافة اختبارات الطالب السابقة
-                fetchStudentAllRecords(name);
+                fetchStudentFixedModels(name);
             };
             listDiv.appendChild(item);
         });
     }
 
-    // دالة لجلب جميع نماذج الاختبارات التي اختبرها الطالب وعرضها في القائمة المخصصة
-    async function fetchStudentAllRecords(studentName) {
+    // جلب اختبارات الطالب مع حصرها وقصرها فقط على النماذج الستة الموجودة في الكود
+    async function fetchStudentFixedModels(studentName) {
         try {
             const snapshot = await db.collection("alkfaeat_results")
                 .where("name", "==", studentName)
                 .get();
 
+            studentRecordsCache = {}; // تخزين السجلات المتاحة فقط للنماذج الستة
+
+            snapshot.forEach(doc => {
+                let record = doc.data();
+                if (record.model_id) {
+                    studentRecordsCache[record.model_id] = record;
+                }
+            });
+
             const savedModelsSelector = document.getElementById('studentSavedModelsSelector');
             savedModelsSelector.innerHTML = '';
-            studentRecordsCache = [];
 
-            if (!snapshot.empty) {
-                snapshot.forEach(doc => {
-                    let record = doc.data();
-                    studentRecordsCache.push(record);
-                    
-                    let opt = document.createElement('option');
-                    opt.value = record.model_id; // مثل "نموذج أ"
-                    opt.innerText = `${record.model_id} (الدرجة: ${record.score}/20 - ${Math.round((record.score/20)*100)}%)`;
-                    savedModelsSelector.appendChild(opt);
-                });
+            // قائمة النماذج الستة الثابتة الموجودة في الكود البرمجي حصرياً
+            const fixedModelsList = [
+                { key: 'modelA', name: 'نموذج أ' },
+                { key: 'modelB', name: 'نموذج ب' },
+                { key: 'modelC', name: 'نموذج ج' },
+                { key: 'modelD', name: 'نموذج 4 (د)' },
+                { key: 'modelE', name: 'نموذج 5 (هـ)' },
+                { key: 'modelF', name: 'نموذج 6 (و)' }
+            ];
 
-                // إظهار صندوق اختيار نماذج الطالب
-                document.getElementById('studentModelsGroup').style.display = 'block';
+            fixedModelsList.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.key;
+                
+                if (studentRecordsCache[m.name]) {
+                    let rec = studentRecordsCache[m.name];
+                    opt.innerText = `${m.name} (مسجل: ${rec.score}/20 - ${Math.round((rec.score/20)*100)}%)`;
+                } else {
+                    opt.innerText = `${m.name} (لم يختبر / فارغ)`;
+                }
+                savedModelsSelector.appendChild(opt);
+            });
 
-                // تلقائياً استعراض أول نموذج مسجل للطالب
-                loadStudentSpecificModel(studentRecordsCache[0].model_id);
-            } else {
-                document.getElementById('studentModelsGroup').style.display = 'none';
-                clearQuickPaste();
-            }
+            document.getElementById('studentModelsGroup').style.display = 'block';
+
+            // استعراض أول نموذج افتراضياً (نموذج أ)
+            loadStudentSpecificModel('modelA');
+
         } catch (error) {
-            console.error("خطأ في جلب اختبارات الطالب:", error);
+            console.error("خطأ في جلب النماذج الثابتة للطالب:", error);
         }
     }
 
-    // دالة لاستعراض نموذج معين اختاره الطالب من القائمة الفرعية
-    function loadStudentSpecificModel(modelName) {
-        let record = studentRecordsCache.find(r => r.model_id === modelName);
-        if (!record) return;
+    // استعراض النموذج المختار من القائمة الثابتة (النماذج الستة فقط)
+    function loadStudentSpecificModel(modelKey) {
+        document.getElementById('modelSelector').value = modelKey;
+        currentModelKey = modelKey;
 
-        // مطابقة اسم النموذج مع القائمة الرئيسية
-        let targetModelKey = '';
-        for (let key in modelsData) {
-            if (modelsData[key].name === modelName) {
-                targetModelKey = key;
-                break;
-            }
-        }
+        let modelName = modelsData[modelKey].name;
+        let record = studentRecordsCache[modelName];
 
-        if (targetModelKey) {
-            document.getElementById('modelSelector').value = targetModelKey;
-            currentModelKey = targetModelKey;
-        }
-
-        // استخراج إجابات الطالب الحرفية ووضعها في الحقل الفوري
-        let reconstructedAnswers = "";
-        if (record.answers && record.answers.length > 0) {
+        if (record && record.answers && record.answers.length > 0) {
+            let reconstructedAnswers = "";
             record.answers.forEach(ansObj => {
                 let match = ansObj.studentAns.match(/\(([^)]+)\)/);
                 if (match) {
@@ -685,11 +686,10 @@
                     else reconstructedAnswers += 'A';
                 }
             });
-        }
-
-        if (reconstructedAnswers.length > 0) {
             document.getElementById('quickPasteInput').value = reconstructedAnswers;
             applyInstantPaste();
+        } else {
+            clearQuickPaste();
         }
     }
 
@@ -710,7 +710,6 @@
         }
     });
 
-    // دوال التحكم بالنافذة المنبثقة
     function showModal(modalId, text) {
         if (modalId === 'alertModalRed') {
             document.getElementById('alertModalRedText').innerHTML = text;
@@ -740,7 +739,7 @@
         }
 
         if (!quickInputVal || quickInputVal.length === 0) {
-            showModal('alertModalRed', '⚠️ تنبيه خطأ في الإدخال:<br>لم تقم بإضافة أي إجابات للطالب في حقل الإدخال الفوري! يرجى كتابة أو لصق الإجابات أولاً.');
+            showModal('alertModalRed', '⚠️ تنبيه خطأ في الإدخال:<br>لم تقم بإضافة أي إجابات للط الطالب في حقل الإدخال الفوري! يرجى كتابة أو لصق الإجابات أولاً.');
             return;
         }
 
