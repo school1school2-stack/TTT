@@ -141,12 +141,12 @@
 
     <!-- 3. نافذة التعبئة الذكية الفورية اللحظية (مع زر الميكروفون الصوتي) -->
     <div class="ai-helper-box">
-        <label style="color: #047857; margin-bottom: 5px;">3️⃣ خانة إدخال الإجابات الفورية أو الإدخال الصوتي بالمايك:</label>
+        <label style="color: #047857; margin-bottom: 5px;">3️⃣ خانة إدخال الإجابات الفورية (تظهر بالحروف ABCD تدعم الكتابة أو الصوت):</label>
         <p style="font-size: 0.82rem; color: #065f46; margin-top: 0; margin-bottom: 10px;" id="inputCounterStatus">
             المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: 0 / 20):
         </p>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <input type="text" id="quickPasteInput" placeholder="اكتب الحروف بمسافات، ألصقها، أو استخدم المايك..." style="flex: 1; padding: 10px; border: 1px solid #10b981; border-radius: 8px; font-size: 1rem;" oninput="applyInstantPaste()">
+            <input type="text" id="quickPasteInput" placeholder="اكتب الحروف ABCD، ألصقها، أو استخدم المايك..." style="flex: 1; padding: 10px; border: 1px solid #10b981; border-radius: 8px; font-size: 1rem; text-transform: uppercase;" oninput="applyInstantPaste()">
             <button type="button" id="micBtn" class="mic-btn" onclick="toggleVoiceInput()">🎙️ إدخال صوتي</button>
             <button type="button" class="clear-btn" onclick="clearQuickPaste()">🗑️ تصفير الحقل</button>
         </div>
@@ -242,13 +242,9 @@
 
                 let spokenText = (finalTranscript || interimTranscript).trim();
                 if (spokenText) {
-                    let converted = convertSpokenTextToChars(spokenText);
+                    let converted = convertSpokenTextToEnglishChars(spokenText);
                     let inputField = document.getElementById('quickPasteInput');
-                    // إضافة مسافة فاصلة بين الإدخال الصوتي المتتابع
-                    if (inputField.value.trim() !== '' && !inputField.value.endsWith(' ')) {
-                        inputField.value += ' ';
-                    }
-                    inputField.value += converted.split('').join(' ');
+                    inputField.value += converted;
                     applyInstantPaste();
                 }
             };
@@ -266,21 +262,22 @@
         }
     }
 
-    function convertSpokenTextToChars(text) {
+    // تحويل الكلمات المنطوقة بالعربية (أ، باء، جيم، دال) إلى حروف إنجليزية ABCD
+    function convertSpokenTextToEnglishChars(text) {
         let result = '';
-        text = text.replace(/ألف/g, 'أ')
-                   .replace(/باء/g, 'ب')
-                   .replace(/جيم/g, 'ج')
-                   .replace(/دال/g, 'د');
+        text = text.replace(/ألف/g, 'A')
+                   .replace(/باء/g, 'B')
+                   .replace(/جيم/g, 'C')
+                   .replace(/دال/g, 'D');
 
         for (let i = 0; i < text.length; i++) {
             let ch = text[i];
-            if (['أ', 'إ', 'آ', 'ا', 'A', 'a'].includes(ch)) result += 'أ ';
-            else if (['ب', 'B', 'b'].includes(ch)) result += 'ب ';
-            else if (['ج', 'C', 'c'].includes(ch)) result += 'ج ';
-            else if (['د', 'D', 'd'].includes(ch)) result += 'د ';
+            if (['أ', 'إ', 'آ', 'ا', 'A', 'a'].includes(ch)) result += 'A';
+            else if (['ب', 'B', 'b'].includes(ch)) result += 'B';
+            else if (['ج', 'C', 'c'].includes(ch)) result += 'C';
+            else if (['د', 'D', 'd'].includes(ch)) result += 'D';
         }
-        return result.trim();
+        return result;
     }
 
     function toggleVoiceInput() {
@@ -288,7 +285,7 @@
             initSpeechRecognition();
         }
         if (!recognition) {
-            showModal('alertModalRed', '⚠️ متصفحك لا يدعم الإدخال الصوتي. يرجى استخدام متصفح Google Chrome.');
+            showModal('alertModalRed', '⚠️️ متصفحك لا يدعم الإدخال الصوتي. يرجى استخدام متصفح Google Chrome.');
             return;
         }
 
@@ -314,7 +311,7 @@
         isRecording = false;
         const micBtn = document.getElementById('micBtn');
         micBtn.classList.remove('recording');
-        micBtn.innerText = "🎙️️ إدخال صوتي";
+        micBtn.innerText = "🎙️ إدخال صوتي";
     }
 
     const modelsData = {
@@ -559,21 +556,19 @@
         modelContainer.innerHTML = rightColModel + leftColModel;
     }
 
-    // دالة التحديث المعَدلة لتترك مسافات بين الحروف عند الضغط اليدوي
+    // دالة التحديث العكسي لتظهر الحروف الإنجليزية ABCD في حقل الإدخال عند الضغط على الأزرار
     function setStudentAns(qNum, ansKey) {
         studentAnswersState[qNum] = ansKey;
         
-        let charsArray = [];
+        let updatedText = '';
         for (let i = 1; i <= 20; i++) {
             let val = studentAnswersState[i];
-            if (val === 'A') charsArray.push('أ');
-            else if (val === 'B') charsArray.push('ب');
-            else if (val === 'C') charsArray.push('ج');
-            else if (val === 'D') charsArray.push('د');
-            else charsArray.push('_'); // شرطة سفلية للدلالة على السؤال غير المجاب عنه لتحافظ على الفراغات
+            if (val) {
+                updatedText += val; // إظهار الحرف الإنجليزي ABCD
+            }
         }
         
-        document.getElementById('quickPasteInput').value = charsArray.join(' ');
+        document.getElementById('quickPasteInput').value = updatedText;
         
         let count = 0;
         for (let i = 1; i <= 20; i++) {
@@ -614,6 +609,17 @@
             }
         }
 
+        if (inputField.value !== cleaned) {
+            inputField.value = cleaned;
+        }
+
+        let count = cleaned.length;
+        let statusText = `المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: ${count} / 20):`;
+        if (count === 20) {
+            statusText += " ✅ تم اكتمال الإدخال بنجاح!";
+        }
+        document.getElementById('inputCounterStatus').innerText = statusText;
+        
         let index = 0;
         for (let i = 1; i <= 20; i++) {
             if (index < cleaned.length) {
@@ -623,14 +629,6 @@
                 studentAnswersState[i] = ''; 
             }
         }
-
-        let count = cleaned.length;
-        let statusText = `المنطقة مخصصة لـ 20 إجابة (المدخل حالياً: ${count} / 20):`;
-        if (count === 20) {
-            statusText += " ✅ تم اكتمال الإدخال بنجاح!";
-        }
-        document.getElementById('inputCounterStatus').innerText = statusText;
-
         buildGrids();
         updateComparison();
     }
@@ -763,17 +761,17 @@
                             let match = ansObj.studentAns.match(/\(([^)]+)\)/);
                             if (match) {
                                 let arabicChar = match[1];
-                                if (arabicChar === 'أ') reconstructedAnswers += 'أ ';
-                                else if (arabicChar === 'ب') reconstructedAnswers += 'ب ';
-                                else if (arabicChar === 'ج') reconstructedAnswers += 'ج ';
-                                else if (arabicChar === 'د') reconstructedAnswers += 'د ';
-                                else reconstructedAnswers += 'أ ';
+                                if (arabicChar === 'أ') reconstructedAnswers += 'A';
+                                else if (arabicChar === 'ب') reconstructedAnswers += 'B';
+                                else if (arabicChar === 'ج') reconstructedAnswers += 'C';
+                                else if (arabicChar === 'د') reconstructedAnswers += 'D';
+                                else reconstructedAnswers += 'A';
                             }
                         });
                     }
 
                     if (reconstructedAnswers.length > 0) {
-                        document.getElementById('quickPasteInput').value = reconstructedAnswers.trim();
+                        document.getElementById('quickPasteInput').value = reconstructedAnswers;
                         applyInstantPaste();
                     }
                 } else {
