@@ -104,7 +104,7 @@
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
     <p class="subtitle">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 2026[cite: 7]
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 2026
     </p>
 
     <!-- 1. اختيار النموذج الرئيسي للرصد -->
@@ -122,9 +122,9 @@
 
     <!-- 2. اختيار اسم الطالب في المقدمة -->
     <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
-        <label style="color: #0369a1; font-size: 1rem; margin-bottom: 8px;">2️⃣ ابحث عن اسم الطالب واختاره أولاً:</label>
+        <label style="color: #0369a1; font-size: 1rem; margin-bottom: 8px;">2️⃣ ابحث عن اسم الطالب (بأي جزء من الاسم: الأول، الأب، أو العائلة):</label>
         <div class="student-select-box">
-            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="اكتب اسم الطالب للبحث..." oninput="filterStudents()" onclick="showDropdown()">
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="اكتب أي جزء من اسم الطالب للبحث..." oninput="filterStudents()" onclick="showDropdown()">
             <div id="studentDropdownList" class="student-dropdown-list"></div>
         </div>
     </div>
@@ -177,7 +177,7 @@
     <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026[cite: 7]
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026
     </div>
 </div>
 
@@ -339,7 +339,7 @@
                 { q: "17. من الأفعال الخمسة المرفوعة بثبوت النون:", options: { A: "يدرسون", B: "لن يدرسوا", C: "لم يدرسوا", D: "ادرسوا" }, ans: "A" },
                 { q: "18. الفعل المضارع المجزوم بـ (لم) بالسكون الصحيح هو:", options: { A: "لم يسعَ", B: "لم يكتبْ", C: "لم يدعُ", D: "لم يقضِ" }, ans: "B" },
                 { q: "19. الجملة المبنية للمعلوم فيما يلي هي:", options: { A: "كُتِبَ الدرسُ", B: "فُتِحَ البابُ", C: "حفظَ الطالبُ الدرسَ", D: "كُوفِئَ المجتهدُ" }, ans: "C" },
-                { q: "20. \"كان وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "ترفع المبتدأ وتنصب الخبر", C: "تنصب المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "B" }
+                { q: "20. \"كان وأخواتها\" عند دخولها على الجملة الاسمية فإنها:", options: { A: "تنصب المبتدأ وترفع الخبر", B: "تنصب المبتدأ وترفع الخبر", C: "تنصب المبتدأ والخبر", D: "تجزم المبتدأ والخبر" }, ans: "B" }
             ]
         },
         modelF: {
@@ -582,7 +582,7 @@
         document.getElementById('liveScoreDisplay').innerText = `${score} من 20 (${percentage}%)`;
     }
 
-    // دالة توحيد وتطبيع النصوص (تتجاهل الفروق بين المسافات والهمزات وكلمة عبد/عبدالرحمن وبن)
+    // دالة تطبيع النصوص (تتجاهل الفروق بين المسافات والهمزات وتزيل كلمة "بن" أو "ابن" لتسهيل البحث الشامل)
     function normalizeText(text) {
         if (!text) return "";
         return text
@@ -591,6 +591,7 @@
             .replace(/[إأآا]/g, "ا")
             .replace(/ة/g, "ه")
             .replace(/ى/g, "ي")
+            .replace(/\b(بن|ابن)\b/g, "")
             .replace(/عبد\s+/g, "عبد")
             .replace(/\s+/g, " ");
     }
@@ -626,7 +627,7 @@
         });
     }
 
-    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً مع دعم التطبيع الذكي للاسم
+    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً مع دعم البحث بأي جزء من الاسم
     async function fetchStudentFixedModels(studentName) {
         try {
             const snapshot = await db.collection("alkfaeat_results").get();
@@ -638,7 +639,6 @@
                 let record = doc.data();
                 let recNameNormalized = normalizeText(record.name);
                 
-                // مطابقة مرنة تتجاوز فروق المسافات أو الهمزات
                 if (recNameNormalized === targetNormalized || recNameNormalized.includes(targetNormalized) || targetNormalized.includes(recNameNormalized)) {
                     if (record.model_id) {
                         studentRecordsCache[record.model_id] = record;
@@ -704,13 +704,24 @@
         document.getElementById('studentDropdownList').style.display = 'block';
     }
 
+    // 🚀 التعديل الجذري هنا: البحث بالتقسيم (دعم البحث بأي جزء من الاسم الأول، الأب، العائلة منفصلين أو مجتمعين)
     function filterStudents() {
         const query = document.getElementById('studentSearchInput').value.trim();
         const queryNormalized = normalizeText(query);
         
+        if (!queryNormalized) {
+            renderStudentDropdown(allStudents);
+            document.getElementById('studentDropdownList').style.display = 'block';
+            return;
+        }
+
+        // تقسيم إدخال الباحث إلى كلمات مستقلة (مثلاً: الاسم، اسم الأب، اسم العائلة)
+        const queryTokens = queryNormalized.split(" ").filter(t => t.length > 0);
+
         const filtered = allStudents.filter(name => {
             const nameNormalized = normalizeText(name);
-            return nameNormalized.includes(queryNormalized);
+            // التأكد من أن كافة الكلمات المكتوبة في خانة البحث متواجدة في اسم الطالب بغض النظر عن ترتيبها
+            return queryTokens.every(token => nameNormalized.includes(token));
         });
         
         renderStudentDropdown(filtered);
@@ -763,7 +774,7 @@
                 .get();
 
             if (!existingCheck.empty) {
-                showModal('alertModalRed', `⚠️️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
+                showModal('alertModalRed', `⚠️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
                 return;
             }
 
