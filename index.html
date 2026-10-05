@@ -582,7 +582,7 @@
         document.getElementById('liveScoreDisplay').innerText = `${score} من 20 (${percentage}%)`;
     }
 
-    // دالة توحيد وتطبيع النصوص (تتجاهل الفروق بين المسافات والهمزات وكلمة عبد/عبدالرحمن وبن)
+    // دالة توحيد وتطبيع النصوص (تتجاهل الفروق بين المسافات والهمزات، وكلمة "بن" أو "ابن" و "عبدالرحمن")
     function normalizeText(text) {
         if (!text) return "";
         return text
@@ -591,6 +591,7 @@
             .replace(/[إأآا]/g, "ا")
             .replace(/ة/g, "ه")
             .replace(/ى/g, "ي")
+            .replace(/\b(بن|ابن)\b/g, "") // إزالة كلمة بن أو ابن تماماً لتسهيل البحث بغض النظر عن كتابتها
             .replace(/عبد\s+/g, "عبد")
             .replace(/\s+/g, " ");
     }
@@ -626,7 +627,7 @@
         });
     }
 
-    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً مع دعم التطبيع الذكي للاسم
+    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً مع دعم تجاهل كلمة بن
     async function fetchStudentFixedModels(studentName) {
         try {
             const snapshot = await db.collection("alkfaeat_results").get();
@@ -638,7 +639,7 @@
                 let record = doc.data();
                 let recNameNormalized = normalizeText(record.name);
                 
-                // مطابقة مرنة تتجاوز فروق المسافات أو الهمزات
+                // مقارنة مرنة تتجاوز فروق كتابة "بن" والمسافات
                 if (recNameNormalized === targetNormalized || recNameNormalized.includes(targetNormalized) || targetNormalized.includes(recNameNormalized)) {
                     if (record.model_id) {
                         studentRecordsCache[record.model_id] = record;
@@ -763,7 +764,7 @@
                 .get();
 
             if (!existingCheck.empty) {
-                showModal('alertModalRed', `⚠️️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
+                showModal('alertModalRed', `⚠️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
                 return;
             }
 
