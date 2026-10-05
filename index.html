@@ -104,7 +104,7 @@
 <div class="scanner-container">
     <h1>📷 أداة التصحيح والتغذية الراجعة المفصلة</h1>
     <p class="subtitle">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 2026
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 2026[cite: 7]
     </p>
 
     <!-- 1. اختيار النموذج الرئيسي للرصد -->
@@ -177,7 +177,7 @@
     <button class="submit-btn" onclick="processAndSendToDashboard()">6️⃣ اعتماد النتيجة وإرسالها لوحة التحكم</button>
 
     <div class="footer-note">
-        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026
+        ✨ أ / عبدالعزيز الفيفي - ثانوية الأمير عبدالمجيد 🎓 الحقوق محفوظة 2026[cite: 7]
     </div>
 </div>
 
@@ -214,7 +214,7 @@
     let allStudents = [];
     let studentAnswersState = {};
     let currentModelKey = 'modelA';
-    let studentRecordsCache = {}; // تخزين سجلات النماذج الخاصة بالطالب
+    let studentRecordsCache = {}; 
 
     const modelsData = {
         modelA: {
@@ -582,6 +582,19 @@
         document.getElementById('liveScoreDisplay').innerText = `${score} من 20 (${percentage}%)`;
     }
 
+    // دالة توحيد وتطبيع النصوص (تتجاهل الفروق بين المسافات والهمزات وكلمة عبد/عبدالرحمن وبن)
+    function normalizeText(text) {
+        if (!text) return "";
+        return text
+            .trim()
+            .toLowerCase()
+            .replace(/[إأآا]/g, "ا")
+            .replace(/ة/g, "ه")
+            .replace(/ى/g, "ي")
+            .replace(/عبد\s+/g, "عبد")
+            .replace(/\s+/g, " ");
+    }
+
     function loadAllowedStudents() {
         db.collection("allowed_students").orderBy("name").get().then((snapshot) => {
             allStudents = [];
@@ -613,26 +626,29 @@
         });
     }
 
-    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً بحسب النماذج المعرفة في الكود (modelsData)
+    // جلب اختبارات الطالب وتعبئة القائمة ديناميكياً مع دعم التطبيع الذكي للاسم
     async function fetchStudentFixedModels(studentName) {
         try {
-            const snapshot = await db.collection("alkfaeat_results")
-                .where("name", "==", studentName)
-                .get();
+            const snapshot = await db.collection("alkfaeat_results").get();
 
             studentRecordsCache = {}; 
+            const targetNormalized = normalizeText(studentName);
 
             snapshot.forEach(doc => {
                 let record = doc.data();
-                if (record.model_id) {
-                    studentRecordsCache[record.model_id] = record;
+                let recNameNormalized = normalizeText(record.name);
+                
+                // مطابقة مرنة تتجاوز فروق المسافات أو الهمزات
+                if (recNameNormalized === targetNormalized || recNameNormalized.includes(targetNormalized) || targetNormalized.includes(recNameNormalized)) {
+                    if (record.model_id) {
+                        studentRecordsCache[record.model_id] = record;
+                    }
                 }
             });
 
             const savedModelsSelector = document.getElementById('studentSavedModelsSelector');
             savedModelsSelector.innerHTML = '';
 
-            // 🚀 جلب النماذج تلقائياً ومتغيّرة بحسب كائن modelsData أياً كان عددها مستقبلاً
             Object.keys(modelsData).forEach(key => {
                 let mName = modelsData[key].name;
                 let opt = document.createElement('option');
@@ -649,7 +665,6 @@
 
             document.getElementById('studentModelsGroup').style.display = 'block';
 
-            // استعراض أول نموذج افتراضياً
             const firstKey = Object.keys(modelsData)[0];
             loadStudentSpecificModel(firstKey);
 
@@ -690,8 +705,14 @@
     }
 
     function filterStudents() {
-        const query = document.getElementById('studentSearchInput').value.trim().toLowerCase();
-        const filtered = allStudents.filter(name => name.toLowerCase().includes(query));
+        const query = document.getElementById('studentSearchInput').value.trim();
+        const queryNormalized = normalizeText(query);
+        
+        const filtered = allStudents.filter(name => {
+            const nameNormalized = normalizeText(name);
+            return nameNormalized.includes(queryNormalized);
+        });
+        
         renderStudentDropdown(filtered);
         document.getElementById('studentDropdownList').style.display = 'block';
     }
@@ -742,7 +763,7 @@
                 .get();
 
             if (!existingCheck.empty) {
-                showModal('alertModalRed', `⚠️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
+                showModal('alertModalRed', `⚠️️ تنبيه تكرار:<br>تم رصد نتيجة الطالب (${studentName}) لـ (${customModelName}) مسبقاً! لا يمكن إرسالها مرة أخرى.`);
                 return;
             }
 
